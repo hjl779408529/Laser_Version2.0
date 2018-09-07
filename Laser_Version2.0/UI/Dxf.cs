@@ -140,6 +140,10 @@ namespace Laser_Build_1._0
             //相机与振镜 中心差值
             textBox19.Text = Convert.ToString(Para_List.Parameter.Cam_Rtc_X);
             textBox18.Text = Convert.ToString(Para_List.Parameter.Cam_Rtc_Y);
+
+            //RTCjiaozhun
+            textBox21.Text = Convert.ToString(Para_List.Parameter.Rtc_Cal_Radius);
+            textBox20.Text = Convert.ToString(Para_List.Parameter.Rtc_Cal_Interval);
         }
         //线程函数
         private void Refresh_Timer_Elapsed_Thread(object sender, ElapsedEventArgs e)
@@ -401,7 +405,7 @@ namespace Laser_Build_1._0
             richTextBox1.AppendText("Arc_Data 数量： " + Arc_Line_Entity_Data.Count + "\r\n");
 
             //圆弧直线数据矫正
-            Arc_Line_Entity_Data =new List<Entity_Data>(Data_Cal.Calibration_Trail(Arc_Line_Entity_Data));//直接矫正路径
+            //Arc_Line_Entity_Data =new List<Entity_Data>(Data_Cal.Calibration_Trail(Arc_Line_Entity_Data));//直接矫正路径
 
             int Current_Pos = 0;//用于记录比对插补数据的位置
             temp_intepolation_Dat.Clear();
@@ -630,7 +634,7 @@ namespace Laser_Build_1._0
             richTextBox1.AppendText("多边形线段数： " + LwPolylines_Entity_Data.Count + "\r\n");
 
             //多边形数据矫正
-            LwPolylines_Entity_Data = new List<Entity_Data>(Data_Cal.Calibration_Trail(LwPolylines_Entity_Data));//直接矫正路径
+            //LwPolylines_Entity_Data = new List<Entity_Data>(Data_Cal.Calibration_Trail(LwPolylines_Entity_Data));//直接矫正路径
 
             //生成多边形插补数据
             temp_intepolation_Dat.Clear();
@@ -830,7 +834,7 @@ namespace Laser_Build_1._0
             //Circle_Entity_Data调试信息输出
             richTextBox1.AppendText("圆形数据统计： " + Circle_Entity_Data.Count + "\r\n");
             //圆形数据矫正
-            Circle_Entity_Data = new List<Entity_Data>(Data_Cal.Calibration_Trail(Circle_Entity_Data));//直接矫正路径
+            //Circle_Entity_Data = new List<Entity_Data>(Data_Cal.Calibration_Trail(Circle_Entity_Data));//直接矫正路径
             //生成圆形插补数据
             temp_intepolation_Dat.Clear();
             Circle_Data.Clear();//清除圆形插补数据 
@@ -1842,16 +1846,14 @@ namespace Laser_Build_1._0
         //串口发送
         private void button11_Click(object sender, EventArgs e)
         {
-            Laser_Version2._0.RS232 Test = new Laser_Version2._0.RS232();
-            Test.Open_Com(2);
-            Test.Send_Data("12");
-            richTextBox1.AppendText("数据统计：" + Test.StrCRC("12") + "\r\n");
+            Initialization.Initial.Com_Comunication.Send_Data("12");
+            richTextBox1.AppendText("数据统计：" + Initialization.Initial.Com_Comunication.StrCRC("12") + "\r\n");
             //byte[] Strs= Encoding.ASCII.GetBytes(Test.StrCRC("12").Trim());
             //for(int i = 0;i<Strs.Length;i++)
             //{
             //    richTextBox1.AppendText(string.Format("{0:X}",Strs[i]));
             //}
-            byte[] hexStrs = Encoding.ASCII.GetBytes(Test.Append_Num_Str(500000).Trim());
+            byte[] hexStrs = Encoding.ASCII.GetBytes(Initialization.Initial.Com_Comunication.Append_Num_Str(500000).Trim());
             for (int i = 0; i < hexStrs.Length; i++) 
             {
                 richTextBox1.AppendText(string.Format("{0:X}", hexStrs[i]) + "\r\n"); 
@@ -1892,6 +1894,46 @@ namespace Laser_Build_1._0
             List<Affinity_Matrix> affinity_Matrices = Get_Data.Resolve(Read_Data.Reserialize_Correct_Data("Correct_Data.xml"));
             richTextBox1.AppendText("理论数据量:" + 140*140 + "\r\n");
             richTextBox1.AppendText("实际数据量:" + affinity_Matrices.Count + "\r\n");
+        }
+        
+        private void button13_Click(object sender, EventArgs e)
+        {
+            Data_Resolve get_rtc = new Data_Resolve();
+            Rtc_List_Data.Clear();
+            Rtc_List_Data =get_rtc.Generate_Calibration_Data(Para_List.Parameter.Rtc_Cal_Radius, Para_List.Parameter.Rtc_Cal_Interval);
+            for (int i = 0; i < Rtc_List_Data.Count; i++)
+            {
+                for (int j = 0; j < Rtc_List_Data[i].Count; j++)
+                {
+                    richTextBox1.AppendText("Type：" + Rtc_List_Data[i][j].Type + "  加工类型Work：" + Rtc_List_Data[i][j].Work + "  Rtc起点x：" + Rtc_List_Data[i][j].Rtc_x + "  Rtc起点y：" + Rtc_List_Data[i][j].Rtc_y + "  加工起点 Start_x：" + Rtc_List_Data[i][j].Start_x + "  加工起点 Start_y：" + Rtc_List_Data[i][j].Start_y + "  加工终点 End_x：" + Rtc_List_Data[i][j].End_x + "  加工终点 End_y：" + Rtc_List_Data[i][j].End_y + "  圆心X：" + Rtc_List_Data[i][j].Center_x + "  圆心Y：" + Rtc_List_Data[i][j].Center_y + "  角度：" + Rtc_List_Data[i][j].Angle + "  圆弧方向：" + Rtc_List_Data[i][j].Circle_dir + "\r\n");
+                }
+            }
+        }
+        //RTC校准 间距
+        private void textBox20_TextChanged(object sender, EventArgs e)
+        {
+            this.Invoke((EventHandler)delegate
+            {
+                if (!decimal.TryParse(textBox20.Text, out decimal tmp))
+                {
+                    MessageBox.Show("请正确输入数字");
+                    return;
+                }
+                Para_List.Parameter.Rtc_Cal_Interval = tmp;
+            });
+        }
+        //RTC校准 半径
+        private void textBox21_TextChanged(object sender, EventArgs e)
+        {
+            this.Invoke((EventHandler)delegate
+            {
+                if (!decimal.TryParse(textBox21.Text, out decimal tmp))
+                {
+                    MessageBox.Show("请正确输入数字");
+                    return;
+                }
+                Para_List.Parameter.Rtc_Cal_Radius = tmp;
+            });
         }
 
         //加工停止 

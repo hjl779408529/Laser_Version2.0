@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.IO;
 using GTS;
 using RTC5Import;
+using Laser_Version2._0;
+using System.Windows.Forms;
 
 namespace Initialization
 {
@@ -19,7 +21,9 @@ namespace Initialization
         //调用Factory
         GTS_Fun.Factory Gts_Factory = new GTS_Fun.Factory();
         RTC_Fun.Factory Rtc_Factory = new RTC_Fun.Factory();
-        
+        //强制定义RS232端口
+        public static RS232 Com_Comunication = new RS232();
+
         public void Gts_Initial()
         {
             //打开运动控制器 
@@ -53,6 +57,20 @@ namespace Initialization
             Para_List.Serialize_Parameter Load_Parameter = new Para_List.Serialize_Parameter();
             Load_Parameter.Reserialize("Para.xml");
 
+        }
+
+        //通讯初始化
+        public void Communication_Initial() 
+        {
+            if (Para_List.Parameter.Com_No < Com_Comunication.PortName.Count)
+            {
+                Com_Comunication.Open_Com(Para_List.Parameter.Com_No);
+            }
+            else
+            {
+                MessageBox.Show("激光控制器通讯串口端口编号异常，请在激光控制面板选择正确的串口编号！！！");
+            }
+            
         }
     }
 

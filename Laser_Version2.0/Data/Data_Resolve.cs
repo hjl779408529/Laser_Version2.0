@@ -1151,6 +1151,170 @@ namespace Laser_Build_1._0
                 return list;
             }
         }
+        //生成RTC校准数据
+        public List<List<Interpolation_Data>> Generate_Calibration_Data(decimal Radius, decimal Interval)
+        {
+            //结果变量
+            List<List<Interpolation_Data>> Result = new List<List<Interpolation_Data>>();//返回值
+            List<Interpolation_Data> Temp_Interpolation_List_Data = new List<Interpolation_Data>();//二级层
+            Interpolation_Data Temp_Data = new Interpolation_Data();//一级层  
+            decimal Gts_X = 100, Gts_Y = 100;//X、Y坐标
+            //decimal Radius = 1.0m;//半径
+            //decimal Interval = 3.0m;//间距  
+            //初始清除
+            Result.Clear();
+            Temp_Interpolation_List_Data.Clear();
+            Temp_Data.Empty();
+
+            //走刀至Gts 平台坐标
+
+            //Gts 直线插补
+            Temp_Data.Type = 1;
+            //强制抬刀标志：1
+            Temp_Data.Lift_flag = 1;
+            //强制加工类型为Gts
+            Temp_Data.Work = 10;
+            //直线终点坐标
+            Temp_Data.End_x = Gts_X;
+            Temp_Data.End_y = Gts_Y;
+            //追加修改的数据
+            Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
+            Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
+            Temp_Interpolation_List_Data.Clear();
+
+            //坐标原点 1半径的圆圈 1号圆
+            //追加RTC加工数据
+            //数据清空
+            Temp_Data.Empty();
+            //强制抬刀标志：0
+            Temp_Data.Lift_flag = 0;
+            //强制加工类型为RTC
+            Temp_Data.Work = 20;
+            //GTS平台配合坐标
+            Temp_Data.Gts_x = Gts_X;
+            Temp_Data.Gts_y = Gts_Y;
+            //Rtc定位 激光加工起点坐标
+            Temp_Data.Rtc_x = Radius;
+            Temp_Data.Rtc_y = 0;
+            //RTC arc_abs圆弧
+            Temp_Data.Type = 11;
+            //RTC 圆弧加工圆心坐标转换
+            Temp_Data.Center_x = 0;
+            Temp_Data.Center_y = 0;
+            //圆弧角度
+            Temp_Data.Angle = 360;
+            //追加修改的数据
+            Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
+            Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
+            Temp_Interpolation_List_Data.Clear();
+
+            //坐标原点 2.5半径的圆圈 X+ 2号圆
+            //追加RTC加工数据
+            //数据清空
+            Temp_Data.Empty();
+            //强制抬刀标志：0
+            Temp_Data.Lift_flag = 0;
+            //强制加工类型为RTC
+            Temp_Data.Work = 20;
+            //GTS平台配合坐标
+            Temp_Data.Gts_x = Gts_X;
+            Temp_Data.Gts_y = Gts_Y;
+            //Rtc定位 激光加工起点坐标
+            Temp_Data.Rtc_x = (Interval + Radius);
+            Temp_Data.Rtc_y = 0;
+            //RTC arc_abs圆弧
+            Temp_Data.Type = 11;
+            //RTC 圆弧加工圆心坐标转换
+            Temp_Data.Center_x = Interval;
+            Temp_Data.Center_y = 0;
+            //圆弧角度
+            Temp_Data.Angle = 360;
+            //追加修改的数据
+            Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
+            Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
+            Temp_Interpolation_List_Data.Clear();
+
+            //坐标原点 2.5半径的圆圈 X- 3号圆
+            //追加RTC加工数据
+            //数据清空
+            Temp_Data.Empty();
+            //强制抬刀标志：0
+            Temp_Data.Lift_flag = 0;
+            //强制加工类型为RTC
+            Temp_Data.Work = 20;
+            //GTS平台配合坐标
+            Temp_Data.Gts_x = Gts_X;
+            Temp_Data.Gts_y = Gts_Y;
+            //Rtc定位 激光加工起点坐标
+            Temp_Data.Rtc_x = -(Interval + Radius);
+            Temp_Data.Rtc_y = 0;
+            //RTC arc_abs圆弧
+            Temp_Data.Type = 11;
+            //RTC 圆弧加工圆心坐标转换
+            Temp_Data.Center_x = -Interval;
+            Temp_Data.Center_y = 0;
+            //圆弧角度
+            Temp_Data.Angle = 360;
+            //追加修改的数据
+            Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
+            Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
+            Temp_Interpolation_List_Data.Clear();
+
+            //坐标原点 2.5半径的圆圈 Y+ 4号圆
+            //追加RTC加工数据
+            //数据清空
+            Temp_Data.Empty();
+            //强制抬刀标志：0
+            Temp_Data.Lift_flag = 0;
+            //强制加工类型为RTC
+            Temp_Data.Work = 20;
+            //GTS平台配合坐标
+            Temp_Data.Gts_x = Gts_X;
+            Temp_Data.Gts_y = Gts_Y;
+            //Rtc定位 激光加工起点坐标
+            Temp_Data.Rtc_x = 0;
+            Temp_Data.Rtc_y = (Interval + Radius); ;
+            //RTC arc_abs圆弧
+            Temp_Data.Type = 11;
+            //RTC 圆弧加工圆心坐标转换
+            Temp_Data.Center_x = 0;
+            Temp_Data.Center_y = Interval;
+            //圆弧角度
+            Temp_Data.Angle = 360;
+            //追加修改的数据
+            Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
+            Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
+            Temp_Interpolation_List_Data.Clear();
+
+            //坐标原点 2.5半径的圆圈 Y- 5号圆
+            //追加RTC加工数据
+            //数据清空
+            Temp_Data.Empty();
+            //强制抬刀标志：0
+            Temp_Data.Lift_flag = 0;
+            //强制加工类型为RTC
+            Temp_Data.Work = 20;
+            //GTS平台配合坐标
+            Temp_Data.Gts_x = Gts_X;
+            Temp_Data.Gts_y = Gts_Y;
+            //Rtc定位 激光加工起点坐标
+            Temp_Data.Rtc_x = 0;
+            Temp_Data.Rtc_y = -(Interval + Radius); ;
+            //RTC arc_abs圆弧
+            Temp_Data.Type = 11;
+            //RTC 圆弧加工圆心坐标转换
+            Temp_Data.Center_x = 0;
+            Temp_Data.Center_y = -Interval;
+            //圆弧角度
+            Temp_Data.Angle = 360;
+            //追加修改的数据
+            Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
+            Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
+            Temp_Interpolation_List_Data.Clear();
+
+            //返回结果
+            return Result;
+        }
         //坐标误差容许判断
         private bool Differ_Err(decimal x1, decimal y1, decimal x2, decimal y2)
         {
@@ -1276,5 +1440,6 @@ namespace Laser_Build_1._0
             }
             return Result;
         }
+
     }
 }

@@ -127,6 +127,10 @@ namespace Para_List
         //定义串口号
         private static Int32 com_no = 0;
 
+        //定义RTC校准尺寸
+        private static decimal rtc_cal_radius = 1.0m; //圆半径
+        private static decimal rtc_cal_interval = 4.0m; //间距
+
 
         public static decimal Gts_Vel_reference { get => gts_vel_reference; set => gts_vel_reference = value; }
         public static decimal Gts_Acc_reference { get => gts_acc_reference; set => gts_acc_reference = value; }
@@ -210,6 +214,8 @@ namespace Para_List
         public static UInt32 List2_Size { get => list2_size; set => list2_size = value; }
         public static Vector Rtc_Home { get => rtc_home; set => rtc_home = value; }
         public static Int32 Com_No { get => com_no; set => com_no = value; }
+        public static decimal Rtc_Cal_Radius { get => rtc_cal_radius; set => rtc_cal_radius = value; }
+        public static decimal Rtc_Cal_Interval { get => rtc_cal_interval; set => rtc_cal_interval = value; }
         //公开构造函数
         public Parameter() { }
     }
@@ -324,6 +330,10 @@ namespace Para_List
         private Vector rtc_home;
         //定义串口号
         private Int32 com_no = 0;
+        //定义RTC校准尺寸
+        private decimal rtc_cal_radius; //圆半径
+        private decimal rtc_cal_interval; //间距
+
         public decimal Gts_Vel_reference { get => gts_vel_reference; set => gts_vel_reference = value; }
         public decimal Gts_Acc_reference { get => gts_acc_reference; set => gts_acc_reference = value; }
         public decimal Gts_Pos_reference { get => gts_pos_reference; set => gts_pos_reference = value; }
@@ -406,6 +416,8 @@ namespace Para_List
         public UInt32 List2_Size { get => list2_size; set => list2_size = value; }
         public Vector Rtc_Home { get => rtc_home; set => rtc_home = value; }
         public Int32 Com_No { get => com_no; set => com_no = value; }
+        public decimal Rtc_Cal_Radius { get => rtc_cal_radius; set => rtc_cal_radius = value; }
+        public decimal Rtc_Cal_Interval { get => rtc_cal_interval; set => rtc_cal_interval = value; }
         //构造函数
         public Parameter_RW() { }
     }
@@ -501,7 +513,9 @@ namespace Para_List
                 List1_Size = Para_List.Parameter.List1_Size,
                 List2_Size = Para_List.Parameter.List2_Size,
                 Rtc_Home = Para_List.Parameter.Rtc_Home,
-                Com_No = Para_List.Parameter.Com_No
+                Com_No = Para_List.Parameter.Com_No,
+                Rtc_Cal_Radius = Para_List.Parameter.Rtc_Cal_Radius,
+                Rtc_Cal_Interval = Para_List.Parameter.Rtc_Cal_Interval
             };
 
             //二进制 序列化
@@ -620,6 +634,8 @@ namespace Para_List
                     Para_List.Parameter.List2_Size = parameter.List2_Size;
                     Para_List.Parameter.Rtc_Home = parameter.Rtc_Home;
                     Para_List.Parameter.Com_No = parameter.Com_No;
+                    Para_List.Parameter.Rtc_Cal_Radius = parameter.Rtc_Cal_Radius;
+                    Para_List.Parameter.Rtc_Cal_Interval = parameter.Rtc_Cal_Interval;
                 }
             }
         }

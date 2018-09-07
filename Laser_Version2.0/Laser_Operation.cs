@@ -34,7 +34,7 @@ namespace Laser_Version2._0
         //构造函数
         public Laser_Operation()
         {
-            Com_rs232.Open_Com(Para_List.Parameter.Com_No);
+            
         }
         //读取数据
         public void Read(byte[] Address,byte[] CC)//读取数据没有D1-Dn

@@ -43,6 +43,8 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.Com_List = new System.Windows.Forms.ComboBox();
+            this.label6 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
@@ -185,11 +187,31 @@
             this.richTextBox1.TabIndex = 14;
             this.richTextBox1.Text = "";
             // 
+            // Com_List
+            // 
+            this.Com_List.FormattingEnabled = true;
+            this.Com_List.Location = new System.Drawing.Point(297, 27);
+            this.Com_List.Name = "Com_List";
+            this.Com_List.Size = new System.Drawing.Size(121, 26);
+            this.Com_List.TabIndex = 15;
+            this.Com_List.SelectedIndexChanged += new System.EventHandler(this.Com_List_SelectedIndexChanged);
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(430, 31);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(80, 18);
+            this.label6.TabIndex = 16;
+            this.label6.Text = "通讯端口";
+            // 
             // Laser_Control_Panel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(742, 682);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.Com_List);
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
@@ -203,6 +225,7 @@
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -223,5 +246,7 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.RichTextBox richTextBox1;
+        private System.Windows.Forms.ComboBox Com_List;
+        private System.Windows.Forms.Label label6;
     }
 }

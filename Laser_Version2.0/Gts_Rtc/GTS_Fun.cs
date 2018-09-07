@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 using GTS;
+using Laser_Build_1._0;
 
 namespace GTS_Fun
 {
@@ -440,7 +443,13 @@ namespace GTS_Fun
         private MC.TCrdData[] crdData = new MC.TCrdData[4096];
         IntPtr Crd_IntPtr = new IntPtr();
         public static double[] Crd_Pos = new double[2];//坐标系位置
-
+        public static List<Affinity_Matrix> affinity_Matrices;//校准数据集合
+        //构造函数
+        public Interpolation()
+        {
+            //获取标定板标定数据
+            affinity_Matrices = Reserialize_Affinity_Matrix("Affinity_Matrix.xml");
+        }
         public void Coordination(decimal X_original, decimal Y_original)
         {
             //结构体变量，用于定义坐标系 
@@ -543,9 +552,51 @@ namespace GTS_Fun
             //初始化FIFO 0前瞻模块
             Gts_Return = MC.GT_InitLookAhead(1, 0, Convert.ToDouble(Para_List.Parameter.LookAhead_EvenTime), Convert.ToDouble(Para_List.Parameter.LookAhead_MaxAcc), 4096, ref crdData[0]);
             Gts_Log.Commandhandler("Line_Interpolation--初始化FIFO 0前瞻模块", Gts_Return);
-
-            foreach (var o in Concat_Datas)
+            
+            ////临时定位变量
+            //Int16 End_m, End_n, Center_m, Center_n;            
+            ////定义处理的变量
+            //decimal Tmp_End_X;
+            //decimal Tmp_End_Y;
+            //decimal Tmp_Center_X;
+            //decimal Tmp_Center_Y;
+            //decimal Tmp_Center_Start_X;
+            //decimal Tmp_Center_Start_Y; 
+            foreach (var o in Concat_Datas) 
             {
+                
+                ////数据矫正
+                ////获取落点
+                //End_m = Convert.ToInt16(o.End_x / Para_List.Parameter.Calibration_Cell);
+                //End_n = Convert.ToInt16(o.End_y / Para_List.Parameter.Calibration_Cell);
+                //Center_m = Convert.ToInt16(o.Center_x / Para_List.Parameter.Calibration_Cell);
+                //Center_n = Convert.ToInt16(o.Center_y / Para_List.Parameter.Calibration_Cell);
+                ////计算最终数据
+                ////终点计算
+                //Tmp_End_X = o.End_x * affinity_Matrices[End_m * Para_List.Parameter.Affinity_Col + End_n].Cos_Value + o.End_y * affinity_Matrices[End_m * Para_List.Parameter.Affinity_Col + End_n].Sin_Value + affinity_Matrices[End_m * Para_List.Parameter.Affinity_Col + End_n].Delta_X;
+                //Tmp_End_Y = o.End_y * affinity_Matrices[End_m * Para_List.Parameter.Affinity_Col + End_n].Cos_Value - o.End_x * affinity_Matrices[End_m * Para_List.Parameter.Affinity_Col + End_n].Sin_Value + affinity_Matrices[End_n * Para_List.Parameter.Affinity_Col + End_n].Delta_Y;
+                ////圆心计算
+                //Tmp_Center_X = o.End_x * affinity_Matrices[Center_m * Para_List.Parameter.Affinity_Col + Center_n].Cos_Value + o.End_y * affinity_Matrices[Center_m * Para_List.Parameter.Affinity_Col + Center_n].Sin_Value + affinity_Matrices[Center_m * Para_List.Parameter.Affinity_Col + Center_n].Delta_X;
+                //Tmp_Center_Y = o.End_y * affinity_Matrices[Center_m * Para_List.Parameter.Affinity_Col + Center_n].Cos_Value - o.End_x * affinity_Matrices[Center_m * Para_List.Parameter.Affinity_Col + Center_n].Sin_Value + affinity_Matrices[Center_n * Para_List.Parameter.Affinity_Col + Center_n].Delta_Y;
+                ////圆心与差值计算
+                //Tmp_Center_Start_X = Tmp_Center_X - Tmp_End_X;
+                //Tmp_Center_Start_Y = Tmp_Center_X - Tmp_End_Y;
+                ////替换数据
+                //if (o.Type == 1)//直线
+                //{
+                //    Line_FIFO(Tmp_End_X, Tmp_End_Y);//将直线插补数据写入
+                //}
+                //else if (o.Type == 2)//圆弧
+                //{
+                //    Circle_R_FIFO(Tmp_End_X, Tmp_End_Y, o.Circle_radius, o.Circle_dir);//将圆弧插补写入
+                //}
+                //else if (o.Type == 3)//圆形
+                //{
+                //    Circle_C_FIFO(Tmp_End_X, Tmp_End_Y, Tmp_Center_Start_X, Tmp_Center_Start_Y, o.Circle_dir);//将圆形插补写入
+                //}
+
+                //未矫正数据
+                
                 if (o.Type == 1)//直线
                 {
                     Line_FIFO(o.End_x, o.End_y);//将直线插补数据写入
@@ -558,13 +609,29 @@ namespace GTS_Fun
                 {
                     Circle_C_FIFO(o.End_x, o.End_y, o.Center_Start_x, o.Center_Start_y, o.Circle_dir);//将圆形插补写入
                 }
+                
             }
 
             //将前瞻数据压入控制器
             Gts_Return = MC.GT_CrdData(1, Crd_IntPtr, 0);
             Gts_Log.Commandhandler("Line_Interpolation--将前瞻数据压入控制器", Gts_Return);
 
-        }        
+        }
+        private List<Affinity_Matrix> Reserialize_Affinity_Matrix(string fileName)
+        {
+
+            //读取文件
+            string File_Path = @"./\Config/" + fileName;
+            using (FileStream fs = new FileStream(File_Path, FileMode.Open, FileAccess.Read))
+            {
+                //二进制 反序列化
+                //BinaryFormatter bf = new BinaryFormatter();
+                //xml 反序列化
+                XmlSerializer bf = new XmlSerializer(typeof(List<Affinity_Matrix>));
+                List<Affinity_Matrix> list = (List<Affinity_Matrix>)bf.Deserialize(fs);
+                return list;
+            }
+        }
         public void Interpolation_Start()
         {
 
@@ -607,6 +674,26 @@ namespace GTS_Fun
         //XY平台运动到配合振镜切割准备点
         public void Gts_Ready(decimal x,decimal y)
         {
+            //数据矫正
+            ////临时定位变量
+            //Int16 End_m, End_n;
+            ////获取落点
+            //End_m = Convert.ToInt16(x / Para_List.Parameter.Calibration_Cell);
+            //End_n = Convert.ToInt16(y / Para_List.Parameter.Calibration_Cell);
+            ////定义处理的变量
+            //decimal Tmp_End_X;
+            //decimal Tmp_End_Y;            
+            ////终点计算
+            //Tmp_End_X = x * affinity_Matrices[End_m * Para_List.Parameter.Affinity_Col + End_n].Cos_Value + y * affinity_Matrices[End_m * Para_List.Parameter.Affinity_Col + End_n].Sin_Value + affinity_Matrices[End_m * Para_List.Parameter.Affinity_Col + End_n].Delta_X;
+            //Tmp_End_Y = y * affinity_Matrices[End_m * Para_List.Parameter.Affinity_Col + End_n].Cos_Value - x * affinity_Matrices[End_m * Para_List.Parameter.Affinity_Col + End_n].Sin_Value + affinity_Matrices[End_n * Para_List.Parameter.Affinity_Col + End_n].Delta_Y;
+            ////清除FIFO 0
+            //Clear_FIFO();
+            ////直线插补定位
+            //Line_FIFO(Tmp_End_X, Tmp_End_X);//将直线插补数据写入
+            ////启动定位
+            //Interpolation_Start();
+
+            //无数据矫正
             //清除FIFO 0
             Clear_FIFO();
             //直线插补定位

@@ -93,6 +93,11 @@
             this.button11 = new System.Windows.Forms.Button();
             this.btn_Mark_Position = new System.Windows.Forms.Button();
             this.button12 = new System.Windows.Forms.Button();
+            this.button13 = new System.Windows.Forms.Button();
+            this.label22 = new System.Windows.Forms.Label();
+            this.textBox20 = new System.Windows.Forms.TextBox();
+            this.label23 = new System.Windows.Forms.Label();
+            this.textBox21 = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // button5
@@ -728,11 +733,63 @@
             this.button12.UseVisualStyleBackColor = true;
             this.button12.Click += new System.EventHandler(this.button12_Click);
             // 
+            // button13
+            // 
+            this.button13.Location = new System.Drawing.Point(1676, 630);
+            this.button13.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.button13.Name = "button13";
+            this.button13.Size = new System.Drawing.Size(154, 50);
+            this.button13.TabIndex = 97;
+            this.button13.Text = "Rtc 标定";
+            this.button13.UseVisualStyleBackColor = true;
+            this.button13.Click += new System.EventHandler(this.button13_Click);
+            // 
+            // label22
+            // 
+            this.label22.AutoSize = true;
+            this.label22.Location = new System.Drawing.Point(1718, 562);
+            this.label22.Name = "label22";
+            this.label22.Size = new System.Drawing.Size(71, 18);
+            this.label22.TabIndex = 101;
+            this.label22.Text = "间距/mm";
+            // 
+            // textBox20
+            // 
+            this.textBox20.Location = new System.Drawing.Point(1703, 596);
+            this.textBox20.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.textBox20.Name = "textBox20";
+            this.textBox20.Size = new System.Drawing.Size(100, 28);
+            this.textBox20.TabIndex = 100;
+            this.textBox20.TextChanged += new System.EventHandler(this.textBox20_TextChanged);
+            // 
+            // label23
+            // 
+            this.label23.AutoSize = true;
+            this.label23.Location = new System.Drawing.Point(1718, 482);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(71, 18);
+            this.label23.TabIndex = 99;
+            this.label23.Text = "半径/mm";
+            // 
+            // textBox21
+            // 
+            this.textBox21.Location = new System.Drawing.Point(1703, 517);
+            this.textBox21.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.textBox21.Name = "textBox21";
+            this.textBox21.Size = new System.Drawing.Size(100, 28);
+            this.textBox21.TabIndex = 98;
+            this.textBox21.TextChanged += new System.EventHandler(this.textBox21_TextChanged);
+            // 
             // Dxf
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1712, 707);
+            this.ClientSize = new System.Drawing.Size(1979, 707);
+            this.Controls.Add(this.label22);
+            this.Controls.Add(this.textBox20);
+            this.Controls.Add(this.label23);
+            this.Controls.Add(this.textBox21);
+            this.Controls.Add(this.button13);
             this.Controls.Add(this.button12);
             this.Controls.Add(this.btn_Mark_Position);
             this.Controls.Add(this.button11);
@@ -877,5 +934,10 @@
         private System.Windows.Forms.Button button11;
         private System.Windows.Forms.Button btn_Mark_Position;
         private System.Windows.Forms.Button button12;
+        private System.Windows.Forms.Button button13;
+        private System.Windows.Forms.Label label22;
+        private System.Windows.Forms.TextBox textBox20;
+        private System.Windows.Forms.Label label23;
+        private System.Windows.Forms.TextBox textBox21;
     }
 }
