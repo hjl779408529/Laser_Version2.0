@@ -1853,11 +1853,11 @@ namespace Laser_Build_1._0
             //{
             //    richTextBox1.AppendText(string.Format("{0:X}",Strs[i]));
             //}
-            byte[] hexStrs = Encoding.ASCII.GetBytes(Initialization.Initial.Com_Comunication.Append_Num_Str(500000).Trim());
-            for (int i = 0; i < hexStrs.Length; i++) 
-            {
-                richTextBox1.AppendText(string.Format("{0:X}", hexStrs[i]) + "\r\n"); 
-            }
+            //、、byte[] hexStrs = Encoding.ASCII.GetBytes(Initialization.Initial.Com_Comunication.Append_Num_Str(500000).Trim());
+            //for (int i = 0; i < hexStrs.Length; i++) 
+            //{
+            //    richTextBox1.AppendText(string.Format("{0:X}", hexStrs[i]) + "\r\n"); 
+            //}
         }
         /// <summary>
         /// 8.31 Mark点 位置定位  自动定位

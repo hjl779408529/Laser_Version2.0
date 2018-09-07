@@ -84,8 +84,9 @@ namespace Laser_Version2._0
             Rec_Flag = false;
             //发送的字节数组
             byte[] data = null;
-            //将发送的字符串转化为byte
-            data = Encoding.ASCII.GetBytes(StrCRC(sendData).Trim());
+            
+            //将发送的字符串转化为byte,并追加终止符号
+            data = StrCRC(sendData).Concat(new byte[] { 0x0D}).ToArray();
             //数据发送
             if (ComDevice.IsOpen)
             {
@@ -109,14 +110,14 @@ namespace Laser_Version2._0
         public byte[] StrToHexByte(string hexString) 
         {
             hexString = hexString.Replace(" ", "");
-            if ((hexString.Length % 2) != 0) hexString += " ";
+            if ((hexString.Length % 2) != 0) hexString = " " + hexString;
             byte[] returnBytes = new byte[hexString.Length / 2];
-            for (int i = 0; i < returnBytes.Length; i++)
+            for (int i = 0; i < returnBytes.Length ; i++)
                 returnBytes[i] = Convert.ToByte(hexString.Substring(i * 2, 2).Replace(" ", ""), 16);
             return returnBytes;
         }
         //将数值10进制转16进制，再将16进制转换为字符串返回 中心是byte转化为ASCII
-        public string Append_Num_Str(UInt32 Num)
+        public byte[] Append_Num_Str(UInt32 Num)
         {
             string tempStr = null;
             if (Num <= 255)
@@ -126,14 +127,15 @@ namespace Laser_Version2._0
             else
             {
                 tempStr = string.Format("{0:X4}", Num);
+                MessageBox.Show(tempStr);
             }
-            byte[] tempByte = StrToHexByte(tempStr);
-            string Result = System.Text.Encoding.Default.GetString(tempByte);
-            MessageBox.Show(Result);
+            byte[] Result = StrToHexByte(tempStr);
+            //string Result = new ASCIIEncoding().GetString(tempByte);
+            //MessageBox.Show(Result);
             return Result;
         }
         //CRC数据校验值添加
-        public string StrCRC(string inStr) 
+        public byte[] StrCRC(string inStr) 
         {
             byte[] data = null;
             //将发送的字符串转化为byte
@@ -150,7 +152,9 @@ namespace Laser_Version2._0
             MAC OS: 回车符CR表示下一行.
             */
             //将校准值追加 至 传入值 {1:X4}---x表示16进制，4表示保留4位  
-            string Result = inStr + Append_Num_Str(usCrc16) + "\r";
+            //string Result = inStr + Append_Num_Str(usCrc16) + "\r";
+            //return Result;
+            byte[] Result = data.Concat(Append_Num_Str(usCrc16)).ToArray();
             return Result;
         }
         //数据接收
@@ -159,16 +163,26 @@ namespace Laser_Version2._0
             byte[] ReDatas = new byte[ComDevice.BytesToRead];
             ComDevice.Read(ReDatas, 0, ReDatas.Length);//读取数据
             //接收数据处理 将ReDatas 转化为 String
-            ReceiveData = new ASCIIEncoding().GetString(ReDatas);
-            byte[] Rec_Data = null;
-            Rec_Data = Encoding.ASCII.GetBytes(ReceiveData.Trim());
-            //string ASCIIstr2 = null;
-            //for (int j=0;j< Rec_Data.Length; j++)
-            //{
-            //    int asciicode = (int)(Rec_Data[j]);
-            //    ASCIIstr2 += Convert.ToString(asciicode);//字符串ASCIIstr2 为对应的ASCII字符串
-            //}
-            //MessageBox.Show(ASCIIstr2);
+            //该方式回丢弃数据
+            //ASCII编码只能包含0-127的数据，高出的数据将丢弃
+            //ReceiveData = new ASCIIEncoding().GetString(ReDatas);  
+            //byte[] Rec_Data = null;
+            //Rec_Data = Encoding.ASCII.GetBytes(ReceiveData.Trim());
+
+            byte[] Rec_Data =ReDatas;
+
+            /**************将int数据以Hex形式显示******************/
+            /*
+            string ASCIIstr2 = null;
+            for (int j = 0; j < Rec_Data.Length; j++)
+            {
+                int asciicode = (int)(Rec_Data[j]);
+                ASCIIstr2 += Convert.ToString(asciicode);//字符串ASCIIstr2 为对应的ASCII字符串
+            }
+            MessageBox.Show(ASCIIstr2);
+            */
+            /**************将int数据以Hex形式显示******************/
+
             Resolve_Rec.Empty();
             //数据解析
             Resolve_Rec.RW = System.Text.Encoding.Default.GetString(new byte[] { Rec_Data[0] });
@@ -182,24 +196,16 @@ namespace Laser_Version2._0
                 {
                     Resolve_Rec.Data = Resolve_Rec.Data + System.Text.Encoding.Default.GetString(new byte[] { Rec_Data[4 + i] });
                 }
-                Resolve_Rec.Crc = BitConverter.ToUInt16(new byte[] { Rec_Data[4 + Rec_Data[1]], Rec_Data[4 + Rec_Data[1] + 1] }, 0);
+                Resolve_Rec.Crc = BitConverter.ToUInt16(new byte[] { Rec_Data[4 + Rec_Data[1]+1], Rec_Data[4 + Rec_Data[1]] }, 0);
             }
             else
             {
                 Resolve_Rec.Data = "";
-                Resolve_Rec.Crc = BitConverter.ToUInt16(new byte[] { Rec_Data[4], Rec_Data[5] }, 0);
+                Resolve_Rec.Crc = BitConverter.ToUInt16(new byte[] { Rec_Data[5], Rec_Data[4] }, 0);
             }
             //接收数据组合
             Resolve_Rec.Sum = Resolve_Rec.RW + Resolve_Rec.DataSize + Resolve_Rec.Address + Resolve_Rec.Com_Control + Resolve_Rec.Data;
-            byte[] tmp_Data = null;
-            tmp_Data = Encoding.ASCII.GetBytes(Resolve_Rec.Sum.Trim());
-            string ASCIIstr2 = null;
-            for (int j = 0; j < tmp_Data.Length; j++)
-            {
-                int asciicode = (int)(tmp_Data[j]);
-                ASCIIstr2 += Convert.ToString(asciicode);//字符串ASCIIstr2 为对应的ASCII字符串
-            }
-            MessageBox.Show(ASCIIstr2);
+            
             UInt16 Cal_Num = Cal_Crc(Resolve_Rec.Sum);
             //校验
             if (Cal_Num == Resolve_Rec.Crc)
@@ -214,7 +220,7 @@ namespace Laser_Version2._0
             //置位接收标志
             Rec_Flag = true;
         }
-        //只计算CRC数值
+        //只计算CRC数值 只能校验ASCII覆盖的范围，后续可以覆盖0-255的byte校验
         public UInt16 Cal_Crc(string inStr)
         {
             byte[] data = null;
