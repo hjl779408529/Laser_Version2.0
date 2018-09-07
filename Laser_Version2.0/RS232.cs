@@ -25,6 +25,8 @@ namespace Laser_Version2._0
         public List<int> StopBits = new List<int>() {1, 2, 3};
         //接收数据数组
         public string ReceiveData = "";
+        public Laser_CC_Data Resolve_Rec = new Laser_CC_Data();//接收数据解析
+        public bool Rec_Flag;//数据接收完成标志
         // Crc Computation Class
         private static CRCTool compCRC = new CRCTool();
         //构造函数
@@ -78,6 +80,9 @@ namespace Laser_Version2._0
         //数据发送
         public bool Send_Data(string sendData)
         {
+            //清除接收标志
+            Rec_Flag = false;
+            //发送的字节数组
             byte[] data = null;
             //将发送的字符串转化为byte
             data = Encoding.ASCII.GetBytes(StrCRC(sendData).Trim());
@@ -100,7 +105,7 @@ namespace Laser_Version2._0
             }
             return false;
         }
-        //Hex字符串转换16进制字节数组 只支持为数字的字符串
+        //Hex字符串转换16进制字节数组 只支持为16进制数字的字符串
         public byte[] StrToHexByte(string hexString) 
         {
             hexString = hexString.Replace(" ", "");
@@ -113,9 +118,18 @@ namespace Laser_Version2._0
         //将数值10进制转16进制，再将16进制转换为字符串返回 中心是byte转化为ASCII
         public string Append_Num_Str(UInt32 Num)
         {
-            string tempStr = string.Format("{0:X4}", Num);
-            byte[] tempByte = StrToHexByte(tempStr.Trim());
+            string tempStr = null;
+            if (Num <= 255)
+            {
+                tempStr = string.Format("{0:X2}", Num);
+            }
+            else
+            {
+                tempStr = string.Format("{0:X4}", Num);
+            }
+            byte[] tempByte = StrToHexByte(tempStr);
             string Result = System.Text.Encoding.Default.GetString(tempByte);
+            MessageBox.Show(Result);
             return Result;
         }
         //CRC数据校验值添加
@@ -136,7 +150,7 @@ namespace Laser_Version2._0
             MAC OS: 回车符CR表示下一行.
             */
             //将校准值追加 至 传入值 {1:X4}---x表示16进制，4表示保留4位  
-            string Result = string.Format("{0}{1:X4}\r", inStr, usCrc16);
+            string Result = inStr + Append_Num_Str(usCrc16) + "\r";
             return Result;
         }
         //数据接收
@@ -146,7 +160,71 @@ namespace Laser_Version2._0
             ComDevice.Read(ReDatas, 0, ReDatas.Length);//读取数据
             //接收数据处理 将ReDatas 转化为 String
             ReceiveData = new ASCIIEncoding().GetString(ReDatas);
-        }        
+            byte[] Rec_Data = null;
+            Rec_Data = Encoding.ASCII.GetBytes(ReceiveData.Trim());
+            //string ASCIIstr2 = null;
+            //for (int j=0;j< Rec_Data.Length; j++)
+            //{
+            //    int asciicode = (int)(Rec_Data[j]);
+            //    ASCIIstr2 += Convert.ToString(asciicode);//字符串ASCIIstr2 为对应的ASCII字符串
+            //}
+            //MessageBox.Show(ASCIIstr2);
+            Resolve_Rec.Empty();
+            //数据解析
+            Resolve_Rec.RW = System.Text.Encoding.Default.GetString(new byte[] { Rec_Data[0] });
+            Resolve_Rec.DataSize = System.Text.Encoding.Default.GetString(new byte[] { Rec_Data[1] });
+            Resolve_Rec.Address = System.Text.Encoding.Default.GetString(new byte[] { Rec_Data[2] });
+            Resolve_Rec.Com_Control = System.Text.Encoding.Default.GetString(new byte[] { Rec_Data[3] });
+            //D1-Dn解析 和 Crc校验
+            if (Rec_Data[1] > 0)
+            {
+                for (int i = 0; i < Rec_Data[1]; i++)
+                {
+                    Resolve_Rec.Data = Resolve_Rec.Data + System.Text.Encoding.Default.GetString(new byte[] { Rec_Data[4 + i] });
+                }
+                Resolve_Rec.Crc = BitConverter.ToUInt16(new byte[] { Rec_Data[4 + Rec_Data[1]], Rec_Data[4 + Rec_Data[1] + 1] }, 0);
+            }
+            else
+            {
+                Resolve_Rec.Data = "";
+                Resolve_Rec.Crc = BitConverter.ToUInt16(new byte[] { Rec_Data[4], Rec_Data[5] }, 0);
+            }
+            //接收数据组合
+            Resolve_Rec.Sum = Resolve_Rec.RW + Resolve_Rec.DataSize + Resolve_Rec.Address + Resolve_Rec.Com_Control + Resolve_Rec.Data;
+            byte[] tmp_Data = null;
+            tmp_Data = Encoding.ASCII.GetBytes(Resolve_Rec.Sum.Trim());
+            string ASCIIstr2 = null;
+            for (int j = 0; j < tmp_Data.Length; j++)
+            {
+                int asciicode = (int)(tmp_Data[j]);
+                ASCIIstr2 += Convert.ToString(asciicode);//字符串ASCIIstr2 为对应的ASCII字符串
+            }
+            MessageBox.Show(ASCIIstr2);
+            UInt16 Cal_Num = Cal_Crc(Resolve_Rec.Sum);
+            //校验
+            if (Cal_Num == Resolve_Rec.Crc)
+            {
+                MessageBox.Show(string.Format("解析值：{0}，校验值：{1}，校验成功！！！" ,Resolve_Rec.Crc , Cal_Num));
+            }
+            else
+            {
+                MessageBox.Show(string.Format("解析值：{0}，校验值：{1}，校验失败！！！" , Resolve_Rec.Crc , Cal_Num));
+            }
+            
+            //置位接收标志
+            Rec_Flag = true;
+        }
+        //只计算CRC数值
+        public UInt16 Cal_Crc(string inStr)
+        {
+            byte[] data = null;
+            //将发送的字符串转化为byte
+            data = Encoding.ASCII.GetBytes(inStr.Trim());
+            //CRC校准方式
+            compCRC.Init(CRCTool.CRCCode.CRC_CCITT);
+            ushort usCrc16 = (ushort)compCRC.crctablefast(data);
+            return usCrc16;
+        }
 
     }
 }

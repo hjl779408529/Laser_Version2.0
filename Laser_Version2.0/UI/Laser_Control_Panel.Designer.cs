@@ -75,6 +75,7 @@
             this.button3.TabIndex = 2;
             this.button3.Text = "状态更新";
             this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
             // button4
             // 
@@ -209,7 +210,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(742, 682);
+            this.ClientSize = new System.Drawing.Size(702, 682);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.Com_List);
             this.Controls.Add(this.richTextBox1);

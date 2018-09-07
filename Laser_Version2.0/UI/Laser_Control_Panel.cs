@@ -18,7 +18,8 @@ namespace Laser_Version2._0
         {
             InitializeComponent();
         }
-        
+        //Laser_Control  通讯控制
+        Laser_Operation Laser_Control = new Laser_Operation();
         private void Laser_Control_Panel_Load(object sender, EventArgs e)
         {
             richTextBox1.AppendText("Running"+"\r\n");
@@ -57,6 +58,11 @@ namespace Laser_Version2._0
         private void Com_List_SelectedIndexChanged(object sender, EventArgs e)
         {
             Para_List.Parameter.Com_No = Com_List.SelectedIndex;
+        }
+        //状态更新
+        private void button3_Click(object sender, EventArgs e)
+        {
+            Laser_Control.Write(new byte[]{0x00},new byte[]{0x07 }, new byte[] { 0x07 ,0x10}); 
         }
     }
 }
