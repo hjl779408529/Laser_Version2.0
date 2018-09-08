@@ -15,6 +15,7 @@ using Emgu.Util;
 using System.Drawing;
 using System.Threading;
 using System.Xml.Serialization;
+using System.Windows.Forms;
 
 namespace Laser_Build_1._0
 {
@@ -408,7 +409,7 @@ namespace Laser_Build_1._0
                         temp_array = mat.GetDoubleArray();
                         //获取仿射变换参数
                         Temp_Affinity_Matrix.Cos_Value = Convert.ToDecimal(temp_array[0]);//余弦值
-                        Temp_Affinity_Matrix.Sin_Value = -Convert.ToDecimal(temp_array[1]);//正弦值
+                        Temp_Affinity_Matrix.Sin_Value = Convert.ToDecimal(temp_array[1]);//正弦值
                         Temp_Affinity_Matrix.Delta_X = Convert.ToDecimal(temp_array[2]);//x方向偏移
                         Temp_Affinity_Matrix.Delta_Y = Convert.ToDecimal(temp_array[3]);//y方向偏移
                         //追加进入仿射变换List
@@ -597,7 +598,36 @@ namespace Laser_Build_1._0
                 return list;
             }
         }
+        //将矫正数据保存为csv
+        public void Save_To_Csv(List<Correct_Data> Data,string fileName)
+        {
+            string sdatetime = DateTime.Now.ToString("D");
+            string delimiter = ",";
+            string strHeader = "";
+            //保存的位置和文件名称
+            string File_Path = @"./\Config/" + fileName;
 
+            strHeader += "相机实际X坐标,相机实际Y坐标,平台电机实际X坐标,平台电机实际Y坐标";
+
+            bool isExit = File.Exists(File_Path);
+            StreamWriter sw = new StreamWriter(File_Path, true, Encoding.GetEncoding("gb2312"));
+            if (!isExit)
+            {
+                sw.WriteLine(strHeader);
+            }
+            for (int i=0;i< Data.Count;i++)
+            {
+                //output rows data
+                string strRowValue = "";
+                strRowValue += Data[i].Xo + delimiter
+                             + Data[i].Yo + delimiter
+                             + Data[i].Xm + delimiter
+                             + Data[i].Ym + delimiter;
+                sw.WriteLine(strRowValue);
+            }
+            sw.Close();
+            MessageBox.Show("保存成功！");
+        }
 
         //仿射变换数据序列化操作
         public void Serialize_Affinity_Matrix(List<Affinity_Matrix> list, string txtFile) 
@@ -631,6 +661,7 @@ namespace Laser_Build_1._0
             }
         }
 
+        
 
         //8.28
         //dxf-仿射变换数据序列化操作

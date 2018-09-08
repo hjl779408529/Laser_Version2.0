@@ -17,6 +17,7 @@ namespace Laser_Version2._0
         public string Data;//数据
         public UInt16 Crc;//CRC校验值
         public string Sum;//数据整合
+        public UInt16[] Rec;//接收数据，指向数组的头部的指针
 
         public void Empty()
         {
@@ -25,7 +26,8 @@ namespace Laser_Version2._0
             Address = "";//地址
             Com_Control = "";//控制命令
             Data = "";//数据
-            Sum="";//数据整合
+            Crc = 0;//CRC校验值
+            Sum ="";//数据整合
         }
     }
     

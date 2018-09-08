@@ -192,17 +192,22 @@ namespace Laser_Version2._0
             //D1-Dn解析 和 Crc校验
             if (Rec_Data[1] > 0)
             {
+                //接收数据
+                Resolve_Rec.Rec = new UInt16[Rec_Data[1]];
                 for (int i = 0; i < Rec_Data[1]; i++)
                 {
                     Resolve_Rec.Data = Resolve_Rec.Data + System.Text.Encoding.Default.GetString(new byte[] { Rec_Data[4 + i] });
+                    Resolve_Rec.Rec[i]= (UInt16)(Rec_Data[4 + i]);
                 }
                 Resolve_Rec.Crc = BitConverter.ToUInt16(new byte[] { Rec_Data[4 + Rec_Data[1]+1], Rec_Data[4 + Rec_Data[1]] }, 0);
+                
             }
             else
             {
                 Resolve_Rec.Data = "";
                 Resolve_Rec.Crc = BitConverter.ToUInt16(new byte[] { Rec_Data[5], Rec_Data[4] }, 0);
             }
+            //MessageBox.Show(string.Format("data0：{0}，data1：{1}！！！", Resolve_Rec.Rec[0], Resolve_Rec.Rec[1]));
             //接收数据组合
             Resolve_Rec.Sum = Resolve_Rec.RW + Resolve_Rec.DataSize + Resolve_Rec.Address + Resolve_Rec.Com_Control + Resolve_Rec.Data;
             
@@ -220,7 +225,7 @@ namespace Laser_Version2._0
             //置位接收标志
             Rec_Flag = true;
         }
-        //只计算CRC数值 只能校验ASCII覆盖的范围，后续可以覆盖0-255的byte校验
+        //只计算CRC数值 只能校验ASCII 0-127覆盖的范围，后续可以覆盖0-255的byte校验
         public UInt16 Cal_Crc(string inStr)
         {
             byte[] data = null;

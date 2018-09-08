@@ -73,8 +73,6 @@ namespace Laser_Build_1._0
                             //启动Gts运动
                             Gts_Fun.Integrate(List_Datas[i]);
 
-                            //加工结束
-
                             //关闭激光
                             Rtc_Motion.Close_Laser();
 
@@ -93,11 +91,8 @@ namespace Laser_Build_1._0
                         {
                             //关闭激光
                             Rtc_Motion.Close_Laser();
-                            //定位到Rtc加工起点
-                            //Rtc_Motion.Rtc_Ready(List_Datas[i][0].Rtc_x, List_Datas[i][0].Rtc_y);
                             //Gts移动到准备位置 本次开头
-                            Gts_Fun.Gts_Ready(List_Datas[i][0].Gts_x, List_Datas[i][0].Gts_y);                           
-
+                            Gts_Fun.Gts_Ready(List_Datas[i][0].Gts_x, List_Datas[i][0].Gts_y); 
                             //启动加工
                             Rtc_Motion.Draw(List_Datas[i], 1);
 

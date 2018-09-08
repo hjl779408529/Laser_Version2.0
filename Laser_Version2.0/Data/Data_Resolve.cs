@@ -802,7 +802,7 @@ namespace Laser_Build_1._0
                                 Temp_Data.End_x = In_Data[i][j].End_x - In_Data[i][j].Center_x;
                                 Temp_Data.End_y = In_Data[i][j].End_y - In_Data[i][j].Center_y;
                                 //追加修改的数据
-                                Temp_Interpolation_List_Data.Add(Temp_Data);
+                                Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
                                 Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
                                 //清空数据
                                 Temp_Data.Empty();
@@ -817,7 +817,7 @@ namespace Laser_Build_1._0
                                 Temp_Data.End_y = In_Data[i][j].End_y;
 
                                 //追加修改的数据
-                                Temp_Interpolation_List_Data.Add(Temp_Data);
+                                Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
                                 Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
                                 //清空数据
                                 Temp_Data.Empty();
@@ -846,11 +846,11 @@ namespace Laser_Build_1._0
                                 Temp_Data.Gts_x = In_Data[i][j].Center_x;
                                 Temp_Data.Gts_y = In_Data[i][j].Center_y;                                
                                 //RTC 圆弧加工圆心坐标转换
-                                Temp_Data.Center_x = In_Data[i][j].Center_x - Temp_Data.Gts_x;
-                                Temp_Data.Center_y = In_Data[i][j].Center_y - Temp_Data.Gts_y;
+                                Temp_Data.Center_x = 0;
+                                Temp_Data.Center_y = 0;
                                 //RTC加工切入点
                                 Temp_Data.End_x = Temp_Data.Center_x;
-                                Temp_Data.End_y = In_Data[i][j].Circle_radius + Temp_Data.Center_y;
+                                Temp_Data.End_y = Temp_Data.Center_y + In_Data[i][j].Circle_radius;
                                 //RTC加工整圆角度
                                 // arc angle in ° as a 64 - bit IEEE floating point value
                                 // (positive angle values correspond to clockwise angles);
@@ -860,10 +860,10 @@ namespace Laser_Build_1._0
 
                                 //Rtc定位 激光加工起点坐标
                                 Temp_Data.Rtc_x = Temp_Data.Center_x;
-                                Temp_Data.Rtc_y = In_Data[i][j].Circle_radius + Temp_Data.Center_y;
+                                Temp_Data.Rtc_y = Temp_Data.Center_y + In_Data[i][j].Circle_radius;
 
                                 //追加修改的数据
-                                Temp_Interpolation_List_Data.Add(Temp_Data);
+                                Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
                             }
                             Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
                         }
@@ -895,14 +895,14 @@ namespace Laser_Build_1._0
                             if (Temp_Data.Type ==1)//直线
                             {
                                 //追加修改的数据
-                                Temp_Interpolation_List_Data.Add(Temp_Data);
+                                Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
                             }
                             else if (Temp_Data.Type == 2)//圆弧
                             {
                                 if (Temp_Data.Circle_radius >= 20)//圆弧半径大于等于20mm
                                 {
                                     //追加修改的数据
-                                    Temp_Interpolation_List_Data.Add(Temp_Data);
+                                    Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
                                 }
                                 else//圆弧半径小于20mm
                                 {
@@ -950,7 +950,7 @@ namespace Laser_Build_1._0
                                         Temp_Data.End_x = In_Data[i][m].End_x - Temp_Data.Gts_x;
                                         Temp_Data.End_y = In_Data[i][m].End_y - Temp_Data.Gts_y;
                                         //追加修改的数据
-                                        Temp_Interpolation_List_Data.Add(Temp_Data);
+                                        Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
                                         Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
                                         //清空数据
                                         Temp_Data.Empty();
@@ -965,7 +965,7 @@ namespace Laser_Build_1._0
                                         Temp_Data.End_y = In_Data[i][m].End_y;
 
                                         //追加修改的数据
-                                        Temp_Interpolation_List_Data.Add(Temp_Data);
+                                        Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
                                         Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
                                         //清空数据
                                         Temp_Data.Empty();
@@ -1009,7 +1009,7 @@ namespace Laser_Build_1._0
                                             Temp_Data.End_x = In_Data[i][m].End_x - Temp_Data.Gts_x;
                                             Temp_Data.End_y = In_Data[i][m].End_y - Temp_Data.Gts_y;
                                             //追加修改的数据
-                                            Temp_Interpolation_List_Data.Add(Temp_Data);
+                                            Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
                                             Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
                                             //清空数据
                                             Temp_Data.Empty();
@@ -1024,7 +1024,7 @@ namespace Laser_Build_1._0
                                             Temp_Data.End_y = In_Data[i][m].End_y;
 
                                             //追加修改的数据
-                                            Temp_Interpolation_List_Data.Add(Temp_Data);
+                                            Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
                                             Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
                                             //清空数据
                                             Temp_Data.Empty();
@@ -1095,16 +1095,30 @@ namespace Laser_Build_1._0
                                 {
                                     Temp_Data.Angle = -In_Data[i][j].Angle;
                                 }
-                                //Temp_Data.Angle = -Temp_Data.Angle;
                             }
                             //坐标转换 将坐标转换为RTC坐标系坐标
                             Temp_Data.End_x = In_Data[i][j].End_x - Rtc_Cal_X;
                             Temp_Data.End_y = In_Data[i][j].End_y - Rtc_Cal_Y;
                             //追加修改的数据
-                            Temp_Interpolation_List_Data.Add(Temp_Data);
+                            Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
                         }
                         Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
                     }
+                }
+            }
+            //处理二次结果，合并走直线的Gts数据，下次为Rtc加工，则变动该GTS数据终点坐标为RTC加工的gts基准位置
+            for (int cal = 0; cal < Result.Count; cal++)
+            {
+                //当前序号 数量为1、加工类型1 直线、加工方式10 GTS
+                //当前+1序号 数量大于1、加工方式20 RTX
+                if ((cal< Result.Count-1) && (Result[cal].Count==1) && (Result[cal][0].Type==1) && (Result[cal][0].Work == 10) && (Result[cal+1].Count >= 1) && (Result[cal+1][0].Work == 20))
+                {
+                    Temp_Data.Empty();
+                    Temp_Data = Result[cal][0];
+                    Temp_Data.End_x = Result[cal + 1][0].Gts_x;
+                    Temp_Data.End_y = Result[cal + 1][0].Gts_y;
+                    //重新赋值
+                    Result[cal][0] = new Interpolation_Data(Temp_Data);
                 }
             }
             //返回结果

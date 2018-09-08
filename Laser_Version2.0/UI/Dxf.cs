@@ -1724,6 +1724,7 @@ namespace Laser_Build_1._0
             //输出
             for (int i = 0; i < Rtc_List_Data.Count; i++)
             {
+
                 for (int j = 0; j < Rtc_List_Data[i].Count; j++)
                 {
                     richTextBox1.AppendText("RTC Type：" + Rtc_List_Data[i][j].Type + "RTC Work：" + Rtc_List_Data[i][j].Work+ "RTC 整合数据 end_x：" + Rtc_List_Data[i][j].End_x + "RTC 整合数据 end_y：" + Rtc_List_Data[i][j].End_y + "\r\n");
@@ -1794,19 +1795,21 @@ namespace Laser_Build_1._0
             Test.Separate_Rtc_Gts(Compensation_Concat_List_Data).ForEach(m => Rtc_List_Data.Add(m));
             //Rtc_List_Data = new List<List<Interpolation_Data>>(Compensation_Integrate(Concat_List_Data));
             //输出
-            for (int i = 0; i < Compensation_Concat_List_Data.Count; i++)
-            {
-                for (int j = 0; j < Compensation_Concat_List_Data[i].Count; j++)
-                {
-                    richTextBox1.AppendText("Type：" + Compensation_Concat_List_Data[i][j].Type + "  加工类型Work：" + Compensation_Concat_List_Data[i][j].Work + "  加工起点 Start_x：" + Compensation_Concat_List_Data[i][j].Start_x + "  加工起点 Start_y：" + Compensation_Concat_List_Data[i][j].Start_y + "  加工终点 End_x：" + Compensation_Concat_List_Data[i][j].End_x + "  加工终点 End_y：" + Compensation_Concat_List_Data[i][j].End_y + "  圆心X：" + Compensation_Concat_List_Data[i][j].Center_x + "  圆心Y：" + Compensation_Concat_List_Data[i][j].Center_y + "\r\n");
-                }
-            }
+            //for (int i = 0; i < Compensation_Concat_List_Data.Count; i++)
+            //{
+            //    for (int j = 0; j < Compensation_Concat_List_Data[i].Count; j++)
+            //    {
+            //        richTextBox1.AppendText("Type：" + Compensation_Concat_List_Data[i][j].Type + "  加工类型Work：" + Compensation_Concat_List_Data[i][j].Work + "  加工起点 Start_x：" + Compensation_Concat_List_Data[i][j].Start_x + "  加工起点 Start_y：" + Compensation_Concat_List_Data[i][j].Start_y + "  加工终点 End_x：" + Compensation_Concat_List_Data[i][j].End_x + "  加工终点 End_y：" + Compensation_Concat_List_Data[i][j].End_y + "  圆心X：" + Compensation_Concat_List_Data[i][j].Center_x + "  圆心Y：" + Compensation_Concat_List_Data[i][j].Center_y + "\r\n");
+            //    }
+            //}
             richTextBox1.AppendText("RTC和GTS数据拆分后数据数量：" + Rtc_List_Data.Count + "\r\n");
             for (int i = 0; i < Rtc_List_Data.Count; i++)
             {
+                richTextBox1.AppendText("No：" + i + "  加工类型Work：" + Rtc_List_Data[i][0].Work + "  Gts起点x：" + Rtc_List_Data[i][0].Gts_x + "  Gts起点y：" + Rtc_List_Data[i][0].Gts_y + "\r\n");
+
                 for (int j = 0; j < Rtc_List_Data[i].Count; j++)
                 {
-                    richTextBox1.AppendText("Type：" + Rtc_List_Data[i][j].Type + "  加工类型Work：" + Rtc_List_Data[i][j].Work + "  加工起点 Start_x：" + Rtc_List_Data[i][j].Start_x+ "  加工起点 Start_y：" + Rtc_List_Data[i][j].Start_y + "  加工终点 End_x：" + Rtc_List_Data[i][j].End_x + "  加工终点 End_y：" + Rtc_List_Data[i][j].End_y + "  圆心X：" + Rtc_List_Data[i][j].Center_x + "  圆心Y：" + Rtc_List_Data[i][j].Center_y + "  角度：" + Rtc_List_Data[i][j].Angle + "  圆弧方向：" + Rtc_List_Data[i][j].Circle_dir + "\r\n");
+                    richTextBox1.AppendText("      Type：" + Rtc_List_Data[i][j].Type + "  加工类型Work：" + Rtc_List_Data[i][j].Work + "  Gts起点x：" + Rtc_List_Data[i][j].Gts_x + "  Gts起点y：" + Rtc_List_Data[i][j].Gts_y + "  Rtc起点x：" + Rtc_List_Data[i][j].Rtc_x + "  Rtc起点y：" + Rtc_List_Data[i][j].Rtc_y + "  加工起点 Start_x：" + Rtc_List_Data[i][j].Start_x + "  加工起点 Start_y：" + Rtc_List_Data[i][j].Start_y + "  加工终点 End_x：" + Rtc_List_Data[i][j].End_x + "  加工终点 End_y：" + Rtc_List_Data[i][j].End_y + "  圆心X：" + Rtc_List_Data[i][j].Center_x + "  圆心Y：" + Rtc_List_Data[i][j].Center_y + "  角度：" + Rtc_List_Data[i][j].Angle + "  圆弧方向：" + Rtc_List_Data[i][j].Circle_dir + "\r\n");
                 }
             }
 
@@ -1892,8 +1895,11 @@ namespace Laser_Build_1._0
             //获取标定板标定数据
             Generate_Affinity_Matrix Get_Data = new Generate_Affinity_Matrix();
             List<Affinity_Matrix> affinity_Matrices = Get_Data.Resolve(Read_Data.Reserialize_Correct_Data("Correct_Data.xml"));
-            richTextBox1.AppendText("理论数据量:" + 140*140 + "\r\n");
+            richTextBox1.AppendText("理论数据量:" + 140 * 140 + "\r\n");
             richTextBox1.AppendText("实际数据量:" + affinity_Matrices.Count + "\r\n");
+
+            //将数据保存为Csv 方便Matlab处理
+            //Read_Data.Save_To_Csv(Read_Data.Reserialize_Correct_Data("Correct_Data.xml"), "Data.csv");
         }
         
         private void button13_Click(object sender, EventArgs e)
@@ -1905,7 +1911,7 @@ namespace Laser_Build_1._0
             {
                 for (int j = 0; j < Rtc_List_Data[i].Count; j++)
                 {
-                    richTextBox1.AppendText("Type：" + Rtc_List_Data[i][j].Type + "  加工类型Work：" + Rtc_List_Data[i][j].Work + "  Rtc起点x：" + Rtc_List_Data[i][j].Rtc_x + "  Rtc起点y：" + Rtc_List_Data[i][j].Rtc_y + "  加工起点 Start_x：" + Rtc_List_Data[i][j].Start_x + "  加工起点 Start_y：" + Rtc_List_Data[i][j].Start_y + "  加工终点 End_x：" + Rtc_List_Data[i][j].End_x + "  加工终点 End_y：" + Rtc_List_Data[i][j].End_y + "  圆心X：" + Rtc_List_Data[i][j].Center_x + "  圆心Y：" + Rtc_List_Data[i][j].Center_y + "  角度：" + Rtc_List_Data[i][j].Angle + "  圆弧方向：" + Rtc_List_Data[i][j].Circle_dir + "\r\n");
+                    richTextBox1.AppendText("Type：" + Rtc_List_Data[i][j].Type + "  加工类型Work：" + Rtc_List_Data[i][j].Work + "  Gts起点x：" + Rtc_List_Data[i][j].Gts_x + "  Gts起点y：" + Rtc_List_Data[i][j].Gts_y + "  Rtc起点x：" + Rtc_List_Data[i][j].Rtc_x + "  Rtc起点y：" + Rtc_List_Data[i][j].Rtc_y + "  加工起点 Start_x：" + Rtc_List_Data[i][j].Start_x + "  加工起点 Start_y：" + Rtc_List_Data[i][j].Start_y + "  加工终点 End_x：" + Rtc_List_Data[i][j].End_x + "  加工终点 End_y：" + Rtc_List_Data[i][j].End_y + "  圆心X：" + Rtc_List_Data[i][j].Center_x + "  圆心Y：" + Rtc_List_Data[i][j].Center_y + "  角度：" + Rtc_List_Data[i][j].Angle + "  圆弧方向：" + Rtc_List_Data[i][j].Circle_dir + "\r\n");
                 }
             }
         }
