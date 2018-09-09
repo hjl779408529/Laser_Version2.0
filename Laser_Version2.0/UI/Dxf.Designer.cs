@@ -81,16 +81,12 @@
             this.label19 = new System.Windows.Forms.Label();
             this.textBox17 = new System.Windows.Forms.TextBox();
             this.button18 = new System.Windows.Forms.Button();
-            this.button21 = new System.Windows.Forms.Button();
-            this.button22 = new System.Windows.Forms.Button();
-            this.button23 = new System.Windows.Forms.Button();
             this.button25 = new System.Windows.Forms.Button();
             this.button10 = new System.Windows.Forms.Button();
             this.label20 = new System.Windows.Forms.Label();
             this.textBox18 = new System.Windows.Forms.TextBox();
             this.label21 = new System.Windows.Forms.Label();
             this.textBox19 = new System.Windows.Forms.TextBox();
-            this.button11 = new System.Windows.Forms.Button();
             this.btn_Mark_Position = new System.Windows.Forms.Button();
             this.button12 = new System.Windows.Forms.Button();
             this.button13 = new System.Windows.Forms.Button();
@@ -416,7 +412,7 @@
             // 
             // button9
             // 
-            this.button9.Location = new System.Drawing.Point(1138, 466);
+            this.button9.Location = new System.Drawing.Point(1138, 218);
             this.button9.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button9.Name = "button9";
             this.button9.Size = new System.Drawing.Size(154, 50);
@@ -481,7 +477,7 @@
             // 
             // button14
             // 
-            this.button14.Location = new System.Drawing.Point(1138, 630);
+            this.button14.Location = new System.Drawing.Point(1138, 384);
             this.button14.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button14.Name = "button14";
             this.button14.Size = new System.Drawing.Size(154, 50);
@@ -492,7 +488,7 @@
             // 
             // button15
             // 
-            this.button15.Location = new System.Drawing.Point(1138, 548);
+            this.button15.Location = new System.Drawing.Point(1138, 303);
             this.button15.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button15.Name = "button15";
             this.button15.Size = new System.Drawing.Size(154, 50);
@@ -610,38 +606,6 @@
             this.button18.UseVisualStyleBackColor = true;
             this.button18.Click += new System.EventHandler(this.button18_Click);
             // 
-            // button21
-            // 
-            this.button21.Location = new System.Drawing.Point(1138, 138);
-            this.button21.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.button21.Name = "button21";
-            this.button21.Size = new System.Drawing.Size(154, 50);
-            this.button21.TabIndex = 86;
-            this.button21.Text = "生成RTC数据";
-            this.button21.UseVisualStyleBackColor = true;
-            this.button21.Click += new System.EventHandler(this.button21_Click);
-            // 
-            // button22
-            // 
-            this.button22.Location = new System.Drawing.Point(1138, 302);
-            this.button22.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.button22.Name = "button22";
-            this.button22.Size = new System.Drawing.Size(154, 50);
-            this.button22.TabIndex = 85;
-            this.button22.Text = "RTC终止";
-            this.button22.UseVisualStyleBackColor = true;
-            // 
-            // button23
-            // 
-            this.button23.Location = new System.Drawing.Point(1138, 218);
-            this.button23.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.button23.Name = "button23";
-            this.button23.Size = new System.Drawing.Size(154, 50);
-            this.button23.TabIndex = 84;
-            this.button23.Text = "RTC启动";
-            this.button23.UseVisualStyleBackColor = true;
-            this.button23.Click += new System.EventHandler(this.button23_Click);
-            // 
             // button25
             // 
             this.button25.Location = new System.Drawing.Point(971, 630);
@@ -655,7 +619,7 @@
             // 
             // button10
             // 
-            this.button10.Location = new System.Drawing.Point(1138, 384);
+            this.button10.Location = new System.Drawing.Point(1138, 138);
             this.button10.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button10.Name = "button10";
             this.button10.Size = new System.Drawing.Size(154, 50);
@@ -700,17 +664,6 @@
             this.textBox19.TabIndex = 90;
             this.textBox19.TextChanged += new System.EventHandler(this.textBox19_TextChanged);
             // 
-            // button11
-            // 
-            this.button11.Location = new System.Drawing.Point(1484, 548);
-            this.button11.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.button11.Name = "button11";
-            this.button11.Size = new System.Drawing.Size(154, 50);
-            this.button11.TabIndex = 94;
-            this.button11.Text = "Send";
-            this.button11.UseVisualStyleBackColor = true;
-            this.button11.Click += new System.EventHandler(this.button11_Click);
-            // 
             // btn_Mark_Position
             // 
             this.btn_Mark_Position.Location = new System.Drawing.Point(1310, 630);
@@ -735,7 +688,7 @@
             // 
             // button13
             // 
-            this.button13.Location = new System.Drawing.Point(1676, 630);
+            this.button13.Location = new System.Drawing.Point(1138, 630);
             this.button13.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button13.Name = "button13";
             this.button13.Size = new System.Drawing.Size(154, 50);
@@ -747,7 +700,7 @@
             // label22
             // 
             this.label22.AutoSize = true;
-            this.label22.Location = new System.Drawing.Point(1718, 562);
+            this.label22.Location = new System.Drawing.Point(1180, 562);
             this.label22.Name = "label22";
             this.label22.Size = new System.Drawing.Size(71, 18);
             this.label22.TabIndex = 101;
@@ -755,7 +708,7 @@
             // 
             // textBox20
             // 
-            this.textBox20.Location = new System.Drawing.Point(1703, 596);
+            this.textBox20.Location = new System.Drawing.Point(1165, 596);
             this.textBox20.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBox20.Name = "textBox20";
             this.textBox20.Size = new System.Drawing.Size(100, 28);
@@ -765,7 +718,7 @@
             // label23
             // 
             this.label23.AutoSize = true;
-            this.label23.Location = new System.Drawing.Point(1718, 482);
+            this.label23.Location = new System.Drawing.Point(1180, 482);
             this.label23.Name = "label23";
             this.label23.Size = new System.Drawing.Size(71, 18);
             this.label23.TabIndex = 99;
@@ -773,7 +726,7 @@
             // 
             // textBox21
             // 
-            this.textBox21.Location = new System.Drawing.Point(1703, 517);
+            this.textBox21.Location = new System.Drawing.Point(1165, 517);
             this.textBox21.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBox21.Name = "textBox21";
             this.textBox21.Size = new System.Drawing.Size(100, 28);
@@ -784,7 +737,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1979, 707);
+            this.ClientSize = new System.Drawing.Size(1732, 707);
             this.Controls.Add(this.label22);
             this.Controls.Add(this.textBox20);
             this.Controls.Add(this.label23);
@@ -792,16 +745,12 @@
             this.Controls.Add(this.button13);
             this.Controls.Add(this.button12);
             this.Controls.Add(this.btn_Mark_Position);
-            this.Controls.Add(this.button11);
             this.Controls.Add(this.label20);
             this.Controls.Add(this.textBox18);
             this.Controls.Add(this.label21);
             this.Controls.Add(this.textBox19);
             this.Controls.Add(this.button10);
             this.Controls.Add(this.button25);
-            this.Controls.Add(this.button21);
-            this.Controls.Add(this.button22);
-            this.Controls.Add(this.button23);
             this.Controls.Add(this.button18);
             this.Controls.Add(this.label18);
             this.Controls.Add(this.textBox16);
@@ -922,16 +871,12 @@
         private System.Windows.Forms.Label label19;
         private System.Windows.Forms.TextBox textBox17;
         private System.Windows.Forms.Button button18;
-        private System.Windows.Forms.Button button21;
-        private System.Windows.Forms.Button button22;
-        private System.Windows.Forms.Button button23;
         private System.Windows.Forms.Button button25;
         private System.Windows.Forms.Button button10;
         private System.Windows.Forms.Label label20;
         private System.Windows.Forms.TextBox textBox18;
         private System.Windows.Forms.Label label21;
         private System.Windows.Forms.TextBox textBox19;
-        private System.Windows.Forms.Button button11;
         private System.Windows.Forms.Button btn_Mark_Position;
         private System.Windows.Forms.Button button12;
         private System.Windows.Forms.Button button13;

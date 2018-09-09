@@ -583,16 +583,57 @@ namespace GTS_Fun
                 End_n = Convert.ToInt16(o.End_y / Para_List.Parameter.Calibration_Cell);
                 Center_m = Convert.ToInt16(o.Center_x / Para_List.Parameter.Calibration_Cell);
                 Center_n = Convert.ToInt16(o.Center_y / Para_List.Parameter.Calibration_Cell);
+                /*
+                string sdatetime = DateTime.Now.ToString("D");
+                string delimiter = ",";
+                string strHeader = "";
+                //保存的位置和文件名称
+                string File_Path = @"./\Config/" + "Gts_List.csv";
+                strHeader += "原X坐标,原Y坐标,补偿后X坐标,补偿后Y坐标,补偿前后X差值,补偿前后Y差值";
+                bool isExit = File.Exists(File_Path);
+                StreamWriter sw = new StreamWriter(File_Path, true, Encoding.GetEncoding("gb2312"));
+                if (!isExit)
+                {
+                    sw.WriteLine(strHeader);
+                }
+                */
                 //计算最终数据
                 //终点计算
                 Tmp_End_X = o.End_x * affinity_Matrices[End_m * Para_List.Parameter.Affinity_Col + End_n].Cos_Value + o.End_y * affinity_Matrices[End_m * Para_List.Parameter.Affinity_Col + End_n].Sin_Value + affinity_Matrices[End_m * Para_List.Parameter.Affinity_Col + End_n].Delta_X;
                 Tmp_End_Y = o.End_y * affinity_Matrices[End_m * Para_List.Parameter.Affinity_Col + End_n].Cos_Value - o.End_x * affinity_Matrices[End_m * Para_List.Parameter.Affinity_Col + End_n].Sin_Value + affinity_Matrices[End_n * Para_List.Parameter.Affinity_Col + End_n].Delta_Y;
+                /*
+                //output rows data
+                string strRowValue = "";
+                strRowValue += o.End_x + delimiter
+                                + o.End_y + delimiter
+                                + Tmp_End_X + delimiter
+                                + Tmp_End_Y + delimiter
+                                + (Tmp_End_X - o.End_x) + delimiter
+                                + (Tmp_End_Y - o.End_y) + delimiter;
+                sw.WriteLine(strRowValue);
+                */
+
                 //圆心计算
-                Tmp_Center_X = o.End_x * affinity_Matrices[Center_m * Para_List.Parameter.Affinity_Col + Center_n].Cos_Value + o.End_y * affinity_Matrices[Center_m * Para_List.Parameter.Affinity_Col + Center_n].Sin_Value + affinity_Matrices[Center_m * Para_List.Parameter.Affinity_Col + Center_n].Delta_X;
-                Tmp_Center_Y = o.End_y * affinity_Matrices[Center_m * Para_List.Parameter.Affinity_Col + Center_n].Cos_Value - o.End_x * affinity_Matrices[Center_m * Para_List.Parameter.Affinity_Col + Center_n].Sin_Value + affinity_Matrices[Center_n * Para_List.Parameter.Affinity_Col + Center_n].Delta_Y;
+                Tmp_Center_X = o.Center_x * affinity_Matrices[Center_m * Para_List.Parameter.Affinity_Col + Center_n].Cos_Value + o.Center_y * affinity_Matrices[Center_m * Para_List.Parameter.Affinity_Col + Center_n].Sin_Value + affinity_Matrices[Center_m * Para_List.Parameter.Affinity_Col + Center_n].Delta_X;
+                Tmp_Center_Y = o.Center_y * affinity_Matrices[Center_m * Para_List.Parameter.Affinity_Col + Center_n].Cos_Value - o.Center_x * affinity_Matrices[Center_m * Para_List.Parameter.Affinity_Col + Center_n].Sin_Value + affinity_Matrices[Center_n * Para_List.Parameter.Affinity_Col + Center_n].Delta_Y;
+                /*
+                //output rows data
+                strRowValue = "";
+                strRowValue += o.Center_x + delimiter
+                                + o.Center_y + delimiter
+                                + Tmp_Center_X + delimiter
+                                + Tmp_Center_Y + delimiter
+                                + (Tmp_Center_X - o.Center_x) + delimiter
+                                + (Tmp_Center_Y - o.Center_y) + delimiter;
+                sw.WriteLine(strRowValue);
+                */
                 //圆心与差值计算
                 Tmp_Center_Start_X = Tmp_Center_X - Tmp_End_X;
-                Tmp_Center_Start_Y = Tmp_Center_X - Tmp_End_Y;
+                Tmp_Center_Start_Y = Tmp_Center_X - Tmp_End_Y;                
+                
+                //sw.Close();
+                
+
                 //替换数据
                 if (o.Type == 1)//直线
                 {
@@ -643,6 +684,15 @@ namespace GTS_Fun
                 List<Affinity_Matrix> list = (List<Affinity_Matrix>)bf.Deserialize(fs);
                 return list;
             }
+        }
+        //获取当前点的坐标系坐标
+        public Vector Get_Coordinate()
+        {
+            Vector Result;
+            double[] Curent_Pos=new double[2];
+            MC.GT_GetCrdPos(1,out Curent_Pos[0]);
+            Result = new Vector(-(decimal)Curent_Pos[0]/Para_List.Parameter.Gts_Pos_reference,-(decimal)Curent_Pos[1]/ Para_List.Parameter.Gts_Pos_reference);
+            return Result;
         }
         public void Interpolation_Start()
         {
@@ -708,6 +758,32 @@ namespace GTS_Fun
             //将前瞻数据压入控制器
             Gts_Return = MC.GT_CrdData(1, Crd_IntPtr, 0);
             Gts_Log.Commandhandler("Line_Interpolation--将前瞻数据压入控制器", Gts_Return);
+            
+            /*
+            string sdatetime = DateTime.Now.ToString("D");
+            string delimiter = ",";
+            string strHeader = "";
+            //保存的位置和文件名称
+            string File_Path = @"./\Config/" + "Gts_Ready.csv";
+            strHeader += "原X坐标,原Y坐标,补偿后X坐标,补偿后Y坐标,补偿前后X差值,补偿前后Y差值";
+            bool isExit = File.Exists(File_Path);
+            StreamWriter sw = new StreamWriter(File_Path, true, Encoding.GetEncoding("gb2312"));
+            if (!isExit)
+            {
+                sw.WriteLine(strHeader);
+            }
+            //output rows data
+            string strRowValue = "";
+            strRowValue += x + delimiter
+                            + y + delimiter
+                            + Tmp_X + delimiter
+                            + Tmp_Y + delimiter
+                            + (Tmp_X - x) + delimiter
+                            + (Tmp_Y - y) + delimiter;
+            sw.WriteLine(strRowValue);
+            sw.Close();
+            */
+
             //启动定位
             Interpolation_Start();
 

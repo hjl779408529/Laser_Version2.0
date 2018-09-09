@@ -32,8 +32,6 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.label7 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.Set_Btn_Mark3 = new System.Windows.Forms.Button();
-            this.Set_Btn_Mark2 = new System.Windows.Forms.Button();
             this.Set_Btn_Mark1 = new System.Windows.Forms.Button();
             this.Set_txt_markX1 = new System.Windows.Forms.TextBox();
             this.Set_txt_markY3 = new System.Windows.Forms.TextBox();
@@ -70,7 +68,7 @@
             this.groupBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.groupBox1.Size = new System.Drawing.Size(658, 593);
+            this.groupBox1.Size = new System.Drawing.Size(550, 593);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "系统参数";
@@ -86,8 +84,6 @@
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.Set_Btn_Mark3);
-            this.groupBox2.Controls.Add(this.Set_Btn_Mark2);
             this.groupBox2.Controls.Add(this.Set_Btn_Mark1);
             this.groupBox2.Controls.Add(this.Set_txt_markX1);
             this.groupBox2.Controls.Add(this.Set_txt_markY3);
@@ -104,40 +100,18 @@
             this.groupBox2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.groupBox2.Size = new System.Drawing.Size(658, 245);
+            this.groupBox2.Size = new System.Drawing.Size(550, 303);
             this.groupBox2.TabIndex = 4;
             this.groupBox2.TabStop = false;
             // 
-            // Set_Btn_Mark3
-            // 
-            this.Set_Btn_Mark3.Location = new System.Drawing.Point(550, 184);
-            this.Set_Btn_Mark3.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.Set_Btn_Mark3.Name = "Set_Btn_Mark3";
-            this.Set_Btn_Mark3.Size = new System.Drawing.Size(84, 28);
-            this.Set_Btn_Mark3.TabIndex = 4;
-            this.Set_Btn_Mark3.Text = "获取";
-            this.Set_Btn_Mark3.UseVisualStyleBackColor = true;
-            this.Set_Btn_Mark3.Click += new System.EventHandler(this.Set_Btn_Mark3_Click);
-            // 
-            // Set_Btn_Mark2
-            // 
-            this.Set_Btn_Mark2.Location = new System.Drawing.Point(550, 137);
-            this.Set_Btn_Mark2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.Set_Btn_Mark2.Name = "Set_Btn_Mark2";
-            this.Set_Btn_Mark2.Size = new System.Drawing.Size(84, 28);
-            this.Set_Btn_Mark2.TabIndex = 4;
-            this.Set_Btn_Mark2.Text = "获取";
-            this.Set_Btn_Mark2.UseVisualStyleBackColor = true;
-            this.Set_Btn_Mark2.Click += new System.EventHandler(this.Set_Btn_Mark2_Click);
-            // 
             // Set_Btn_Mark1
             // 
-            this.Set_Btn_Mark1.Location = new System.Drawing.Point(550, 88);
+            this.Set_Btn_Mark1.Location = new System.Drawing.Point(245, 229);
             this.Set_Btn_Mark1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Set_Btn_Mark1.Name = "Set_Btn_Mark1";
-            this.Set_Btn_Mark1.Size = new System.Drawing.Size(84, 28);
+            this.Set_Btn_Mark1.Size = new System.Drawing.Size(195, 52);
             this.Set_Btn_Mark1.TabIndex = 4;
-            this.Set_Btn_Mark1.Text = "获取";
+            this.Set_Btn_Mark1.Text = "矫正Mark坐标";
             this.Set_Btn_Mark1.UseVisualStyleBackColor = true;
             this.Set_Btn_Mark1.Click += new System.EventHandler(this.Set_Btn_Mark1_Click);
             // 
@@ -148,6 +122,7 @@
             this.Set_txt_markX1.Name = "Set_txt_markX1";
             this.Set_txt_markX1.Size = new System.Drawing.Size(148, 28);
             this.Set_txt_markX1.TabIndex = 3;
+            this.Set_txt_markX1.TextChanged += new System.EventHandler(this.Set_txt_markX1_TextChanged);
             // 
             // Set_txt_markY3
             // 
@@ -156,6 +131,7 @@
             this.Set_txt_markY3.Name = "Set_txt_markY3";
             this.Set_txt_markY3.Size = new System.Drawing.Size(148, 28);
             this.Set_txt_markY3.TabIndex = 3;
+            this.Set_txt_markY3.TextChanged += new System.EventHandler(this.Set_txt_markY3_TextChanged);
             // 
             // label2
             // 
@@ -173,6 +149,7 @@
             this.Set_txt_markX3.Name = "Set_txt_markX3";
             this.Set_txt_markX3.Size = new System.Drawing.Size(148, 28);
             this.Set_txt_markX3.TabIndex = 3;
+            this.Set_txt_markX3.TextChanged += new System.EventHandler(this.Set_txt_markX3_TextChanged);
             // 
             // label5
             // 
@@ -190,6 +167,7 @@
             this.Set_txt_markY2.Name = "Set_txt_markY2";
             this.Set_txt_markY2.Size = new System.Drawing.Size(148, 28);
             this.Set_txt_markY2.TabIndex = 3;
+            this.Set_txt_markY2.TextChanged += new System.EventHandler(this.Set_txt_markY2_TextChanged);
             // 
             // label6
             // 
@@ -207,6 +185,7 @@
             this.Set_txt_markX2.Name = "Set_txt_markX2";
             this.Set_txt_markX2.Size = new System.Drawing.Size(148, 28);
             this.Set_txt_markX2.TabIndex = 3;
+            this.Set_txt_markX2.TextChanged += new System.EventHandler(this.Set_txt_markX2_TextChanged);
             // 
             // label3
             // 
@@ -224,6 +203,7 @@
             this.Set_txt_markY1.Name = "Set_txt_markY1";
             this.Set_txt_markY1.Size = new System.Drawing.Size(148, 28);
             this.Set_txt_markY1.TabIndex = 3;
+            this.Set_txt_markY1.TextChanged += new System.EventHandler(this.Set_txt_markY1_TextChanged);
             // 
             // label4
             // 
@@ -247,11 +227,12 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(969, 624);
+            this.ClientSize = new System.Drawing.Size(614, 624);
             this.Controls.Add(this.groupBox1);
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "ParameterSet";
             this.Text = "ParameterSet";
+            this.Load += new System.EventHandler(this.ParameterSet_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
@@ -277,8 +258,6 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Button Set_Btn_Mark3;
-        private System.Windows.Forms.Button Set_Btn_Mark2;
         private System.Windows.Forms.Button Set_Btn_Mark1;
         private System.Windows.Forms.Label label7;
     }

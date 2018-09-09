@@ -7,6 +7,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization;
 using System.Xml.Serialization;
+using Laser_Build_1._0;
 
 namespace Para_List
 {
@@ -131,6 +132,16 @@ namespace Para_List
         private static decimal rtc_cal_radius = 1.0m; //圆半径
         private static decimal rtc_cal_interval = 4.0m; //间距
 
+        //mark点参数
+        private static Vector mark1 = new Vector(0, 0);
+        private static Vector mark2 = new Vector(0, 0);
+        private static Vector mark3 = new Vector(0, 0);
+        //Dxf Mark点参数
+        private static Vector mark_dxf1 = new Vector(0, 0);
+        private static Vector mark_dxf2 = new Vector(0, 0);
+        private static Vector mark_dxf3 = new Vector(0, 0);
+        //整体的仿射变换参数
+        private static Affinity_Matrix trans_affinity = new Affinity_Matrix();  
 
         public static decimal Gts_Vel_reference { get => gts_vel_reference; set => gts_vel_reference = value; }
         public static decimal Gts_Acc_reference { get => gts_acc_reference; set => gts_acc_reference = value; }
@@ -216,6 +227,13 @@ namespace Para_List
         public static Int32 Com_No { get => com_no; set => com_no = value; }
         public static decimal Rtc_Cal_Radius { get => rtc_cal_radius; set => rtc_cal_radius = value; }
         public static decimal Rtc_Cal_Interval { get => rtc_cal_interval; set => rtc_cal_interval = value; }
+        public static Vector Mark1 { get => mark1; set => mark1 = value; }
+        public static Vector Mark2 { get => mark2; set => mark2 = value; }
+        public static Vector Mark3 { get => mark3; set => mark3 = value; }
+        public static Vector Mark_Dxf1 { get => mark_dxf1; set => mark_dxf1 = value; }
+        public static Vector Mark_Dxf2 { get => mark_dxf2; set => mark_dxf2 = value; }
+        public static Vector Mark_Dxf3 { get => mark_dxf3; set => mark_dxf3 = value; }
+        public static Affinity_Matrix Trans_Affinity { get => trans_affinity; set => trans_affinity = value; }
         //公开构造函数
         public Parameter() { }
     }
@@ -333,6 +351,16 @@ namespace Para_List
         //定义RTC校准尺寸
         private decimal rtc_cal_radius; //圆半径
         private decimal rtc_cal_interval; //间距
+        //mark点参数
+        private Vector mark1 = new Vector(0, 0);
+        private Vector mark2 = new Vector(0, 0);
+        private Vector mark3 = new Vector(0, 0);
+        //Dxf Mark点参数
+        private Vector mark_dxf1 = new Vector(0, 0);
+        private Vector mark_dxf2 = new Vector(0, 0);
+        private Vector mark_dxf3 = new Vector(0, 0);
+        //整体的仿射变换参数
+        private Affinity_Matrix trans_affinity;
 
         public decimal Gts_Vel_reference { get => gts_vel_reference; set => gts_vel_reference = value; }
         public decimal Gts_Acc_reference { get => gts_acc_reference; set => gts_acc_reference = value; }
@@ -418,9 +446,16 @@ namespace Para_List
         public Int32 Com_No { get => com_no; set => com_no = value; }
         public decimal Rtc_Cal_Radius { get => rtc_cal_radius; set => rtc_cal_radius = value; }
         public decimal Rtc_Cal_Interval { get => rtc_cal_interval; set => rtc_cal_interval = value; }
+        public Vector Mark1 { get => mark1; set => mark1 = value; }
+        public Vector Mark2 { get => mark2; set => mark2 = value; }
+        public Vector Mark3 { get => mark3; set => mark3 = value; }
+        public Vector Mark_Dxf1 { get => mark_dxf1; set => mark_dxf1 = value; }
+        public Vector Mark_Dxf2 { get => mark_dxf2; set => mark_dxf2 = value; }
+        public Vector Mark_Dxf3 { get => mark_dxf3; set => mark_dxf3 = value; }
+        public Affinity_Matrix Trans_Affinity { get => trans_affinity; set => trans_affinity = value; }
         //构造函数
         public Parameter_RW() { }
-    }
+    } 
     //参数变量序列化
     public class Serialize_Parameter
     {
@@ -515,7 +550,14 @@ namespace Para_List
                 Rtc_Home = Para_List.Parameter.Rtc_Home,
                 Com_No = Para_List.Parameter.Com_No,
                 Rtc_Cal_Radius = Para_List.Parameter.Rtc_Cal_Radius,
-                Rtc_Cal_Interval = Para_List.Parameter.Rtc_Cal_Interval
+                Rtc_Cal_Interval = Para_List.Parameter.Rtc_Cal_Interval,
+                Mark1 = Para_List.Parameter.Mark1,
+                Mark2 = Para_List.Parameter.Mark2,
+                Mark3 = Para_List.Parameter.Mark3,
+                Mark_Dxf1 = Para_List.Parameter.Mark_Dxf1,
+                Mark_Dxf2 = Para_List.Parameter.Mark_Dxf2,
+                Mark_Dxf3 = Para_List.Parameter.Mark_Dxf3,
+                Trans_Affinity = Para_List.Parameter.Trans_Affinity
             };
 
             //二进制 序列化
@@ -636,6 +678,13 @@ namespace Para_List
                     Para_List.Parameter.Com_No = parameter.Com_No;
                     Para_List.Parameter.Rtc_Cal_Radius = parameter.Rtc_Cal_Radius;
                     Para_List.Parameter.Rtc_Cal_Interval = parameter.Rtc_Cal_Interval;
+                    Para_List.Parameter.Mark1 = parameter.Mark1;
+                    Para_List.Parameter.Mark2 = parameter.Mark2;
+                    Para_List.Parameter.Mark3 = parameter.Mark3;
+                    Para_List.Parameter.Mark_Dxf1 = parameter.Mark_Dxf1;
+                    Para_List.Parameter.Mark_Dxf2 = parameter.Mark_Dxf2;
+                    Para_List.Parameter.Mark_Dxf3 = parameter.Mark_Dxf3;
+                    Para_List.Parameter.Trans_Affinity = parameter.Trans_Affinity;
                 }
             }
         }

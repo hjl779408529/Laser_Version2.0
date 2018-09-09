@@ -62,7 +62,7 @@ namespace Laser_Build_1._0
         List<Interpolation_Data> Circle_Data = new List<Interpolation_Data>();
         List<Interpolation_Data> LwPolyline_Data = new List<Interpolation_Data>();
         List<Interpolation_Data> Concat_Data = new List<Interpolation_Data>();
-        List<Interpolation_Data> Compensation_Concat_Data = new List<Interpolation_Data>(); 
+        List<Interpolation_Data> Compensation_Concat_Data = new List<Interpolation_Data>();
         //建立临时插补Data
         Interpolation_Data temp_Data = new Interpolation_Data();
 
@@ -75,6 +75,8 @@ namespace Laser_Build_1._0
         //建立临时插补Data
         List<Interpolation_Data> temp_List_Data = new List<Interpolation_Data>();
 
+        //rtc和gts解析数据
+        List<List<Interpolation_Data>> Rtc_List_Data = new List<List<Interpolation_Data>>();
 
         //定义整合加工函数
         Integrated integrated = new Integrated();
@@ -310,13 +312,12 @@ namespace Laser_Build_1._0
             //Pic_Center_y = centerpoint.Y;
             Pic_Center_x = 0;
             Pic_Center_y = 0;
-            richTextBox1.AppendText("图像中心点X坐标: " + Pic_Center_y + "   图像中心点Y坐标: " + centerpoint.Y + "\r\n");
+            richTextBox1.AppendText("图像中心点X坐标: " + Pic_Center_y + "   图像中心点Y坐标: " + Pic_Center_y + "\r\n");
 
             //建立临时数据存储组
             List<Entity_Data> Arc_Line_Entity_Data = new List<Entity_Data>();//圆弧直线数据
             List<Entity_Data> Circle_Entity_Data = new List<Entity_Data>();//圆数据
             List<Entity_Data> LwPolylines_Entity_Data = new List<Entity_Data>(); //多边形数据
-
 
             //建立临时Entity数据
             Entity_Data temp_Entity_Data = new Entity_Data();
@@ -328,13 +329,10 @@ namespace Laser_Build_1._0
             //建立临时
             List<Interpolation_Data> temp_intepolation_Dat = new List<Interpolation_Data>();
 
-
-
             //清除数据
             Arc_Line_Entity_Data.Clear();
             Arc_Line_Entity_List_Data.Clear();
             temp_Entity_Data.Empty();
-
 
             //数据处理，规划路径
 
@@ -342,7 +340,7 @@ namespace Laser_Build_1._0
             //圆弧数据读取
             for (i = 0; i < dxf.Arcs.Count; i++)
             {
-                if (dxf.Arcs[i].Layer.Name != "Border")
+                if (dxf.Arcs[i].Layer.Name == "Laser")
                 {
                     temp_Entity_Data.Type = 2;//圆弧
                     //使用Gts Pos_reference处理过
@@ -383,7 +381,7 @@ namespace Laser_Build_1._0
             //直线数据读取
             for (i = 0; i < dxf.Lines.Count; i++)
             {
-                if (dxf.Lines[i].Layer.Name != "Border")
+                if (dxf.Lines[i].Layer.Name == "Laser")
                 {
                     temp_Entity_Data.Type = 1;
                     //使用Gts Pos_reference处理过
@@ -591,7 +589,7 @@ namespace Laser_Build_1._0
                 
                 for (i = 0; i < dxf.LwPolylines.Count; i++)
                 {
-                    if (dxf.LwPolylines[i].Layer.Name != "Border")
+                    if (dxf.LwPolylines[i].Layer.Name == "Laser")
                     {
                         for (j = 0; j < dxf.LwPolylines[i].Vertexes.Count; j++)
                         {
@@ -783,7 +781,7 @@ namespace Laser_Build_1._0
             {
                 for (i = 0; i < dxf.Circles.Count; i++)
                 {
-                    if (dxf.Circles[i].Layer.Name != "Border")
+                    if (dxf.Circles[i].Layer.Name == "Laser")                    
                     {
                         temp_Entity_Data.Type = 3;//圆  
                         //使用Gts Pos_reference处理过
@@ -807,10 +805,10 @@ namespace Laser_Build_1._0
                         temp_Entity_Data.Cir_End_Angle = 360.0m;
                         temp_Entity_Data.Cir_Start_Angle = 360.0m;
                         //提交进入Circle_Entity_Data
-                        Circle_Entity_Data.Add(temp_Entity_Data);
+                        Circle_Entity_Data.Add(new Entity_Data(temp_Entity_Data));
                         temp_Entity_Data.Empty();
                     }
-                    else  //Mark点 数据收集
+                    else if (dxf.Circles[i].Layer.Name == "Mark")  //Mark点 数据收集
                     {
                         //原始数据
                         temp_Entity_Data.Center_x = Convert.ToDecimal(dxf.Circles[i].Center.X);
@@ -825,7 +823,7 @@ namespace Laser_Build_1._0
                         temp_Entity_Data.Cir_End_Angle = 360.0m;
                         temp_Entity_Data.Cir_Start_Angle = 360.0m;
                         //提交进入Circle_Entity_Data
-                        Mark_Circle_Entity_Data.Add(temp_Entity_Data);
+                        Mark_Circle_Entity_Data.Add(new Entity_Data(temp_Entity_Data)); 
                         temp_Entity_Data.Empty();
                     }
                 }
@@ -833,6 +831,7 @@ namespace Laser_Build_1._0
 
             //Circle_Entity_Data调试信息输出
             richTextBox1.AppendText("圆形数据统计： " + Circle_Entity_Data.Count + "\r\n");
+            richTextBox1.AppendText("Mark标记数据统计： " + Mark_Circle_Entity_Data.Count + "\r\n");
             //圆形数据矫正
             //Circle_Entity_Data = new List<Entity_Data>(Data_Cal.Calibration_Trail(Circle_Entity_Data));//直接矫正路径
             //生成圆形插补数据
@@ -999,7 +998,7 @@ namespace Laser_Build_1._0
 
             //输出圆形插补数据 调试信息
             richTextBox1.AppendText("圆形插补数据计数：" + Circle_Data.Count + "\r\n");
-           
+
             //圆形、直线和圆弧、多边形数据整合
             Concat_Data.Clear();//清空数据
             Concat_Data.AddRange(Arc_Line_Data);
@@ -1009,7 +1008,7 @@ namespace Laser_Build_1._0
 
             //圆形、直线和圆弧、多边形Rtc+Gts整合
             Concat_List_Data.Clear();//清空数据
-            Concat_List_Data.AddRange(Arc_Line_List_Data); 
+            Concat_List_Data.AddRange(Arc_Line_List_Data);
             Concat_List_Data.AddRange(LwPolyline_List_Data);
             Concat_List_Data.AddRange(Circle_List_Data);
 
@@ -1017,7 +1016,7 @@ namespace Laser_Build_1._0
             richTextBox1.AppendText("直线和圆弧整合数据计数：" + Arc_Line_List_Data.Count + "\r\n");
             richTextBox1.AppendText("多边形插补整合数据计数：" + LwPolyline_List_Data.Count + "\r\n");
             richTextBox1.AppendText("圆形插补整合数据计数：" + Circle_List_Data.Count + "\r\n");
-            richTextBox1.AppendText("整合插补整合数据计数：" + Concat_List_Data.Count + "\r\n");            
+            richTextBox1.AppendText("整合插补整合数据计数：" + Concat_List_Data.Count + "\r\n");
 
             //矫正数据
             Compensation_Concat_Data.Clear();
@@ -1037,57 +1036,34 @@ namespace Laser_Build_1._0
                 Count_CN = Count_CN + Compensation_Concat_List_Data[i].Count;
             }
             richTextBox1.AppendText("整合处理数据数量：" + Count_CN + "\r\n");
-            
+
         }
         /// <summary>
-        /// 8.31
-        /// 找出三个顶点处的Mark点，用于计算 仿射变换的三个参数
+        /// 9.9
+        /// 对MarK圆圈进行排序，依次：左下、左上、右上三个点 
         /// </summary>
         /// <param name="entity_Datas"><Mark点集合/param>
         /// <returns></returns>
-        private List<PointF> Mark_Calculate(List<Entity_Data> entity_Datas)
+        private List<PointF> Mark_Calculate(List<Entity_Data> Mark_Datas) 
         {
-            List<PointF> Mark_Point = new List<PointF>();
-            List<PointF> Mark_Point_List = new List<PointF>();
-            List<float> mark_X = new List<float>();
-            List<float> mark_Y = new List<float>();
-            PointF point = new PointF();
-            for(int i=0;i<entity_Datas.Count;i++)
-            {
-                point.X = (float)entity_Datas[i].Center_x;
-                point.Y = (float)entity_Datas[i].Center_y;
-                mark_X.Add(point.X);
-                mark_Y.Add(point.Y);
-                Mark_Point.Add(point);
-            }
-            mark_X.Sort();
-            mark_Y.Sort();
-            for (int i = 0; i < mark_X.Count; i++)
-            {
-                for (int j = 0; j < mark_Y.Count; j++)
-                {
-                    point.X = mark_X[i];
-                    point.Y = mark_Y[j];
-
-                    if (Mark_Point.Contains(point))
-                    {
-                        if (!Mark_Point_List.Contains(point))
-                        {
-                            Mark_Point_List.Add(point);
-                        }
-                    }
-                }
-            }
-            List<PointF> points = new List<PointF>();
-            PointF point_T = new PointF();
-            point_T.X = Mark_Point_List[0].X;
-            point_T.Y = Mark_Point_List[Mark_Point_List.Count].Y;
-
-            points.Add(Mark_Point_List[0]);
-            points.Add(point_T);
-            points.Add(Mark_Point_List[Mark_Point_List.Count]);
-
-            return points;
+            //定义返回值
+            List<PointF> Result = new List<PointF>();
+            //定义点
+            PointF Tmp_Point = new PointF();
+            //左下点
+            Tmp_Point.X =(float)(Mark_Datas.Min(o => o.Center_x));
+            Tmp_Point.Y = (float)(Mark_Datas.Min(o => o.Center_y));
+            Result.Add(new PointF(Tmp_Point.X, Tmp_Point.Y));
+            //左上点
+            Tmp_Point.X = (float)(Mark_Datas.Min(o => o.Center_x));
+            Tmp_Point.Y = (float)(Mark_Datas.Max(o => o.Center_y));
+            Result.Add(new PointF(Tmp_Point.X, Tmp_Point.Y));
+            //右上点
+            Tmp_Point.X = (float)(Mark_Datas.Max(o => o.Center_x));
+            Tmp_Point.Y = (float)(Mark_Datas.Max(o => o.Center_y));
+            Result.Add(new PointF(Tmp_Point.X, Tmp_Point.Y));            
+            //返回结果
+            return Result;
         }
 
         //角度补偿坐标系
@@ -1362,8 +1338,7 @@ namespace Laser_Build_1._0
         private void Interpolation_Start()
         {            
             interpolation.Interpolation_Start();
-        }
-        
+        }       
 
         private void Dxf_FormClosed(object sender, FormClosedEventArgs e)
         {
@@ -1395,7 +1370,6 @@ namespace Laser_Build_1._0
                 Para_List.Parameter.Work_Y = tmp;
             });
         }                
-
         //刀具绝对坐标X
         private void textBox9_TextChanged(object sender, EventArgs e)
         {
@@ -1651,8 +1625,7 @@ namespace Laser_Build_1._0
                 }
                 Para_List.Parameter.Calibration_Y_Len = tmp;
             });
-        }     
-        
+        }            
         
         //参数保存
         private void button15_Click(object sender, EventArgs e)
@@ -1714,64 +1687,8 @@ namespace Laser_Build_1._0
         {
             integrated.Exit_Flag = true;
         }
-        List<List<Interpolation_Data>> Rtc_List_Data=new List<List<Interpolation_Data>>();
-        //生成RTC数据
-        private void button21_Click(object sender, EventArgs e)
-        {
-            Rtc_List_Data.Clear();
-            Compensation_Integrate(Concat_List_Data).ForEach(m => Rtc_List_Data.Add(m));
-            //Rtc_List_Data = new List<List<Interpolation_Data>>(Compensation_Integrate(Concat_List_Data));
-            //输出
-            for (int i = 0; i < Rtc_List_Data.Count; i++)
-            {
-
-                for (int j = 0; j < Rtc_List_Data[i].Count; j++)
-                {
-                    richTextBox1.AppendText("RTC Type：" + Rtc_List_Data[i][j].Type + "RTC Work：" + Rtc_List_Data[i][j].Work+ "RTC 整合数据 end_x：" + Rtc_List_Data[i][j].End_x + "RTC 整合数据 end_y：" + Rtc_List_Data[i][j].End_y + "\r\n");
-                }
-
-            }
-        }
-        private List<List<Interpolation_Data>> Compensation_Integrate(List<List<Interpolation_Data>> In_Data)
-        {
-            List<List<Interpolation_Data>> Result = new List<List<Interpolation_Data>>();//返回值
-            List<Interpolation_Data> Temp_interpolation_List_Data = new List<Interpolation_Data>();//二级层
-            Interpolation_Data Temp_interpolation_Data = new Interpolation_Data();//一级层            
-
-            for (int i = 0; i < In_Data.Count; i++)
-            {
-                Temp_interpolation_List_Data.Clear();
-                for (int j = 0; j < In_Data[i].Count; j++)
-                {
-                    //数据处理
-                    Temp_interpolation_Data.Empty();
-                    Temp_interpolation_Data = In_Data[i][j];
-                    Temp_interpolation_Data.Work = 20;
-                    if (Temp_interpolation_Data.Type == 1)//直线
-                    {
-                        Temp_interpolation_Data.Type = 15;
-                    }
-                    else if(Temp_interpolation_Data.Type == 2)//圆弧
-                    {
-                        Temp_interpolation_Data.Type = 11;
-                    }
-                    else if (Temp_interpolation_Data.Type == 3)//整圆
-                    {
-                        Temp_interpolation_Data.Type = 11;
-                    }
-                    Temp_interpolation_List_Data.Add(Temp_interpolation_Data);
-                }
-                Result.Add(new List<Interpolation_Data>(Temp_interpolation_List_Data));
-            }
-            return Result;
-        }
-        //RTC启动
-        private void button23_Click(object sender, EventArgs e)
-        {
-            RTC_Fun.Motion Rtc_Motion = new RTC_Fun.Motion();
-            Rtc_Motion.Draw(Rtc_List_Data,1);
-        }
-        //取list极值值
+        
+        //取list极值值 或 数据拆分
         private void button25_Click(object sender, EventArgs e)
         {
             Thread Resolve_thread = new Thread(Resolve_Start);
@@ -1780,6 +1697,7 @@ namespace Laser_Build_1._0
         }
         private void Resolve_Start()
         {
+            //list极值计算
             //for (int i = 0; i < Concat_List_Data.Count; i++)
             //{
             //    for (int j = 0; j < Concat_List_Data[i].Count; j++)
@@ -1832,7 +1750,6 @@ namespace Laser_Build_1._0
                 Para_List.Parameter.Cam_Rtc_X = tmp;
             });
         }
-
         //相机与振镜 中心差值Y/mm
         private void textBox18_TextChanged(object sender, EventArgs e)
         {
@@ -1846,22 +1763,7 @@ namespace Laser_Build_1._0
                 Para_List.Parameter.Cam_Rtc_Y = tmp;
             });
         }
-        //串口发送
-        private void button11_Click(object sender, EventArgs e)
-        {
-            Initialization.Initial.Com_Comunication.Send_Data("12");
-            richTextBox1.AppendText("数据统计：" + Initialization.Initial.Com_Comunication.StrCRC("12") + "\r\n");
-            //byte[] Strs= Encoding.ASCII.GetBytes(Test.StrCRC("12").Trim());
-            //for(int i = 0;i<Strs.Length;i++)
-            //{
-            //    richTextBox1.AppendText(string.Format("{0:X}",Strs[i]));
-            //}
-            //、、byte[] hexStrs = Encoding.ASCII.GetBytes(Initialization.Initial.Com_Comunication.Append_Num_Str(500000).Trim());
-            //for (int i = 0; i < hexStrs.Length; i++) 
-            //{
-            //    richTextBox1.AppendText(string.Format("{0:X}", hexStrs[i]) + "\r\n"); 
-            //}
-        }
+        
         /// <summary>
         /// 8.31 Mark点 位置定位  自动定位
         /// </summary>
@@ -1869,15 +1771,26 @@ namespace Laser_Build_1._0
         /// <param name="e"></param>
         private void btn_Mark_Position_Click(object sender, EventArgs e)
         {
-            return; //不执行操作。
+            
             //dxf中Mark点集合（三个：左下 左上 右上）
             Mark_points_DXF = Mark_Calculate(Mark_Circle_Entity_Data);
-            points_Dxf = Mark_points_DXF.ToArray();
-            //开启实际平台中坐标
-            Generate_Affinity_Matrix.Exit_Flag = false;
-            Thread Mark_Data_thread = new Thread(Mark_Data);
-            Mark_Data_thread.Start();
-            Generate_Affinity_Matrix.Exit_Flag = false;
+            /*点位结果输出对比
+            for (int j = 0; j < Mark_Circle_Entity_Data.Count; j++)
+            {
+                richTextBox1.AppendText("Mark_Circle 序号：" + j +"  X：" + Mark_Circle_Entity_Data[j].Center_x+ "  Y：" + Mark_Circle_Entity_Data[j].Center_y + "\r\n");
+            }
+            for (int j = 0; j < Mark_points_DXF.Count; j++)
+            {
+                richTextBox1.AppendText("Mark 圆心排序 序号：" + j + "  X：" + Mark_points_DXF[j].X + "  Y：" + Mark_points_DXF[j].Y + "\r\n");
+            }
+            */
+
+            //points_Dxf = Mark_points_DXF.ToArray();
+            ////开启实际平台中坐标
+            //Generate_Affinity_Matrix.Exit_Flag = false;
+            //Thread Mark_Data_thread = new Thread(Mark_Data);
+            //Mark_Data_thread.Start();
+            //Generate_Affinity_Matrix.Exit_Flag = false;
 
         }
         private void Mark_Data()
@@ -1886,7 +1799,7 @@ namespace Laser_Build_1._0
             points_Motion=generate_Affinity_Matrix.Get_Mark_Datas(Mark_points_DXF);
             affinity_Matrix=generate_Affinity_Matrix.Resolve_DxfToM(points_Dxf, points_Motion);
         }
-
+        //预留Test按钮
         private void button12_Click(object sender, EventArgs e)
         {
             //读取矫正原始数据

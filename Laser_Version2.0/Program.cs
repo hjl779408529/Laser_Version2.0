@@ -215,6 +215,11 @@ public struct Vector
         this.x = x;
         this.y = y;
     }
+    public Vector(Vector Ini)
+    {
+        this.x = Ini.X;
+        this.y = Ini.Y;
+    }
     public void Empty()
     {
         this.x = 0;

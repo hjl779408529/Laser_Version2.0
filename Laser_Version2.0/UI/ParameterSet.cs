@@ -18,77 +18,176 @@ namespace Laser_Version2._0
         {
             InitializeComponent();
         }
+        //输入转换变量
+        Vector Tmp_Mark = new Vector();
+        //搜寻Mark
+        Generate_Affinity_Matrix Cal_Mark = new Generate_Affinity_Matrix();
         // 像素 毫米 比
         private void Set_txt_valueK_TextChanged(object sender, EventArgs e)
         {
-            Para_List.Parameter.Cam_Reference = Convert.ToDecimal(Set_txt_valueK.Text);//1像素=0.008806mm ()
+            this.Invoke((EventHandler)delegate
+            {
+                if (!decimal.TryParse(Set_txt_valueK.Text, out decimal tmp))
+                {
+                    MessageBox.Show("请正确输入数字");
+                    return;
+                }
+                Para_List.Parameter.Cam_Reference = tmp;//1像素=0.008806mm ()
+            });
         }
 
         /// <summary>
-        /// 8.31 获取Mark1点坐标位置
+        /// 矫正Mark点坐标实际位置
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void Set_Btn_Mark1_Click(object sender, EventArgs e)
         {
-            PointF pointF = new PointF();
-           // 计算平台实际坐标 - 1
-            pointF =get_mark_point();
+            Cal_Mark.Calibrate_Mark();
             //更新显示
-            Set_txt_markX1.Text = pointF.X.ToString();
-            Set_txt_markY1.Text = pointF.Y.ToString();
+            Set_txt_markX1.Text = Para_List.Parameter.Mark1.X.ToString();
+            Set_txt_markY1.Text = Para_List.Parameter.Mark1.Y.ToString();
+            Set_txt_markX2.Text = Para_List.Parameter.Mark2.X.ToString();
+            Set_txt_markY2.Text = Para_List.Parameter.Mark2.Y.ToString();
+            Set_txt_markX3.Text = Para_List.Parameter.Mark3.X.ToString();
+            Set_txt_markY3.Text = Para_List.Parameter.Mark3.Y.ToString();
         }
-        /// <summary>
-        /// 获取Mark2点坐标位置
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Set_Btn_Mark2_Click(object sender, EventArgs e)
+       
+        //Mark1 X坐标
+        private void Set_txt_markX1_TextChanged(object sender, EventArgs e)
         {
-            PointF pointF = new PointF();
-            //计算平台实际坐标-2
-            pointF = get_mark_point();
-            //更新显示
-            Set_txt_markX2.Text = pointF.X.ToString();
-            Set_txt_markY2.Text = pointF.Y.ToString();
-        }
-        /// <summary>
-        /// 获取Mark3点坐标位置
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Set_Btn_Mark3_Click(object sender, EventArgs e)
-        {
-            PointF pointF = new PointF();
-            //计算平台实际坐标-3
-            pointF = get_mark_point();
-            //更新显示
-            Set_txt_markX3.Text = pointF.X.ToString();
-            Set_txt_markY3.Text = pointF.Y.ToString();
-        }
-        /// <summary>
-        /// 获取 MARK点 平台坐标 GTS—
-        /// </summary>
-        /// <returns></returns>
-        private PointF get_mark_point()
-        {
-            Para_List.Parameter.Cam_Reference = 0.00806m;
-            PointF pointF = new PointF();
-            //T_Client.
-            Main.T_Client.Senddata(2);//触发拍照 1：标定 2：Mark点
-            do
+            if (!decimal.TryParse(Set_txt_markX1.Text, out decimal tmp))
             {
-
-            } while (!Main.T_Client.Rec_Ok);
-            decimal Cam_New_X = Main.T_Client.Receive_Cordinate.X * Para_List.Parameter.Cam_Reference;
-            decimal Cam_New_Y = Main.T_Client.Receive_Cordinate.Y * Para_List.Parameter.Cam_Reference;
-            GTS.MC.GT_GetCrdPos(0, out double temp_X);
-            GTS.MC.GT_GetCrdPos(1, out double temp_Y);
-            pointF.X = (float)((decimal)temp_X + Cam_New_X);
-            pointF.Y = (float)((decimal)temp_Y + Cam_New_Y);
-
-            return pointF;
+                MessageBox.Show("请正确输入数字");
+                return;
+            }
+            if ((tmp >= 0) && (tmp <= 350))
+            {
+                Tmp_Mark.X = tmp;
+                Tmp_Mark.Y = Para_List.Parameter.Mark1.Y;
+                Para_List.Parameter.Mark1 =new Vector(Tmp_Mark);
+            }
+            else
+            {
+                MessageBox.Show("请确认数值在0-350范围内");
+                return;
+            }
+            
+        }
+        //Mark1 Y坐标
+        private void Set_txt_markY1_TextChanged(object sender, EventArgs e)
+        {
+            if (!decimal.TryParse(Set_txt_markY1.Text, out decimal tmp))
+            {
+                MessageBox.Show("请正确输入数字");
+                return;
+            }
+            if ((tmp>=0) && (tmp <= 350))
+            {
+                Tmp_Mark.X = Para_List.Parameter.Mark1.X;
+                Tmp_Mark.Y = tmp;
+                Para_List.Parameter.Mark1 = new Vector(Tmp_Mark);
+            }
+            else
+            {
+                MessageBox.Show("请确认数值在0-350范围内");
+                return;
+            }
+            
+        }
+        //Mark2 X坐标
+        private void Set_txt_markX2_TextChanged(object sender, EventArgs e)
+        {
+            if (!decimal.TryParse(Set_txt_markX2.Text, out decimal tmp))
+            {
+                MessageBox.Show("请正确输入数字");
+                return;
+            }
+            if ((tmp >= 0) && (tmp <= 350))
+            {
+                Tmp_Mark.X = tmp;
+                Tmp_Mark.Y = Para_List.Parameter.Mark2.Y;
+                Para_List.Parameter.Mark2 = new Vector(Tmp_Mark);
+            }
+            else
+            {
+                MessageBox.Show("请确认数值在0-350范围内");
+                return;
+            }
+            
+        }
+        //Mark2 Y坐标
+        private void Set_txt_markY2_TextChanged(object sender, EventArgs e)
+        {
+            if (!decimal.TryParse(Set_txt_markY2.Text, out decimal tmp))
+            {
+                MessageBox.Show("请正确输入数字");
+                return;
+            }
+            if ((tmp >= 0) && (tmp <= 350))
+            {
+                Tmp_Mark.X = Para_List.Parameter.Mark2.X;
+                Tmp_Mark.Y = tmp;
+                Para_List.Parameter.Mark2 = new Vector(Tmp_Mark);
+            }
+            else
+            {
+                MessageBox.Show("请确认数值在0-350范围内");
+                return;
+            }
+            
+        }
+        //Mark3 X坐标
+        private void Set_txt_markX3_TextChanged(object sender, EventArgs e)
+        {
+            if (!decimal.TryParse(Set_txt_markX3.Text, out decimal tmp))
+            {
+                MessageBox.Show("请正确输入数字");
+                return;
+            }
+            if ((tmp >= 0) && (tmp <= 350))
+            {
+                Tmp_Mark.X = tmp;
+                Tmp_Mark.Y = Para_List.Parameter.Mark3.Y;
+                Para_List.Parameter.Mark3 = new Vector(Tmp_Mark);
+            }
+            else
+            {
+                MessageBox.Show("请确认数值在0-350范围内");
+                return;
+            }
+            
+        }
+        //Mark3 Y坐标
+        private void Set_txt_markY3_TextChanged(object sender, EventArgs e)
+        {
+            if (!decimal.TryParse(Set_txt_markY3.Text, out decimal tmp))
+            {
+                MessageBox.Show("请正确输入数字");
+                return;
+            }
+            if ((tmp >= 0) && (tmp <= 350))
+            {
+                Tmp_Mark.X = Para_List.Parameter.Mark3.X;
+                Tmp_Mark.Y = tmp;
+                Para_List.Parameter.Mark3 = new Vector(Tmp_Mark);
+            }
+            else
+            {
+                MessageBox.Show("请确认数值在0-350范围内");
+                return;
+            }            
         }
 
+        private void ParameterSet_Load(object sender, EventArgs e)
+        {
+            Set_txt_valueK.Text = Para_List.Parameter.Cam_Reference.ToString();
+            Set_txt_markX1.Text = Para_List.Parameter.Mark1.X.ToString();
+            Set_txt_markY1.Text = Para_List.Parameter.Mark1.Y.ToString();
+            Set_txt_markX2.Text = Para_List.Parameter.Mark2.X.ToString();
+            Set_txt_markY2.Text = Para_List.Parameter.Mark2.Y.ToString();
+            Set_txt_markX3.Text = Para_List.Parameter.Mark3.X.ToString();
+            Set_txt_markY3.Text = Para_List.Parameter.Mark3.Y.ToString();
+        }
     }
 }
