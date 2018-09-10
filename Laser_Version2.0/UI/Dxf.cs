@@ -85,10 +85,6 @@ namespace Laser_Build_1._0
 
         //8.31-sta
         List<Entity_Data> Mark_Circle_Entity_Data = new List<Entity_Data>();//mark 点数据收集
-        List<PointF> Mark_points_DXF = new List<PointF>();                  //DXF  三个 Mark点位置集合
-        PointF[] points_Dxf = new PointF[3];                                //DXF  三个 Mark点位置集合
-        PointF[] points_Motion = new PointF[3];                             //平台 三个 Mark点位置集合
-        Affinity_Matrix affinity_Matrix = new Affinity_Matrix();            //仿射变换参数
         //8.31-end
 
         //生成所需的函数
@@ -405,6 +401,9 @@ namespace Laser_Build_1._0
             //圆弧直线数据矫正
             //Arc_Line_Entity_Data =new List<Entity_Data>(Data_Cal.Calibration_Trail(Arc_Line_Entity_Data));//直接矫正路径
 
+            //圆弧直线数据矫正
+            Arc_Line_Entity_Data =new List<Entity_Data>(Data_Cal.Calibration_Entity(Arc_Line_Entity_Data,Para_List.Parameter.Trans_Affinity));//直接矫正路径
+
             int Current_Pos = 0;//用于记录比对插补数据的位置
             temp_intepolation_Dat.Clear();
             Arc_Line_Data.Clear();//清除直线圆弧插补数据
@@ -634,6 +633,9 @@ namespace Laser_Build_1._0
             //多边形数据矫正
             //LwPolylines_Entity_Data = new List<Entity_Data>(Data_Cal.Calibration_Trail(LwPolylines_Entity_Data));//直接矫正路径
 
+            //多边形数据矫正
+            LwPolylines_Entity_Data = new List<Entity_Data>(Data_Cal.Calibration_Entity(LwPolylines_Entity_Data, Para_List.Parameter.Trans_Affinity));//直接矫正路径
+
             //生成多边形插补数据
             temp_intepolation_Dat.Clear();
             LwPolyline_Data.Clear();//清除多边形插补数据 
@@ -834,6 +836,10 @@ namespace Laser_Build_1._0
             richTextBox1.AppendText("Mark标记数据统计： " + Mark_Circle_Entity_Data.Count + "\r\n");
             //圆形数据矫正
             //Circle_Entity_Data = new List<Entity_Data>(Data_Cal.Calibration_Trail(Circle_Entity_Data));//直接矫正路径
+
+            //圆形数据矫正
+            Circle_Entity_Data = new List<Entity_Data>(Data_Cal.Calibration_Entity(Circle_Entity_Data, Para_List.Parameter.Trans_Affinity));//直接矫正路径
+
             //生成圆形插补数据
             temp_intepolation_Dat.Clear();
             Circle_Data.Clear();//清除圆形插补数据 
@@ -1044,24 +1050,27 @@ namespace Laser_Build_1._0
         /// </summary>
         /// <param name="entity_Datas"><Mark点集合/param>
         /// <returns></returns>
-        private List<PointF> Mark_Calculate(List<Entity_Data> Mark_Datas) 
+        private List<Vector> Mark_Calculate(List<Entity_Data> Mark_Datas) 
         {
             //定义返回值
-            List<PointF> Result = new List<PointF>();
+            List<Vector> Result = new List<Vector>();
             //定义点
-            PointF Tmp_Point = new PointF();
+            Vector Tmp_Point=new Vector();
             //左下点
-            Tmp_Point.X =(float)(Mark_Datas.Min(o => o.Center_x));
-            Tmp_Point.Y = (float)(Mark_Datas.Min(o => o.Center_y));
-            Result.Add(new PointF(Tmp_Point.X, Tmp_Point.Y));
+            Tmp_Point.X = (Mark_Datas.Min(o => o.Center_x));
+            Tmp_Point.Y = (Mark_Datas.Min(o => o.Center_y));
+            Para_List.Parameter.Mark_Dxf1 = new Vector(Tmp_Point);
+            Result.Add(new Vector(Tmp_Point));
             //左上点
-            Tmp_Point.X = (float)(Mark_Datas.Min(o => o.Center_x));
-            Tmp_Point.Y = (float)(Mark_Datas.Max(o => o.Center_y));
-            Result.Add(new PointF(Tmp_Point.X, Tmp_Point.Y));
+            Tmp_Point.X = (Mark_Datas.Min(o => o.Center_x));
+            Tmp_Point.Y = (Mark_Datas.Max(o => o.Center_y));
+            Para_List.Parameter.Mark_Dxf2 = new Vector(Tmp_Point);
+            Result.Add(new Vector(Tmp_Point));
             //右上点
-            Tmp_Point.X = (float)(Mark_Datas.Max(o => o.Center_x));
-            Tmp_Point.Y = (float)(Mark_Datas.Max(o => o.Center_y));
-            Result.Add(new PointF(Tmp_Point.X, Tmp_Point.Y));            
+            Tmp_Point.X = (Mark_Datas.Max(o => o.Center_x));
+            Tmp_Point.Y = (Mark_Datas.Max(o => o.Center_y));
+            Para_List.Parameter.Mark_Dxf3 = new Vector(Tmp_Point);
+            Result.Add(new Vector(Tmp_Point));            
             //返回结果
             return Result;
         }
@@ -1497,14 +1506,23 @@ namespace Laser_Build_1._0
             PointF[] srcTri = new PointF[3];
             PointF[] dstTri = new PointF[3];
             //点位数据赋值
+            ////标准数据
+            //srcTri[0] = new PointF(0, 0);
+            //srcTri[1] = new PointF(5, 0);
+            //srcTri[2] = new PointF(0, 5);
+            ////仿射数据
+            //dstTri[0] = new PointF(0+10, 0+11);
+            //dstTri[1] = new PointF(Convert.ToSingle(5.0 * Math.Cos(Math.PI / 9)+10), Convert.ToSingle(-5.0 * Math.Sin(Math.PI / 9)+11));
+            //dstTri[2] = new PointF(Convert.ToSingle(5.0 * Math.Sin(Math.PI / 9)+10), Convert.ToSingle(5.0 * Math.Cos(Math.PI / 9)+11));
+
             //标准数据
-            srcTri[0] = new PointF(0, 0);
-            srcTri[1] = new PointF(5, 0);
-            srcTri[2] = new PointF(0, 5);
+            srcTri[0] = new PointF(Convert.ToSingle(Para_List.Parameter.Mark_Dxf1.X), Convert.ToSingle(Para_List.Parameter.Mark_Dxf1.Y));
+            srcTri[1] = new PointF(Convert.ToSingle(Para_List.Parameter.Mark_Dxf2.X), Convert.ToSingle(Para_List.Parameter.Mark_Dxf2.Y));
+            srcTri[2] = new PointF(Convert.ToSingle(Para_List.Parameter.Mark_Dxf3.X), Convert.ToSingle(Para_List.Parameter.Mark_Dxf3.Y));
             //仿射数据
-            dstTri[0] = new PointF(0, 0);
-            dstTri[1] = new PointF(Convert.ToSingle(5.0*Math.Cos(Math.PI/9)), Convert.ToSingle(5.0 * Math.Sin(Math.PI / 9)));
-            dstTri[2] = new PointF(-Convert.ToSingle(5.0 * Math.Sin(Math.PI / 9)), Convert.ToSingle(5.0 * Math.Cos(Math.PI / 9)));
+            dstTri[0] = new PointF(Convert.ToSingle(Para_List.Parameter.Mark1.X), Convert.ToSingle(Para_List.Parameter.Mark1.Y));
+            dstTri[1] = new PointF(Convert.ToSingle(Para_List.Parameter.Mark2.X), Convert.ToSingle(Para_List.Parameter.Mark2.Y));
+            dstTri[2] = new PointF(Convert.ToSingle(Para_List.Parameter.Mark3.X), Convert.ToSingle(Para_List.Parameter.Mark3.Y));
 
             //计算仿射变换矩阵
             mat = CvInvoke.GetAffineTransform(srcTri, dstTri);
@@ -1525,12 +1543,23 @@ namespace Laser_Build_1._0
                     richTextBox1.AppendText("映射数组元素:" +temp_array[i*mat.Rows+j]  + "\r\n");
                 }
             }
-
+            //数组输出
+            for (int i = 0; i < temp_array.Length; i++)
+            {
+                richTextBox1.AppendText("按顺序数组元素:" + temp_array[i] + "\r\n");
+            }
             //获取仿射变换参数
             decimal Cos_Arc = Convert.ToDecimal(temp_array[0]);//余弦值
             decimal Sin_Arc =-Convert.ToDecimal(temp_array[1]);//正弦值
             decimal Delta_x = Convert.ToDecimal(temp_array[2]);//x方向偏移
-            decimal Delta_y = Convert.ToDecimal(temp_array[3]);//y方向偏移
+            decimal Delta_y = Convert.ToDecimal(temp_array[5]);//y方向偏移
+
+            richTextBox1.AppendText("Mark1 X：" + Para_List.Parameter.Mark1.X + "  Y：" + Para_List.Parameter.Mark1.Y + "\r\n");
+            richTextBox1.AppendText("Mark2 X：" + Para_List.Parameter.Mark2.X + "  Y：" + Para_List.Parameter.Mark2.Y + "\r\n");
+            richTextBox1.AppendText("Mark3 X：" + Para_List.Parameter.Mark3.X + "  Y：" + Para_List.Parameter.Mark3.Y + "\r\n");
+            richTextBox1.AppendText("Mark_Dxf1 X：" + Para_List.Parameter.Mark_Dxf1.X + "  Y：" + Para_List.Parameter.Mark_Dxf1.Y + "\r\n");
+            richTextBox1.AppendText("Mark_Dxf2 X：" + Para_List.Parameter.Mark_Dxf2.X + "  Y：" + Para_List.Parameter.Mark_Dxf2.Y + "\r\n");
+            richTextBox1.AppendText("Mark_Dxf3 X：" + Para_List.Parameter.Mark_Dxf3.X + "  Y：" + Para_List.Parameter.Mark_Dxf3.Y + "\r\n");
 
             //坐标转换值
 
@@ -1773,17 +1802,15 @@ namespace Laser_Build_1._0
         {
             
             //dxf中Mark点集合（三个：左下 左上 右上）
-            Mark_points_DXF = Mark_Calculate(Mark_Circle_Entity_Data);
-            /*点位结果输出对比
+            Mark_Calculate(Mark_Circle_Entity_Data);
+            //点位结果输出对比
             for (int j = 0; j < Mark_Circle_Entity_Data.Count; j++)
             {
                 richTextBox1.AppendText("Mark_Circle 序号：" + j +"  X：" + Mark_Circle_Entity_Data[j].Center_x+ "  Y：" + Mark_Circle_Entity_Data[j].Center_y + "\r\n");
             }
-            for (int j = 0; j < Mark_points_DXF.Count; j++)
-            {
-                richTextBox1.AppendText("Mark 圆心排序 序号：" + j + "  X：" + Mark_points_DXF[j].X + "  Y：" + Mark_points_DXF[j].Y + "\r\n");
-            }
-            */
+            richTextBox1.AppendText("Mark_Dxf1 X：" + Para_List.Parameter.Mark_Dxf1.X + "  Y：" + Para_List.Parameter.Mark_Dxf1.Y + "\r\n");
+            richTextBox1.AppendText("Mark_Dxf2 X：" + Para_List.Parameter.Mark_Dxf2.X + "  Y：" + Para_List.Parameter.Mark_Dxf2.Y + "\r\n");
+            richTextBox1.AppendText("Mark_Dxf3 X：" + Para_List.Parameter.Mark_Dxf3.X + "  Y：" + Para_List.Parameter.Mark_Dxf3.Y + "\r\n");
 
             //points_Dxf = Mark_points_DXF.ToArray();
             ////开启实际平台中坐标
@@ -1793,33 +1820,35 @@ namespace Laser_Build_1._0
             //Generate_Affinity_Matrix.Exit_Flag = false;
 
         }
-        private void Mark_Data()
-        {
-            Generate_Affinity_Matrix generate_Affinity_Matrix = new Generate_Affinity_Matrix();
-            points_Motion=generate_Affinity_Matrix.Get_Mark_Datas(Mark_points_DXF);
-            affinity_Matrix=generate_Affinity_Matrix.Resolve_DxfToM(points_Dxf, points_Motion);
-        }
         //预留Test按钮
         private void button12_Click(object sender, EventArgs e)
         {
             //读取矫正原始数据
-            Serialize_Data Read_Data = new Serialize_Data();
+            //Serialize_Data Read_Data = new Serialize_Data();
             //Read_Data.Reserialize_Correct_Data("Correct_Data.xml");
             //获取标定板标定数据
-            Generate_Affinity_Matrix Get_Data = new Generate_Affinity_Matrix();
-            List<Affinity_Matrix> affinity_Matrices = Get_Data.Resolve(Read_Data.Reserialize_Correct_Data("Correct_Data.xml"));
-            richTextBox1.AppendText("理论数据量:" + 140 * 140 + "\r\n");
-            richTextBox1.AppendText("实际数据量:" + affinity_Matrices.Count + "\r\n");
+            //Generate_Affinity_Matrix Get_Data = new Generate_Affinity_Matrix();
+            //List<Affinity_Matrix> affinity_Matrices = Get_Data.Resolve(Read_Data.Reserialize_Correct_Data("Correct_Data.xml"));
+            //richTextBox1.AppendText("理论数据量:" + 140 * 140 + "\r\n");
+            //richTextBox1.AppendText("实际数据量:" + affinity_Matrices.Count + "\r\n");
 
             //将数据保存为Csv 方便Matlab处理
             //Read_Data.Save_To_Csv(Read_Data.Reserialize_Correct_Data("Correct_Data.xml"), "Data.csv");
+
+            //搜寻Mark
+            Generate_Affinity_Matrix Cal_Mark = new Generate_Affinity_Matrix();
+            Para_List.Parameter.Trans_Affinity = Cal_Mark.Cal_Affinity();
+
         }
-        
+        //生成Rtc标定数据
         private void button13_Click(object sender, EventArgs e)
         {
             Data_Resolve get_rtc = new Data_Resolve();
             Rtc_List_Data.Clear();
-            Rtc_List_Data =get_rtc.Generate_Calibration_Data(Para_List.Parameter.Rtc_Cal_Radius, Para_List.Parameter.Rtc_Cal_Interval);
+            //RTC切割距离矫正数据
+            //Rtc_List_Data =get_rtc.Generate_Calibration_Data(Para_List.Parameter.Rtc_Cal_Radius, Para_List.Parameter.Rtc_Cal_Interval);
+            //RTC与ORG 距离数据
+            Rtc_List_Data =get_rtc.Generate_Org_Rtc_Data(Para_List.Parameter.Rtc_Cal_Radius, Para_List.Parameter.Rtc_Cal_Interval);
             for (int i = 0; i < Rtc_List_Data.Count; i++)
             {
                 for (int j = 0; j < Rtc_List_Data[i].Count; j++)
@@ -1853,6 +1882,12 @@ namespace Laser_Build_1._0
                 }
                 Para_List.Parameter.Rtc_Cal_Radius = tmp;
             });
+        }
+        //提取坐标
+        private void button11_Click(object sender, EventArgs e)
+        {
+            Vector Tem =new Vector(interpolation.Get_Coordinate());
+            MessageBox.Show("X坐标："+ Convert.ToString(Tem.X) + "  Y坐标：" + Convert.ToString(Tem.Y));
         }
 
         //加工停止 

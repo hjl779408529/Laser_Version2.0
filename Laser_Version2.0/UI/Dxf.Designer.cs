@@ -94,6 +94,7 @@
             this.textBox20 = new System.Windows.Forms.TextBox();
             this.label23 = new System.Windows.Forms.Label();
             this.textBox21 = new System.Windows.Forms.TextBox();
+            this.button11 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // button5
@@ -700,7 +701,7 @@
             // label22
             // 
             this.label22.AutoSize = true;
-            this.label22.Location = new System.Drawing.Point(1180, 562);
+            this.label22.Location = new System.Drawing.Point(1180, 541);
             this.label22.Name = "label22";
             this.label22.Size = new System.Drawing.Size(71, 18);
             this.label22.TabIndex = 101;
@@ -708,7 +709,7 @@
             // 
             // textBox20
             // 
-            this.textBox20.Location = new System.Drawing.Point(1165, 596);
+            this.textBox20.Location = new System.Drawing.Point(1165, 575);
             this.textBox20.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBox20.Name = "textBox20";
             this.textBox20.Size = new System.Drawing.Size(100, 28);
@@ -718,7 +719,7 @@
             // label23
             // 
             this.label23.AutoSize = true;
-            this.label23.Location = new System.Drawing.Point(1180, 482);
+            this.label23.Location = new System.Drawing.Point(1180, 461);
             this.label23.Name = "label23";
             this.label23.Size = new System.Drawing.Size(71, 18);
             this.label23.TabIndex = 99;
@@ -726,18 +727,30 @@
             // 
             // textBox21
             // 
-            this.textBox21.Location = new System.Drawing.Point(1165, 517);
+            this.textBox21.Location = new System.Drawing.Point(1165, 496);
             this.textBox21.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBox21.Name = "textBox21";
             this.textBox21.Size = new System.Drawing.Size(100, 28);
             this.textBox21.TabIndex = 98;
             this.textBox21.TextChanged += new System.EventHandler(this.textBox21_TextChanged);
             // 
+            // button11
+            // 
+            this.button11.Location = new System.Drawing.Point(1484, 548);
+            this.button11.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.button11.Name = "button11";
+            this.button11.Size = new System.Drawing.Size(154, 50);
+            this.button11.TabIndex = 102;
+            this.button11.Text = "提取坐标";
+            this.button11.UseVisualStyleBackColor = true;
+            this.button11.Click += new System.EventHandler(this.button11_Click);
+            // 
             // Dxf
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1732, 707);
+            this.ClientSize = new System.Drawing.Size(1748, 707);
+            this.Controls.Add(this.button11);
             this.Controls.Add(this.label22);
             this.Controls.Add(this.textBox20);
             this.Controls.Add(this.label23);
@@ -884,5 +897,6 @@
         private System.Windows.Forms.TextBox textBox20;
         private System.Windows.Forms.Label label23;
         private System.Windows.Forms.TextBox textBox21;
+        private System.Windows.Forms.Button button11;
     }
 }

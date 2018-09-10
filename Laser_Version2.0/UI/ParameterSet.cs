@@ -51,6 +51,7 @@ namespace Laser_Version2._0
             Set_txt_markY2.Text = Para_List.Parameter.Mark2.Y.ToString();
             Set_txt_markX3.Text = Para_List.Parameter.Mark3.X.ToString();
             Set_txt_markY3.Text = Para_List.Parameter.Mark3.Y.ToString();
+            
         }
        
         //Mark1 X坐标

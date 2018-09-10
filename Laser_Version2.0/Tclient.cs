@@ -108,7 +108,7 @@ namespace Laser_Build_1._0
                     {
                         Receive_Cordinate.X = d_tmp_x;
                         Receive_Cordinate.Y = d_tmp_y;
-                        //MessageBox.Show(string.Format("(X:{0},Y:{1})", d_tmp_x, d_tmp_y));
+                        MessageBox.Show(string.Format("(X:{0},Y:{1})", d_tmp_x, d_tmp_y));
                     }
                     else
                     {

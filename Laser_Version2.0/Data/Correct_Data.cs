@@ -415,7 +415,7 @@ namespace Laser_Build_1._0
                         Temp_Affinity_Matrix.Cos_Value = Convert.ToDecimal(temp_array[0]);//余弦值
                         Temp_Affinity_Matrix.Sin_Value = Convert.ToDecimal(temp_array[1]);//正弦值
                         Temp_Affinity_Matrix.Delta_X = Convert.ToDecimal(temp_array[2]);//x方向偏移
-                        Temp_Affinity_Matrix.Delta_Y = Convert.ToDecimal(temp_array[3]);//y方向偏移
+                        Temp_Affinity_Matrix.Delta_Y = Convert.ToDecimal(temp_array[5]);//y方向偏移
                         //追加进入仿射变换List
                         Result.Add(new Affinity_Matrix(Temp_Affinity_Matrix));
                         //清除变量
@@ -446,9 +446,9 @@ namespace Laser_Build_1._0
             temp_array = mat.GetDoubleArray();
             //获取仿射变换参数
             Temp_Affinity_Matrix.Cos_Value = Convert.ToDecimal(temp_array[0]);//余弦值
-            Temp_Affinity_Matrix.Sin_Value = -Convert.ToDecimal(temp_array[1]);//正弦值
+            Temp_Affinity_Matrix.Sin_Value = Convert.ToDecimal(temp_array[1]);//正弦值
             Temp_Affinity_Matrix.Delta_X = Convert.ToDecimal(temp_array[2]);//x方向偏移
-            Temp_Affinity_Matrix.Delta_Y = Convert.ToDecimal(temp_array[3]);//y方向偏移
+            Temp_Affinity_Matrix.Delta_Y = Convert.ToDecimal(temp_array[5]);//y方向偏移
             //追加进入仿射变换List
             //保存为文件
             Save_Data.Serialize_Affinity_Matrix_dxf(Temp_Affinity_Matrix, "Affinity_Matrix_DxfToM.txt");
@@ -486,17 +486,20 @@ namespace Laser_Build_1._0
             {
 
             } while (!Main.T_Client.Rec_Ok);
-            Cam_X = Main.T_Client.Receive_Cordinate.X;
-            Cam_Y = Main.T_Client.Receive_Cordinate.Y;
+            Cam_Y = Main.T_Client.Receive_Cordinate.X;
+            Cam_X = Main.T_Client.Receive_Cordinate.Y;
 
             //获取坐标系平台坐标
             Coodinate_Point = new Vector(interpolation.Get_Coordinate());
             //计算偏移
-            Tem_Mark =new Vector(Coodinate_Point.X + Cam_X * Para_List.Parameter.Cam_Reference, Coodinate_Point.Y + Cam_Y * Para_List.Parameter.Cam_Reference);
+            Tem_Mark = new Vector(Coodinate_Point.X - Cam_X * Para_List.Parameter.Cam_Reference - Para_List.Parameter.Cam_Org_X, Coodinate_Point.Y - Cam_Y * Para_List.Parameter.Cam_Reference - Para_List.Parameter.Cam_Org_Y);
             //反馈回Mark点
             Para_List.Parameter.Mark1 = new Vector(Tem_Mark);
-            //MessageBox.Show(string.Format("坐标系 X：{0}，Y：{1}", Coodinate_Point.X, Coodinate_Point.Y));
 
+            //定位到Mark1点
+            //interpolation.Gts_Ready(Para_List.Parameter.Mark1.X, Para_List.Parameter.Mark1.Y);          
+
+            
             //矫正Mark2
             //定位到Mark2点
             interpolation.Gts_Ready(Para_List.Parameter.Mark2.X, Para_List.Parameter.Mark2.Y);
@@ -509,13 +512,13 @@ namespace Laser_Build_1._0
             {
 
             } while (!Main.T_Client.Rec_Ok);
-            Cam_X = Main.T_Client.Receive_Cordinate.X;
-            Cam_Y = Main.T_Client.Receive_Cordinate.Y;
+            Cam_Y = Main.T_Client.Receive_Cordinate.X;
+            Cam_X = Main.T_Client.Receive_Cordinate.Y;
 
             //获取坐标系平台坐标
             Coodinate_Point = new Vector(interpolation.Get_Coordinate());
             //计算偏移
-            Tem_Mark = new Vector(Coodinate_Point.X + Cam_X * Para_List.Parameter.Cam_Reference, Coodinate_Point.Y + Cam_Y * Para_List.Parameter.Cam_Reference);
+            Tem_Mark = new Vector(Coodinate_Point.X - Cam_X * Para_List.Parameter.Cam_Reference - Para_List.Parameter.Cam_Org_X, Coodinate_Point.Y - Cam_Y * Para_List.Parameter.Cam_Reference - Para_List.Parameter.Cam_Org_Y);
             //反馈回Mark点
             Para_List.Parameter.Mark2 = new Vector(Tem_Mark);
             //MessageBox.Show(string.Format("坐标系 X：{0}，Y：{1}", Coodinate_Point.X, Coodinate_Point.Y));
@@ -532,31 +535,32 @@ namespace Laser_Build_1._0
             {
 
             } while (!Main.T_Client.Rec_Ok);
-            Cam_X = Main.T_Client.Receive_Cordinate.X;
-            Cam_Y = Main.T_Client.Receive_Cordinate.Y;
+            Cam_Y = Main.T_Client.Receive_Cordinate.X;
+            Cam_X = Main.T_Client.Receive_Cordinate.Y;
 
             //获取坐标系平台坐标
             Coodinate_Point = new Vector(interpolation.Get_Coordinate());
             //计算偏移
-            Tem_Mark = new Vector(Coodinate_Point.X + Cam_X * Para_List.Parameter.Cam_Reference, Coodinate_Point.Y + Cam_Y * Para_List.Parameter.Cam_Reference);
+            Tem_Mark = new Vector(Coodinate_Point.X - Cam_X * Para_List.Parameter.Cam_Reference - Para_List.Parameter.Cam_Org_X, Coodinate_Point.Y - Cam_Y * Para_List.Parameter.Cam_Reference - Para_List.Parameter.Cam_Org_Y);
             //反馈回Mark点
             Para_List.Parameter.Mark3 = new Vector(Tem_Mark);
             //MessageBox.Show(string.Format("坐标系 X：{0}，Y：{1}", Coodinate_Point.X, Coodinate_Point.Y))
 
             //计算仿射变换参数
             Para_List.Parameter.Trans_Affinity =new Affinity_Matrix(Cal_Affinity());
+            
 
         }
         //dxf 仿射变换 求DX，DY，Dct(sin \cos)
         public Affinity_Matrix Cal_Affinity()//标准数据 //差异化数据 
         {
             //建立变量
-            Affinity_Matrix Temp_Affinity_Matrix = new Affinity_Matrix();
+            Affinity_Matrix Result = new Affinity_Matrix();
             //定义仿射变换数组 
             Mat mat = new Mat(new Size(3, 2), Emgu.CV.CvEnum.DepthType.Cv32F, 1); //2行 3列 的矩阵
             //定义点位数组
             PointF[] srcTri = new PointF[3];//标准数据
-            PointF[] dstTri = new PointF[3];//差异化数据
+            PointF[] dstTri = new PointF[3];//差异化数据 
             double[] temp_array;
             //数据提取
             //标准数据
@@ -567,18 +571,41 @@ namespace Laser_Build_1._0
             dstTri[0] = new PointF(Convert.ToSingle(Para_List.Parameter.Mark1.X), Convert.ToSingle(Para_List.Parameter.Mark1.Y));
             dstTri[1] = new PointF(Convert.ToSingle(Para_List.Parameter.Mark2.X), Convert.ToSingle(Para_List.Parameter.Mark2.Y));
             dstTri[2] = new PointF(Convert.ToSingle(Para_List.Parameter.Mark3.X), Convert.ToSingle(Para_List.Parameter.Mark3.Y));
-
             //计算仿射变换矩阵
             mat = CvInvoke.GetAffineTransform(srcTri, dstTri);
             //提取矩阵数据
             temp_array = mat.GetDoubleArray();
             //获取仿射变换参数
-            Temp_Affinity_Matrix.Cos_Value = Convert.ToDecimal(temp_array[0]);//余弦值
-            Temp_Affinity_Matrix.Sin_Value = Convert.ToDecimal(temp_array[1]);//正弦值
-            Temp_Affinity_Matrix.Delta_X = Convert.ToDecimal(temp_array[2]);//x方向偏移
-            Temp_Affinity_Matrix.Delta_Y = Convert.ToDecimal(temp_array[3]);//y方向偏移
+            Result.Cos_Value = Convert.ToDecimal(temp_array[0]);//余弦值
+            Result.Sin_Value = Convert.ToDecimal(temp_array[1]);//正弦值
+            Result.Delta_X = Convert.ToDecimal(temp_array[2]);//x方向偏移
+            Result.Delta_Y = Convert.ToDecimal(temp_array[5]);//y方向偏移
+
+            //保存为文件
+            string sdatetime = DateTime.Now.ToString("D");
+            string filePath = "";
+            string delimiter = ",";
+            string strHeader = "";
+            filePath = @"./\Config/" + "Cal_Affinity.csv";
+
+            strHeader += "Cos,Sin,Delatx,Deltay"; 
+            bool isExit = File.Exists(filePath); 
+            StreamWriter sw = new StreamWriter(filePath, true, Encoding.GetEncoding("gb2312"));
+            if (!isExit)
+            {
+                sw.WriteLine(strHeader);
+            }
+            //output rows data
+            string strRowValue = "";
+            strRowValue += Result.Cos_Value + delimiter
+                         + Result.Sin_Value + delimiter
+                         + Result.Delta_X + delimiter
+                         + Result.Delta_Y;
+            sw.WriteLine(strRowValue);
+            sw.Close();
+
             //追加进入仿射变换List
-            return Temp_Affinity_Matrix;
+            return Result;
         }
     }
 

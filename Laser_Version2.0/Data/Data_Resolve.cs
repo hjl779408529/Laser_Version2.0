@@ -198,14 +198,14 @@ namespace Laser_Build_1._0
                 //后赋值
                 Temp_Data = O;
                 //起点计算
-                Temp_Data.Start_x = O.Start_x * Mark_affinity_Matrices.Cos_Value + O.Start_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X + Para_List.Parameter.Rtc_Org_X;
-                Temp_Data.Start_y = O.Start_y * Mark_affinity_Matrices.Cos_Value - O.Start_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y + Para_List.Parameter.Rtc_Org_Y;
+                Temp_Data.Start_x = O.Start_x * Mark_affinity_Matrices.Cos_Value + O.Start_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org_X;
+                Temp_Data.Start_y = O.Start_y * Mark_affinity_Matrices.Cos_Value - O.Start_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org_Y;
                 //终点计算
-                Temp_Data.End_x = O.End_x * Mark_affinity_Matrices.Cos_Value + O.End_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X + Para_List.Parameter.Rtc_Org_X;
-                Temp_Data.End_y = O.End_y * Mark_affinity_Matrices.Cos_Value - O.End_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y + Para_List.Parameter.Rtc_Org_Y;
+                Temp_Data.End_x = O.End_x * Mark_affinity_Matrices.Cos_Value + O.End_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org_X;
+                Temp_Data.End_y = O.End_y * Mark_affinity_Matrices.Cos_Value - O.End_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org_Y;
                 //圆心计算
-                Temp_Data.Center_x = O.Center_x * Mark_affinity_Matrices.Cos_Value + O.Center_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X + Para_List.Parameter.Rtc_Org_X;
-                Temp_Data.Center_y = O.Center_y * Mark_affinity_Matrices.Cos_Value - O.Center_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y + Para_List.Parameter.Rtc_Org_Y;
+                Temp_Data.Center_x = O.Center_x * Mark_affinity_Matrices.Cos_Value + O.Center_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org_X;
+                Temp_Data.Center_y = O.Center_y * Mark_affinity_Matrices.Cos_Value - O.Center_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org_Y;
 
                 //追加数据至Result
                 Result.Add(Temp_Data);
@@ -1326,6 +1326,81 @@ namespace Laser_Build_1._0
             Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
             Temp_Interpolation_List_Data.Clear();
 
+            //返回结果
+            return Result;
+        }
+        //生成RTC 与 原点距离矫正
+        public List<List<Interpolation_Data>> Generate_Org_Rtc_Data(decimal Radius, decimal Interval) 
+        {
+            //结果变量
+            List<List<Interpolation_Data>> Result = new List<List<Interpolation_Data>>();//返回值
+            List<Interpolation_Data> Temp_Interpolation_List_Data = new List<Interpolation_Data>();//二级层
+            Interpolation_Data Temp_Data = new Interpolation_Data();//一级层  
+            decimal Gts_X = 100, Gts_Y = 100;//X、Y坐标
+            //decimal Radius = 1.0m;//半径
+            //decimal Interval = 3.0m;//间距  
+            //初始清除
+            Result.Clear();
+            Temp_Interpolation_List_Data.Clear();
+            Temp_Data.Empty();
+
+            //走刀至Gts 平台坐标
+
+            //Gts 直线插补
+            Temp_Data.Type = 1;
+            //强制抬刀标志：1
+            Temp_Data.Lift_flag = 1;
+            //强制加工类型为Gts
+            Temp_Data.Work = 10;
+            //直线终点坐标
+            Temp_Data.End_x = Gts_X;
+            Temp_Data.End_y = Gts_Y;
+            //追加修改的数据
+            Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
+            Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
+            Temp_Interpolation_List_Data.Clear();
+
+            //坐标原点 1半径的圆圈 1号圆
+            //追加RTC加工数据
+            //数据清空
+            Temp_Data.Empty();
+            //强制抬刀标志：0
+            Temp_Data.Lift_flag = 0;
+            //强制加工类型为RTC
+            Temp_Data.Work = 20;
+            //GTS平台配合坐标
+            Temp_Data.Gts_x = Gts_X;
+            Temp_Data.Gts_y = Gts_Y;
+            //Rtc定位 激光加工起点坐标
+            Temp_Data.Rtc_x = Radius;
+            Temp_Data.Rtc_y = 0;
+            //RTC arc_abs圆弧
+            Temp_Data.Type = 11;
+            //RTC 圆弧加工圆心坐标转换
+            Temp_Data.Center_x = 0;
+            Temp_Data.Center_y = 0;
+            //圆弧角度
+            Temp_Data.Angle = 360;
+            //追加修改的数据
+            Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
+            Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
+            ////Temp_Interpolation_List_Data.Clear();
+
+            //处理二次结果，合并走直线的Gts数据，下次为Rtc加工，则变动该GTS数据终点坐标为RTC加工的gts基准位置
+            for (int cal = 0; cal < Result.Count; cal++)
+            {
+                //当前序号 数量为1、加工类型1 直线、加工方式10 GTS
+                //当前+1序号 数量大于1、加工方式20 RTX
+                if ((cal < Result.Count - 1) && (Result[cal].Count == 1) && (Result[cal][0].Type == 1) && (Result[cal][0].Work == 10) && (Result[cal + 1].Count >= 1) && (Result[cal + 1][0].Work == 20))
+                {
+                    Temp_Data.Empty();
+                    Temp_Data = Result[cal][0];
+                    Temp_Data.End_x = Result[cal + 1][0].Gts_x;
+                    Temp_Data.End_y = Result[cal + 1][0].Gts_y;
+                    //重新赋值
+                    Result[cal][0] = new Interpolation_Data(Temp_Data);
+                }
+            }
             //返回结果
             return Result;
         }
