@@ -29,8 +29,10 @@ namespace Laser_Build_1._0
         readonly Prompt.Log Log = new Prompt.Log();
         //定义拍摄完成标志
         private bool Flag = false;
-        Mat Img;
-        
+        //定义输出值
+        public decimal Cam_X;//计算的图像输出X坐标
+        public decimal Cam_Y;//计算的图像输出Y坐标
+        Mat Img;        
         //构造函数
         public Basler_Camera()
         {
@@ -250,25 +252,21 @@ namespace Laser_Build_1._0
             // Image grabbed successfully?
             if (grabResult.GrabSucceeded)
             {
-                // Access the image data.
-                //byte[] buffer = grabResult.PixelData as byte[];
                 //将basler的相机数据流转换为intptr
                 GCHandle hObject = GCHandle.Alloc(grabResult.PixelData, GCHandleType.Pinned);
                 IntPtr pObject = hObject.AddrOfPinnedObject();
                 //将Basler相机的数据转化为Mat
-                //img.Dispose();
-                Mat src = new Mat(new Size(grabResult.Width,grabResult.Height),DepthType.Cv8U,1,pObject, grabResult.Width);                
-                Image<Bgr, byte> dest = src.ToImage<Bgr, byte>();                
+                Mat src = new Mat(new Size(grabResult.Width,grabResult.Height),DepthType.Cv8U,1,pObject, grabResult.Width);
+                //Bgr图像
+                Image<Bgr, byte> dest = src.ToImage<Bgr, byte>();
+                //直接转换为灰度图像
+                //Image<Gray, byte> dest = src.ToImage<Gray, byte>();
                 Img = dest.Mat.Clone();
-                //图像转置
-                //CvInvoke.Transpose(Img, Img);
+                //CvInvoke.Imshow("New",Img);
+                //释放资源
                 hObject.Free();
                 src.Dispose(); 
                 dest.Dispose();
-                // 显示捕获的照片
-                //ImageWindow.DisplayImage(0, grabResult);
-                //将捕获的照片保存在电脑上
-                //ImagePersistence.Save(ImageFileFormat.Bmp, "test.bmp", grabResult);
                 //捕捉完成标志
                 Flag = true;
             }
@@ -279,7 +277,14 @@ namespace Laser_Build_1._0
         }
         public void Take_Picture()
         {
-            Camera_Open();
+            Start_Grabber();  
+            Stop_Grabber();
+        }
+        public void Start_Grabber()
+        {
+            Flag = false;
+            //Open the connection to the camera device.
+            camera.Open();
             //触发拍照
             if (camera.WaitForFrameTriggerReady(100, TimeoutHandling.ThrowException))
             {
@@ -290,13 +295,15 @@ namespace Laser_Build_1._0
             {
                 //MessageBox.Show("拍摄完成");
             }
-            Camera_Close();
         }
-
+        public void Stop_Grabber()
+        {
+            camera.StreamGrabber.Stop();
+            Flag = false;
+        }
         public void Camera_Close() 
         {
-            Flag = false;
-            camera.StreamGrabber.Stop();
+            camera.CameraOpened += Configuration.AcquireSingleFrame;
             camera.Close();
         }
         public void Dispose()
@@ -327,19 +334,26 @@ namespace Laser_Build_1._0
             //CvInvoke.Transpose(Img, Img);
             return Img;
         }
-        //返回差值
+        //返回计算差值
         public Vector Get_Deviation()
         {
             Vector Result = new Vector();
             //获取照片
             Take_Picture();
             Mat srcImg = Img.Clone();
+            //高斯滤波
+            CvInvoke.GaussianBlur(srcImg, srcImg, new Size(5, 5), 0, 0);
+            //随机颜色
+            Random RD = new Random();
             Mat grayImg = new Mat();
+            //bgr转gray
             CvInvoke.CvtColor(srcImg, grayImg, ColorConversion.Bgr2Gray);
-            CvInvoke.Threshold(grayImg, grayImg, 80, 255, ThresholdType.BinaryInv);
+            //图像二值化
+            CvInvoke.Threshold(grayImg, grayImg, 100, 255, ThresholdType.Binary);
+            //定义轮廓数组
             VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint();
+            //寻找轮廓
             CvInvoke.FindContours(grayImg, contours, null, RetrType.External, ChainApproxMethod.ChainApproxNone);
-
             //释放资源
             srcImg.Dispose();
             grayImg.Dispose();

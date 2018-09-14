@@ -374,7 +374,6 @@
         private System.Windows.Forms.Button button8;
         private System.Windows.Forms.ToolStripMenuItem Rtc_Mannual;
         //建立TcpClient
-        public static Tclient T_Client = new Tclient();
         private System.Windows.Forms.ToolStripMenuItem Menu_ParameterSet;
         private System.Windows.Forms.Button button10;
     }

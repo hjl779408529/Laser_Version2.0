@@ -21,7 +21,7 @@ namespace Laser_Build_1._0
         {
             InitializeComponent();
             Control.CheckForIllegalCrossThreadCalls = false;//关闭CheckForIllegalCrossThreadCalls
-            T_Client.TCP_Start();
+            
         }
 
         private void Form1_Load(object sender, EventArgs e)

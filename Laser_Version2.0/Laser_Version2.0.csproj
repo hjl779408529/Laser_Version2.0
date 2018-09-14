@@ -66,7 +66,7 @@
   <ItemGroup>
     <Reference Include="Basler.Pylon, Version=1.0.0.0, Culture=neutral, PublicKeyToken=e389355f398382ab, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>dll\Basler.Pylon\x64\Basler.Pylon.dll</HintPath>
+      <HintPath>..\..\..\Laser_Version2.0\Laser_Version2.0\dll\Basler.Pylon\x64\Basler.Pylon.dll</HintPath>
     </Reference>
     <Reference Include="CSkin">
       <HintPath>dll\CSkin 16.1.14.2\CSkin 4.0\CSkin.dll</HintPath>
@@ -92,6 +92,14 @@
     <Reference Include="netDxf">
       <HintPath>dll\netDxf.dll</HintPath>
     </Reference>
+    <Reference Include="PylonC.NET, Version=4.1.0.0, Culture=neutral, PublicKeyToken=a77e8471c5919d5a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>dll\PylonC.NET.dll</HintPath>
+    </Reference>
+    <Reference Include="PylonC.NETSupportLibrary, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>dll\PylonC.NETSupportLibrary.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -108,10 +116,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Basler_Net_Cam.cs" />
     <Compile Include="Cam_pic\Basler_Camera.cs" />
     <Compile Include="Data\Correct_Data.cs" />
     <Compile Include="CRCTOOL.cs" />
     <Compile Include="Data\Data_Resolve.cs" />
+    <Compile Include="TimeOut.cs" />
     <Compile Include="UI\Laser_Control_Panel.cs">
       <SubType>Form</SubType>
     </Compile>

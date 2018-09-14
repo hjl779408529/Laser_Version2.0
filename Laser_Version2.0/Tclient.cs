@@ -19,7 +19,6 @@ namespace Laser_Build_1._0
         public byte[] buffer=new byte[bufferSize];
         public string readType = null;
         public StringBuilder messageBuffe = new StringBuilder();
-
         //返回值
         int Bis_result = 9;
         TcpClient client = null;
@@ -103,12 +102,11 @@ namespace Laser_Build_1._0
                     data = Encoding.ASCII.GetString(bytedata);
 
                     string[] tmp = data.Split(',');
-                    Rec_Ok = true;
                     if ((decimal.TryParse(tmp[0], out decimal d_tmp_x)) && (decimal.TryParse(tmp[1], out decimal d_tmp_y)))
                     {
-                        Receive_Cordinate.X = d_tmp_x;
-                        Receive_Cordinate.Y = d_tmp_y;
-                        MessageBox.Show(string.Format("(X:{0},Y:{1})", d_tmp_x, d_tmp_y));
+                        Receive_Cordinate = new Vector(d_tmp_x, d_tmp_y);
+                        Rec_Ok = true;
+                        MessageBox.Show(string.Format("(X:{0},Y:{1})", Receive_Cordinate.X * Para_List.Parameter.Cam_Reference, Receive_Cordinate.Y * Para_List.Parameter.Cam_Reference));
                     }
                     else
                     {
@@ -135,6 +133,23 @@ namespace Laser_Build_1._0
             byte[] buf = BitConverter.GetBytes(31);
             stream.Write(buffer, 0, buffer.Length);
             Rec_Ok = false;
+        }
+        //获取校准值
+        public Vector Get_Cam_Deviation(int order)
+        {
+            Vector Result;
+            
+            //发送指令
+            Senddata(order);
+            //等待完成
+            do
+            {
+
+            } while (!Rec_Ok);
+            //换算数据
+            Result = new Vector(Receive_Cordinate.X * Para_List.Parameter.Cam_Reference, Receive_Cordinate.Y * Para_List.Parameter.Cam_Reference);
+            //返回数据
+            return Result;
         }
     }
 }

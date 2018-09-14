@@ -95,6 +95,11 @@
             this.label23 = new System.Windows.Forms.Label();
             this.textBox21 = new System.Windows.Forms.TextBox();
             this.button11 = new System.Windows.Forms.Button();
+            this.label24 = new System.Windows.Forms.Label();
+            this.textBox22 = new System.Windows.Forms.TextBox();
+            this.label25 = new System.Windows.Forms.Label();
+            this.textBox23 = new System.Windows.Forms.TextBox();
+            this.button21 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // button5
@@ -745,11 +750,63 @@
             this.button11.UseVisualStyleBackColor = true;
             this.button11.Click += new System.EventHandler(this.button11_Click);
             // 
+            // label24
+            // 
+            this.label24.AutoSize = true;
+            this.label24.Location = new System.Drawing.Point(1733, 218);
+            this.label24.Name = "label24";
+            this.label24.Size = new System.Drawing.Size(80, 18);
+            this.label24.TabIndex = 106;
+            this.label24.Text = "Y坐标/mm";
+            // 
+            // textBox22
+            // 
+            this.textBox22.Location = new System.Drawing.Point(1723, 252);
+            this.textBox22.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.textBox22.Name = "textBox22";
+            this.textBox22.Size = new System.Drawing.Size(100, 28);
+            this.textBox22.TabIndex = 105;
+            this.textBox22.TextChanged += new System.EventHandler(this.textBox22_TextChanged);
+            // 
+            // label25
+            // 
+            this.label25.AutoSize = true;
+            this.label25.Location = new System.Drawing.Point(1733, 138);
+            this.label25.Name = "label25";
+            this.label25.Size = new System.Drawing.Size(80, 18);
+            this.label25.TabIndex = 104;
+            this.label25.Text = "X坐标/mm";
+            // 
+            // textBox23
+            // 
+            this.textBox23.Location = new System.Drawing.Point(1723, 173);
+            this.textBox23.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.textBox23.Name = "textBox23";
+            this.textBox23.Size = new System.Drawing.Size(100, 28);
+            this.textBox23.TabIndex = 103;
+            this.textBox23.TextChanged += new System.EventHandler(this.textBox23_TextChanged);
+            // 
+            // button21
+            // 
+            this.button21.Location = new System.Drawing.Point(1696, 302);
+            this.button21.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.button21.Name = "button21";
+            this.button21.Size = new System.Drawing.Size(154, 50);
+            this.button21.TabIndex = 107;
+            this.button21.Text = "定位坐标点";
+            this.button21.UseVisualStyleBackColor = true;
+            this.button21.Click += new System.EventHandler(this.button21_Click);
+            // 
             // Dxf
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1748, 707);
+            this.ClientSize = new System.Drawing.Size(1907, 707);
+            this.Controls.Add(this.button21);
+            this.Controls.Add(this.label24);
+            this.Controls.Add(this.textBox22);
+            this.Controls.Add(this.label25);
+            this.Controls.Add(this.textBox23);
             this.Controls.Add(this.button11);
             this.Controls.Add(this.label22);
             this.Controls.Add(this.textBox20);
@@ -898,5 +955,10 @@
         private System.Windows.Forms.Label label23;
         private System.Windows.Forms.TextBox textBox21;
         private System.Windows.Forms.Button button11;
+        private System.Windows.Forms.Label label24;
+        private System.Windows.Forms.TextBox textBox22;
+        private System.Windows.Forms.Label label25;
+        private System.Windows.Forms.TextBox textBox23;
+        private System.Windows.Forms.Button button21;
     }
 }

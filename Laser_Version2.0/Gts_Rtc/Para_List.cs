@@ -57,31 +57,23 @@ namespace Para_List
 
 
         //加工坐标系
-        private static decimal work_x = 450.0m;//加工坐标系X坐标
-        private static decimal work_y = 300.0m;//加工坐标系Y坐标 
+        private static Vector work = new Vector(0,0);//加工坐标系
         //刀具绝对坐标 激光光束相对于整个平台绝对坐标
-        private static decimal laser_x = 0.0m;//刀具绝对坐标X坐标
-        private static decimal laser_y = 0.0m;//刀具绝对坐标Y坐标
+        private static Vector laser =new Vector(0,0);//刀具绝对坐标X坐标 Vector mark1 = new Vector(0, 0);
         //相机单像素对应的实际比例
         private static decimal cam_reference = 0.0m;
         //相机中心与坐标系原点对正时，像素偏差值，每次开机时矫正（待确定）
-        private static decimal cam_org_pixel_x = 0.0m;
-        private static decimal cam_org_pixel_y = 0.0m;
+        private static Vector cam_org_pixel = new Vector(0,0); 
         //Camera中心 相对于 直角坐标系原点 相对间距
-        private static decimal cam_org_x = 0.0m;
-        private static decimal cam_org_y = 0.0m;
+        private static Vector cam_org= new Vector(0,0);
         //振镜激光原点  相对于 直角坐标系原点 相对间距
-        private static decimal rtc_org_x = 0.0m; 
-        private static decimal rtc_org_y = 0.0m;
+        private static Vector rtc_org = new Vector(0,0); 
         //Camera中心 相对于 振镜激光原点   相对间距
-        private static decimal cam_rtc_x = 0.0m;
-        private static decimal cam_rtc_y = 0.0m;
+        private static Vector cam_rtc = new Vector(0,0);
         //偏差补偿值  Dxf中图形 与实际工件摆放的 偏差值，每次加工前进行处理调用获取该值
-        private static decimal delta_x = 0.0m;
-        private static decimal delta_y = 0.0m;
+        private static Vector delta = new Vector(0,0);
         //定义图像中心点
-        private static decimal pic_center_x = 0.0m;
-        private static decimal pic_center_y = 0.0m;
+        private static Vector pic_center = new Vector(0,0);
 
         //振镜参数
         private static UInt32 reset_completely = UInt32.MaxValue; //复位范围
@@ -177,23 +169,15 @@ namespace Para_List
         public static Int16 Calibration_Row { get => calibration_row; set => calibration_row = value; }
         public static Int16 Affinity_Col { get => affinity_col; set => affinity_col = value; }
         public static Int16 Affinity_Row { get => affinity_row; set => affinity_row = value; }
-        public static decimal Work_X { get => work_x; set => work_x = value; }
-        public static decimal Work_Y { get => work_y; set => work_y = value; }
-        public static decimal Laser_X { get => laser_x; set => laser_x = value; }
-        public static decimal Laser_Y { get => laser_y; set => laser_y = value; }
+        public static Vector Work { get => work; set => work = value; }
+        public static Vector Laser { get => laser; set => laser = value; }
         public static decimal Cam_Reference { get => cam_reference; set => cam_reference = value; }
-        public static decimal Cam_Org_Pixel_X { get => cam_org_pixel_x; set => cam_org_pixel_x = value; }
-        public static decimal Cam_Org_Pixel_Y { get => cam_org_pixel_y; set => cam_org_pixel_y = value; }        
-        public static decimal Cam_Org_X { get => cam_org_x; set => cam_org_x = value; }
-        public static decimal Cam_Org_Y { get => cam_org_y; set => cam_org_y = value; }
-        public static decimal Rtc_Org_X { get => rtc_org_x; set => rtc_org_x = value; }
-        public static decimal Rtc_Org_Y { get => rtc_org_y; set => rtc_org_y = value; }
-        public static decimal Cam_Rtc_X { get => cam_rtc_x; set => cam_rtc_x = value; }
-        public static decimal Cam_Rtc_Y { get => cam_rtc_y; set => cam_rtc_y = value; }
-        public static decimal Delta_X { get => delta_x; set => delta_x = value; }
-        public static decimal Delta_Y { get => delta_y; set => delta_y = value; }
-        public static decimal Pic_Center_X { get => pic_center_x; set => pic_center_x = value; }
-        public static decimal Pic_Center_Y { get => pic_center_y; set => pic_center_y = value; }
+        public static Vector Cam_Org_Pixel { get => cam_org_pixel; set => cam_org_pixel = value; }     
+        public static Vector Cam_Org { get => cam_org; set => cam_org = value; }
+        public static Vector Rtc_Org { get => rtc_org; set => rtc_org = value; }
+        public static Vector Cam_Rtc { get => cam_rtc; set => cam_rtc = value; }
+        public static Vector Delta { get => delta; set => delta = value; }
+        public static Vector Pic_Center { get => pic_center; set => pic_center = value; }
         public static UInt32 Reset_Completely { get => reset_completely; set => reset_completely = value; }
         public static UInt32 Default_Card { get => default_card; set => default_card = value; }
         public static UInt32 Laser_Mode { get => laser_mode; set => laser_mode = value; }
@@ -283,34 +267,26 @@ namespace Para_List
         private decimal calibration_cell;//标定板间隔尺寸 mm 
         private Int16 calibration_row, calibration_col;//标定板的点位calibration横纵数 row-行-x  col-列-y
         private Int16 affinity_row, affinity_col;//仿射变换的横纵数 row-行-x  col-列-y
-        
+
 
         //加工坐标系
-        private decimal work_x;//加工坐标系X坐标
-        private decimal work_y;//加工坐标系Y坐标
-        //刀具绝对坐标 激光光束相对于整个平台绝对坐标 读取振镜的XY坐标，进行换算，得到laser_x,laser_y
-        private decimal laser_x;//刀具绝对坐标X坐标
-        private decimal laser_y;//刀具绝对坐标Y坐标 
+        private Vector work;//加工坐标系
+        //刀具绝对坐标 激光光束相对于整个平台绝对坐标
+        private Vector laser;//刀具绝对坐标X坐标 Vector mark1 = new Vector(0, 0);
         //相机单像素对应的实际比例
-        private decimal cam_reference = 0.0m;
+        private decimal cam_reference;
         //相机中心与坐标系原点对正时，像素偏差值，每次开机时矫正（待确定）
-        private decimal cam_org_pixel_x = 0.0m;
-        private decimal cam_org_pixel_y = 0.0m;
+        private Vector cam_org_pixel;
         //Camera中心 相对于 直角坐标系原点 相对间距
-        private decimal cam_org_x;
-        private decimal cam_org_y;
+        private Vector cam_org;
         //振镜激光原点  相对于 直角坐标系原点 相对间距
-        private decimal rtc_org_x;
-        private decimal rtc_org_y;
+        private Vector rtc_org;
         //Camera中心 相对于 振镜激光原点   相对间距
-        private decimal cam_rtc_x;
-        private decimal cam_rtc_y;
+        private Vector cam_rtc;
         //偏差补偿值  Dxf中图形 与实际工件摆放的 偏差值，每次加工前进行处理调用获取该值
-        private decimal delta_x;
-        private decimal delta_y;
+        private Vector delta;
         //定义图像中心点
-        private decimal pic_center_x;
-        private decimal pic_center_y;
+        private Vector pic_center;
 
         //振镜参数
         private UInt32 reset_completely; //复位范围
@@ -396,23 +372,15 @@ namespace Para_List
         public Int16 Calibration_Row { get => calibration_row; set => calibration_row = value; }
         public Int16 Affinity_Col { get => affinity_col; set => affinity_col = value; }
         public Int16 Affinity_Row { get => affinity_row; set => affinity_row = value; }
-        public decimal Work_X { get => work_x; set => work_x = value; }
-        public decimal Work_Y { get => work_y; set => work_y = value; }
-        public decimal Laser_X { get => laser_x; set => laser_x = value; }
-        public decimal Laser_Y { get => laser_y; set => laser_y = value; }
+        public Vector Work { get => work; set => work = value; }
+        public Vector Laser { get => laser; set => laser = value; }
         public decimal Cam_Reference { get => cam_reference; set => cam_reference = value; }
-        public decimal Cam_Org_Pixel_X { get => cam_org_pixel_x; set => cam_org_pixel_x = value; }
-        public decimal Cam_Org_Pixel_Y { get => cam_org_pixel_y; set => cam_org_pixel_y = value; }
-        public decimal Cam_Org_X { get => cam_org_x; set => cam_org_x = value; }
-        public decimal Cam_Org_Y { get => cam_org_y; set => cam_org_y = value; }
-        public decimal Rtc_Org_X { get => rtc_org_x; set => rtc_org_x = value; }
-        public decimal Rtc_Org_Y { get => rtc_org_y; set => rtc_org_y = value; }
-        public decimal Cam_Rtc_X { get => cam_rtc_x; set => cam_rtc_x = value; }
-        public decimal Cam_Rtc_Y { get => cam_rtc_y; set => cam_rtc_y = value; }
-        public decimal Delta_X { get => delta_x; set => delta_x = value; }
-        public decimal Delta_Y { get => delta_y; set => delta_y = value; }
-        public decimal Pic_Center_X { get => pic_center_x; set => pic_center_x = value; }
-        public decimal Pic_Center_Y { get => pic_center_y; set => pic_center_y = value; }
+        public Vector Cam_Org_Pixel { get => cam_org_pixel; set => cam_org_pixel = value; }
+        public Vector Cam_Org { get => cam_org; set => cam_org = value; }
+        public Vector Rtc_Org { get => rtc_org; set => rtc_org = value; }
+        public Vector Cam_Rtc { get => cam_rtc; set => cam_rtc = value; }
+        public Vector Delta { get => delta; set => delta = value; }
+        public Vector Pic_Center { get => pic_center; set => pic_center = value; }
         public UInt32 Reset_Completely { get => reset_completely; set => reset_completely = value; }
         public UInt32 Default_Card { get => default_card; set => default_card = value; }
         public UInt32 Laser_Mode { get => laser_mode; set => laser_mode = value; }
@@ -501,23 +469,15 @@ namespace Para_List
                 Calibration_Row = Para_List.Parameter.Calibration_Row,
                 Affinity_Col = Para_List.Parameter.Affinity_Col,
                 Affinity_Row = Para_List.Parameter.Affinity_Row,
-                Work_X = Para_List.Parameter.Work_X,
-                Work_Y = Para_List.Parameter.Work_Y,
-                Laser_X = Para_List.Parameter.Laser_X,
-                Laser_Y = Para_List.Parameter.Laser_Y,
+                Work = Para_List.Parameter.Work,
+                Laser = Para_List.Parameter.Laser,
                 Cam_Reference = Para_List.Parameter.Cam_Reference,
-                Cam_Org_Pixel_X = Para_List.Parameter.Cam_Org_Pixel_X,
-                Cam_Org_Pixel_Y = Para_List.Parameter.Cam_Org_Pixel_Y,
-                Cam_Org_X = Para_List.Parameter.Cam_Org_X,
-                Cam_Org_Y = Para_List.Parameter.Cam_Org_Y,
-                Rtc_Org_X = Para_List.Parameter.Rtc_Org_X,
-                Rtc_Org_Y = Para_List.Parameter.Rtc_Org_Y,
-                Cam_Rtc_X = Para_List.Parameter.Cam_Rtc_X,
-                Cam_Rtc_Y = Para_List.Parameter.Cam_Rtc_Y,
-                Delta_X = Para_List.Parameter.Delta_X,
-                Delta_Y = Para_List.Parameter.Delta_Y,
-                Pic_Center_X = Para_List.Parameter.Pic_Center_X,
-                Pic_Center_Y = Para_List.Parameter.Pic_Center_Y,
+                Cam_Org_Pixel = Para_List.Parameter.Cam_Org_Pixel,
+                Cam_Org = Para_List.Parameter.Cam_Org,
+                Rtc_Org = Para_List.Parameter.Rtc_Org,
+                Cam_Rtc = Para_List.Parameter.Cam_Rtc,
+                Delta = Para_List.Parameter.Delta,
+                Pic_Center = Para_List.Parameter.Pic_Center,
                 Reset_Completely = Para_List.Parameter.Reset_Completely,
                 Default_Card = Para_List.Parameter.Default_Card,
                 Laser_Mode = Para_List.Parameter.Laser_Mode,
@@ -628,23 +588,15 @@ namespace Para_List
                     Para_List.Parameter.Calibration_Row = parameter.Calibration_Row;
                     Para_List.Parameter.Affinity_Col = parameter.Affinity_Col;
                     Para_List.Parameter.Affinity_Row = parameter.Affinity_Row;
-                    Para_List.Parameter.Work_X = parameter.Work_X;
-                    Para_List.Parameter.Work_Y = parameter.Work_Y;
-                    Para_List.Parameter.Laser_X = parameter.Laser_X;
-                    Para_List.Parameter.Laser_Y = parameter.Laser_Y;
+                    Para_List.Parameter.Work = parameter.Work;
+                    Para_List.Parameter.Laser = parameter.Laser;
                     Para_List.Parameter.Cam_Reference = parameter.Cam_Reference;
-                    Para_List.Parameter.Cam_Org_Pixel_X = parameter.Cam_Org_Pixel_X;
-                    Para_List.Parameter.Cam_Org_Pixel_Y = parameter.Cam_Org_Pixel_Y;
-                    Para_List.Parameter.Cam_Org_X = parameter.Cam_Org_X;
-                    Para_List.Parameter.Cam_Org_Y = parameter.Cam_Org_Y;
-                    Para_List.Parameter.Rtc_Org_X = parameter.Rtc_Org_X;
-                    Para_List.Parameter.Rtc_Org_Y = parameter.Rtc_Org_Y;
-                    Para_List.Parameter.Cam_Rtc_X = parameter.Cam_Rtc_X;
-                    Para_List.Parameter.Cam_Rtc_Y = parameter.Cam_Rtc_Y;
-                    Para_List.Parameter.Delta_X = parameter.Delta_X;
-                    Para_List.Parameter.Delta_Y = parameter.Delta_Y;
-                    Para_List.Parameter.Pic_Center_X = parameter.Pic_Center_X;
-                    Para_List.Parameter.Pic_Center_Y = parameter.Pic_Center_Y;
+                    Para_List.Parameter.Cam_Org_Pixel = parameter.Cam_Org_Pixel;
+                    Para_List.Parameter.Cam_Org = parameter.Cam_Org;
+                    Para_List.Parameter.Rtc_Org = parameter.Rtc_Org;
+                    Para_List.Parameter.Cam_Rtc = parameter.Cam_Rtc;
+                    Para_List.Parameter.Delta = parameter.Delta;
+                    Para_List.Parameter.Pic_Center = parameter.Pic_Center;
                     Para_List.Parameter.Reset_Completely = parameter.Reset_Completely;
                     Para_List.Parameter.Default_Card = parameter.Default_Card;
                     Para_List.Parameter.Laser_Mode = parameter.Laser_Mode;

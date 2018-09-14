@@ -102,8 +102,8 @@ namespace Laser_Build_1._0
 
             //初始数据刷新
             //工件坐标系偏移
-            textBox4.Text = Convert.ToString(Para_List.Parameter.Work_X);
-            textBox3.Text = Convert.ToString(Para_List.Parameter.Work_Y);
+            textBox4.Text = Convert.ToString(Para_List.Parameter.Work.X);
+            textBox3.Text = Convert.ToString(Para_List.Parameter.Work.Y);
             //直线插补
             textBox2.Text = Convert.ToString(Para_List.Parameter.Line_synVel);
             textBox1.Text = Convert.ToString(Para_List.Parameter.Line_synAcc);
@@ -114,15 +114,15 @@ namespace Laser_Build_1._0
             textBox7.Text = Convert.ToString(Para_List.Parameter.Arc_Compensation_A);
 
             //刀具绝对坐标
-            textBox9.Text = Convert.ToString(Para_List.Parameter.Laser_X);
-            textBox8.Text = Convert.ToString(Para_List.Parameter.Laser_Y);
+            textBox9.Text = Convert.ToString(Para_List.Parameter.Laser.X);
+            textBox8.Text = Convert.ToString(Para_List.Parameter.Laser.Y);
 
             //坐标运动平滑系数
             textBox12.Text = Convert.ToString(Para_List.Parameter.Syn_EvenTime);
 
             //偏移量
-            textBox11.Text = Convert.ToString(Para_List.Parameter.Delta_X);
-            textBox10.Text = Convert.ToString(Para_List.Parameter.Delta_Y);
+            textBox11.Text = Convert.ToString(Para_List.Parameter.Delta.X);
+            textBox10.Text = Convert.ToString(Para_List.Parameter.Delta.Y);
 
             //插补终止速度
             textBox14.Text = Convert.ToString(Para_List.Parameter.Line_endVel); 
@@ -136,8 +136,8 @@ namespace Laser_Build_1._0
             textBox16.Text = Convert.ToString(Para_List.Parameter.Calibration_Y_Len);
 
             //相机与振镜 中心差值
-            textBox19.Text = Convert.ToString(Para_List.Parameter.Cam_Rtc_X);
-            textBox18.Text = Convert.ToString(Para_List.Parameter.Cam_Rtc_Y);
+            textBox19.Text = Convert.ToString(Para_List.Parameter.Cam_Rtc.X);
+            textBox18.Text = Convert.ToString(Para_List.Parameter.Cam_Rtc.Y);
 
             //RTCjiaozhun
             textBox21.Text = Convert.ToString(Para_List.Parameter.Rtc_Cal_Radius);
@@ -299,16 +299,7 @@ namespace Laser_Build_1._0
             foreach (var o in dxf.Layers)
             {
                 richTextBox1.AppendText("图层Name: " + o.Name + "\r\n");//图层名称       
-            }
-
-            //计算图像中心点
-            Vector centerpoint = Seek_Center_Point(dxf);
-            //工具坐标赋值
-            //Pic_Center_x = centerpoint.X;
-            //Pic_Center_y = centerpoint.Y;
-            Pic_Center_x = 0;
-            Pic_Center_y = 0;
-            richTextBox1.AppendText("图像中心点X坐标: " + Pic_Center_y + "   图像中心点Y坐标: " + Pic_Center_y + "\r\n");
+            };            
 
             //建立临时数据存储组
             List<Entity_Data> Arc_Line_Entity_Data = new List<Entity_Data>();//圆弧直线数据
@@ -1094,8 +1085,8 @@ namespace Laser_Build_1._0
                 //Temp_interpolation_Data.End_y =-( (In_Data[i].End_y - Pic_Center_y) * Cos_Arc + (In_Data[i].End_x - Pic_Center_x) * Sin_Arc + Pic_Center_x + Para_List.Parameter.Delta_Y);//相对于Pic_Center_y的坐标-
                 //Temp_interpolation_Data.Center_Start_x =- (In_Data[i].Center_Start_x * Cos_Arc - In_Data[i].Center_Start_y * Sin_Arc);
                 //Temp_interpolation_Data.Center_Start_y =- (In_Data[i].Center_Start_y * Cos_Arc + In_Data[i].Center_Start_x * Sin_Arc);
-                Temp_interpolation_Data.End_x = ((In_Data[i].End_x - Pic_Center_x) * Cos_Arc - (In_Data[i].End_y - Pic_Center_y) * Sin_Arc + Pic_Center_x + Para_List.Parameter.Delta_X);//相对于Pic_Center_x的坐标-
-                Temp_interpolation_Data.End_y = ((In_Data[i].End_y - Pic_Center_y) * Cos_Arc + (In_Data[i].End_x - Pic_Center_x) * Sin_Arc + Pic_Center_x + Para_List.Parameter.Delta_Y);//相对于Pic_Center_y的坐标-
+                Temp_interpolation_Data.End_x = ((In_Data[i].End_x - Pic_Center_x) * Cos_Arc - (In_Data[i].End_y - Pic_Center_y) * Sin_Arc + Pic_Center_x + Para_List.Parameter.Delta.X);//相对于Pic_Center_x的坐标-
+                Temp_interpolation_Data.End_y = ((In_Data[i].End_y - Pic_Center_y) * Cos_Arc + (In_Data[i].End_x - Pic_Center_x) * Sin_Arc + Pic_Center_x + Para_List.Parameter.Delta.Y);//相对于Pic_Center_y的坐标-
                 Temp_interpolation_Data.Center_Start_x = (In_Data[i].Center_Start_x * Cos_Arc - In_Data[i].Center_Start_y * Sin_Arc);
                 Temp_interpolation_Data.Center_Start_y = (In_Data[i].Center_Start_y * Cos_Arc + In_Data[i].Center_Start_x * Sin_Arc);
 
@@ -1126,8 +1117,8 @@ namespace Laser_Build_1._0
                     //Temp_interpolation_Data.End_y = -((In_Data[i][j].End_y - Pic_Center_y) * Cos_Arc + (In_Data[i][j].End_x - Pic_Center_x) * Sin_Arc + Pic_Center_x + Para_List.Parameter.Delta_Y);//相对于Pic_Center_y的坐标-
                     //Temp_interpolation_Data.Center_Start_x = -(In_Data[i][j].Center_Start_x * Cos_Arc - In_Data[i][j].Center_Start_y * Sin_Arc);
                     //Temp_interpolation_Data.Center_Start_y = -(In_Data[i][j].Center_Start_y * Cos_Arc + In_Data[i][j].Center_Start_x * Sin_Arc);
-                    Temp_interpolation_Data.End_x = ((In_Data[i][j].End_x - Pic_Center_x) * Cos_Arc - (In_Data[i][j].End_y - Pic_Center_y) * Sin_Arc + Pic_Center_x + Para_List.Parameter.Delta_X);//相对于Pic_Center_x的坐标-
-                    Temp_interpolation_Data.End_y = ((In_Data[i][j].End_y - Pic_Center_y) * Cos_Arc + (In_Data[i][j].End_x - Pic_Center_x) * Sin_Arc + Pic_Center_x + Para_List.Parameter.Delta_Y);//相对于Pic_Center_y的坐标-
+                    Temp_interpolation_Data.End_x = ((In_Data[i][j].End_x - Pic_Center_x) * Cos_Arc - (In_Data[i][j].End_y - Pic_Center_y) * Sin_Arc + Pic_Center_x + Para_List.Parameter.Delta.X);//相对于Pic_Center_x的坐标-
+                    Temp_interpolation_Data.End_y = ((In_Data[i][j].End_y - Pic_Center_y) * Cos_Arc + (In_Data[i][j].End_x - Pic_Center_x) * Sin_Arc + Pic_Center_x + Para_List.Parameter.Delta.Y);//相对于Pic_Center_y的坐标-
                     Temp_interpolation_Data.Center_Start_x = (In_Data[i][j].Center_Start_x * Cos_Arc - In_Data[i][j].Center_Start_y * Sin_Arc);
                     Temp_interpolation_Data.Center_Start_y = (In_Data[i][j].Center_Start_y * Cos_Arc + In_Data[i][j].Center_Start_x * Sin_Arc);
                     Temp_interpolation_List_Data.Add(Temp_interpolation_Data);
@@ -1328,7 +1319,7 @@ namespace Laser_Build_1._0
         //建立直角坐标系
         private void button2_Click(object sender, EventArgs e)
         {
-            interpolation.Coordination(Para_List.Parameter.Work_X, Para_List.Parameter.Work_Y);
+            interpolation.Coordination(Para_List.Parameter.Work.X, Para_List.Parameter.Work.Y);
         }
 
         //生成加工数据
@@ -1355,7 +1346,7 @@ namespace Laser_Build_1._0
         }
         //工件坐标系偏移X
         private void textBox4_TextChanged(object sender, EventArgs e)
-        {
+        {            
             this.Invoke((EventHandler)delegate
             {
                 if (!decimal.TryParse(textBox4.Text, out decimal tmp))
@@ -1363,7 +1354,7 @@ namespace Laser_Build_1._0
                     MessageBox.Show("请正确输入数字");
                     return;
                 }
-                Para_List.Parameter.Work_X = tmp;
+                Para_List.Parameter.Work =new Vector(tmp, Para_List.Parameter.Work.Y);
             });
         }
         //工件坐标系偏移Y
@@ -1376,7 +1367,7 @@ namespace Laser_Build_1._0
                     MessageBox.Show("请正确输入数字");
                     return;
                 }
-                Para_List.Parameter.Work_Y = tmp;
+                Para_List.Parameter.Work = new Vector(Para_List.Parameter.Work.X,tmp);
             });
         }                
         //刀具绝对坐标X
@@ -1389,7 +1380,7 @@ namespace Laser_Build_1._0
                     MessageBox.Show("请正确输入数字");
                     return;
                 }
-                Para_List.Parameter.Laser_X = tmp;
+                Para_List.Parameter.Laser =new Vector(tmp, Para_List.Parameter.Laser.Y);
             });
         }
         //刀具绝对坐标Y
@@ -1402,7 +1393,7 @@ namespace Laser_Build_1._0
                     MessageBox.Show("请正确输入数字");
                     return;
                 }
-                Para_List.Parameter.Laser_Y = tmp;
+                Para_List.Parameter.Laser = new Vector( Para_List.Parameter.Laser.X, tmp);
             });
         }
         //直线插补速度
@@ -1467,7 +1458,7 @@ namespace Laser_Build_1._0
                     MessageBox.Show("请正确输入数字");
                     return;
                 }
-                Para_List.Parameter.Delta_X = tmp;
+                Para_List.Parameter.Delta =new Vector(tmp, Para_List.Parameter.Delta.Y);
             });
         }
         //相对偏移△Y
@@ -1480,7 +1471,7 @@ namespace Laser_Build_1._0
                     MessageBox.Show("请正确输入数字");
                     return;
                 }
-                Para_List.Parameter.Delta_Y = tmp;
+                Para_List.Parameter.Delta=new Vector(Para_List.Parameter.Delta.X,tmp);
             });
         }
         //角度补偿值
@@ -1681,22 +1672,22 @@ namespace Laser_Build_1._0
         //相机校准
         private void button16_Click(object sender, EventArgs e)
         {
-            Generate_Affinity_Matrix.Exit_Flag = false;
+            Calibration.Exit_Flag = false;
             Thread Correct_Data_thread = new Thread(Correct_Data);
             Correct_Data_thread.Start();
-            Generate_Affinity_Matrix.Exit_Flag = false;
+            Calibration.Exit_Flag = false;
         }
 
         private void Correct_Data()
         {
-            Generate_Affinity_Matrix generate_Affinity_Matrix = new Generate_Affinity_Matrix();
+            Calibration generate_Affinity_Matrix = new Calibration();
             generate_Affinity_Matrix.Get_Datas();
 
         }
         //相机校准退出
         private void button17_Click(object sender, EventArgs e)
         {
-            Generate_Affinity_Matrix.Exit_Flag = true;
+            Calibration.Exit_Flag = true;
         }
         //整合加工启动
         private void button20_Click(object sender, EventArgs e)
@@ -1776,7 +1767,7 @@ namespace Laser_Build_1._0
                     MessageBox.Show("请正确输入数字");
                     return;
                 }
-                Para_List.Parameter.Cam_Rtc_X = tmp;
+                Para_List.Parameter.Cam_Rtc =new Vector(tmp, Para_List.Parameter.Cam_Rtc.Y);
             });
         }
         //相机与振镜 中心差值Y/mm
@@ -1789,7 +1780,7 @@ namespace Laser_Build_1._0
                     MessageBox.Show("请正确输入数字");
                     return;
                 }
-                Para_List.Parameter.Cam_Rtc_Y = tmp;
+                Para_List.Parameter.Cam_Rtc =new Vector(Para_List.Parameter.Cam_Rtc.X,tmp);
             });
         }
         
@@ -1835,8 +1826,20 @@ namespace Laser_Build_1._0
             //将数据保存为Csv 方便Matlab处理
             //Read_Data.Save_To_Csv(Read_Data.Reserialize_Correct_Data("Correct_Data.xml"), "Data.csv");
 
+            //获取DxfMark点
+
+            //dxf中Mark点集合（三个：左下 左上 右上）
+            Mark_Calculate(Mark_Circle_Entity_Data);
+            //点位结果输出对比
+            for (int j = 0; j < Mark_Circle_Entity_Data.Count; j++)
+            {
+                richTextBox1.AppendText("Mark_Circle 序号：" + j + "  X：" + Mark_Circle_Entity_Data[j].Center_x + "  Y：" + Mark_Circle_Entity_Data[j].Center_y + "\r\n");
+            }
+            richTextBox1.AppendText("Mark_Dxf1 X：" + Para_List.Parameter.Mark_Dxf1.X + "  Y：" + Para_List.Parameter.Mark_Dxf1.Y + "\r\n");
+            richTextBox1.AppendText("Mark_Dxf2 X：" + Para_List.Parameter.Mark_Dxf2.X + "  Y：" + Para_List.Parameter.Mark_Dxf2.Y + "\r\n");
+            richTextBox1.AppendText("Mark_Dxf3 X：" + Para_List.Parameter.Mark_Dxf3.X + "  Y：" + Para_List.Parameter.Mark_Dxf3.Y + "\r\n");
             //搜寻Mark
-            Generate_Affinity_Matrix Cal_Mark = new Generate_Affinity_Matrix();
+            Calibration Cal_Mark = new Calibration();
             Para_List.Parameter.Trans_Affinity = Cal_Mark.Cal_Affinity();
 
         }
@@ -1848,7 +1851,7 @@ namespace Laser_Build_1._0
             //RTC切割距离矫正数据
             //Rtc_List_Data =get_rtc.Generate_Calibration_Data(Para_List.Parameter.Rtc_Cal_Radius, Para_List.Parameter.Rtc_Cal_Interval);
             //RTC与ORG 距离数据
-            Rtc_List_Data =get_rtc.Generate_Org_Rtc_Data(Para_List.Parameter.Rtc_Cal_Radius, Para_List.Parameter.Rtc_Cal_Interval);
+            //Rtc_List_Data =get_rtc.Generate_Org_Rtc_Data(Para_List.Parameter.Rtc_Cal_Radius, Para_List.Parameter.Rtc_Cal_Interval);
             for (int i = 0; i < Rtc_List_Data.Count; i++)
             {
                 for (int j = 0; j < Rtc_List_Data[i].Count; j++)
@@ -1888,6 +1891,39 @@ namespace Laser_Build_1._0
         {
             Vector Tem =new Vector(interpolation.Get_Coordinate());
             MessageBox.Show("X坐标："+ Convert.ToString(Tem.X) + "  Y坐标：" + Convert.ToString(Tem.Y));
+        }
+        decimal Cor_x, Cor_y;
+        //X坐标
+        private void textBox23_TextChanged(object sender, EventArgs e)
+        {
+            this.Invoke((EventHandler)delegate
+            {
+                if (!decimal.TryParse(textBox23.Text, out decimal tmp))
+                {
+                    MessageBox.Show("请正确输入数字");
+                    return;
+                }
+                Cor_x = tmp;
+            });
+        }
+        //Y坐标
+        private void textBox22_TextChanged(object sender, EventArgs e)
+        {
+            this.Invoke((EventHandler)delegate
+            {
+                if (!decimal.TryParse(textBox22.Text, out decimal tmp))
+                {
+                    MessageBox.Show("请正确输入数字");
+                    return;
+                }
+                Cor_y = tmp;
+            });
+        }
+
+        //定位坐标点
+        private void button21_Click(object sender, EventArgs e)
+        {
+            interpolation.Gts_Ready(Cor_x,Cor_y);
         }
 
         //加工停止 
