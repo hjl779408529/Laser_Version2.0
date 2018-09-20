@@ -876,9 +876,7 @@ namespace Laser_Build_1._0
                 List<Affinity_Matrix> list = (List<Affinity_Matrix>)bf.Deserialize(fs);
                 return list;
             }
-        }
-
-        
+        }        
 
         //8.28
         //dxf-仿射变换数据序列化操作
@@ -906,7 +904,5 @@ namespace Laser_Build_1._0
                 return list;
             }
         }
-
-
     }
 }

@@ -117,6 +117,7 @@ public struct Interpolation_Data
     public decimal Start_y;//插补起点Y坐标 保留参数
     public decimal End_x;//插补终点X坐标
     public decimal End_y;//插补终点Y坐标
+    public Vector Trail_Center;//封闭图形中心坐标X坐标 
     public decimal Gts_x;//Gts定位置激光加工中心X坐标
     public decimal Gts_y;//Gts定位置激光加工中心Y坐标
     public decimal Rtc_x;//Rtc定位 激光加工起点X坐标
@@ -138,6 +139,7 @@ public struct Interpolation_Data
         this.Start_y = Ini.Start_y;//插补起点Y坐标 保留参数
         this.End_x = Ini.End_x;//插补终点X坐标
         this.End_y = Ini.End_y;//插补终点Y坐标
+        this.Trail_Center=new Vector(Ini.Trail_Center);//封闭图形中心坐标X坐标 
         this.Gts_x = Ini.Gts_x;//Gts定位置激光加工中心X坐标
         this.Gts_y = Ini.Gts_y;//Gts定位置激光加工中心Y坐标
         this.Rtc_x = Ini.Rtc_x;//Rtc定位 激光加工起点X坐标
@@ -225,6 +227,57 @@ public struct Vector
     {
         this.x = 0;
         this.y = 0;
+    }
+    public decimal Length()
+    {
+        return (decimal)Math.Sqrt((double)(this.x * this.x + this.y * this.y));
+    }
+
+}
+//Max 和 Min 判断
+[Serializable]
+public struct Extreme
+{
+    private decimal x_max;
+    private decimal x_min;
+    private decimal y_max;
+    private decimal y_min;
+    private decimal delta_x;
+    private decimal delta_y;
+
+    public decimal X_Max { get => x_max; set => x_max = value; }
+    public decimal X_Min { get => x_min; set => x_min = value; }
+    public decimal Y_Max { get => y_max; set => y_max = value; }
+    public decimal Y_Min { get => y_min; set => y_min = value; }
+    public decimal Delta_X { get => delta_x; set => delta_x = value; }
+    public decimal Delta_Y { get => delta_y; set => delta_y = value; } 
+
+    public Extreme(decimal x_max, decimal x_min, decimal y_max, decimal y_min, decimal delta_x, decimal delta_y)
+    {
+        this.x_max = x_max;
+        this.x_min = x_min;
+        this.y_max = y_max;
+        this.y_min = y_min;
+        this.delta_x = delta_x;
+        this.delta_y = delta_y;
+    }
+    public Extreme(Extreme Ini)
+    {
+        this.x_max = Ini.x_max;
+        this.x_min = Ini.x_min;
+        this.y_max = Ini.y_max;
+        this.y_min = Ini.y_min;
+        this.delta_x = Ini.delta_x;
+        this.delta_y = Ini.delta_y;
+    }
+    public void Empt_min()
+    {
+        this.x_max = 0;
+        this.x_min = 0;
+        this.y_max = 0;
+        this.y_min = 0;
+        this.delta_x = 0;
+        this.delta_y = 0;
     }
 }
 //仿射变换

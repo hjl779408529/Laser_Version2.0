@@ -115,7 +115,7 @@ namespace Para_List
         private static UInt32 list1_size = 4000;//  list1 容量
         private static UInt32 list2_size = 4000;//  list2 容量
         //定义Home_XY
-        private static Vector rtc_home = new Vector(100, 100);
+        private static Vector rtc_home = new Vector(0, 0);
 
         //定义串口号
         private static Int32 com_no = 0;
@@ -133,7 +133,12 @@ namespace Para_List
         private static Vector mark_dxf2 = new Vector(0, 0);
         private static Vector mark_dxf3 = new Vector(0, 0);
         //整体的仿射变换参数
-        private static Affinity_Matrix trans_affinity = new Affinity_Matrix();  
+        private static Affinity_Matrix trans_affinity = new Affinity_Matrix();
+        //刀具补偿
+        private static decimal cutter_radius = 0.5m; //刀具半径
+        private static Int16 cutter_type = 0; //刀具补偿类型 0-不补偿、1-钻孔、2-落料
+        //振镜加工范围约束
+        private static Vector rtc_limit = new Vector(50,50); 
 
         public static decimal Gts_Vel_reference { get => gts_vel_reference; set => gts_vel_reference = value; }
         public static decimal Gts_Acc_reference { get => gts_acc_reference; set => gts_acc_reference = value; }
@@ -218,6 +223,9 @@ namespace Para_List
         public static Vector Mark_Dxf2 { get => mark_dxf2; set => mark_dxf2 = value; }
         public static Vector Mark_Dxf3 { get => mark_dxf3; set => mark_dxf3 = value; }
         public static Affinity_Matrix Trans_Affinity { get => trans_affinity; set => trans_affinity = value; }
+        public static decimal Cutter_Radius { get => cutter_radius; set => cutter_radius = value; }
+        public static Int16 Cutter_Type { get => cutter_type; set => cutter_type = value; }        
+        public static Vector Rtc_Limit { get => rtc_limit; set => rtc_limit = value; }
         //公开构造函数
         public Parameter() { }
     }
@@ -337,6 +345,10 @@ namespace Para_List
         private Vector mark_dxf3 = new Vector(0, 0);
         //整体的仿射变换参数
         private Affinity_Matrix trans_affinity;
+        //刀具补偿
+        private decimal cutter_radius = 0.5m; //刀具半径
+        private Int16 cutter_type = 0; //刀具补偿类型 0-不补偿、1-钻孔、2-落料
+        private Vector rtc_limit;
 
         public decimal Gts_Vel_reference { get => gts_vel_reference; set => gts_vel_reference = value; }
         public decimal Gts_Acc_reference { get => gts_acc_reference; set => gts_acc_reference = value; }
@@ -421,6 +433,9 @@ namespace Para_List
         public Vector Mark_Dxf2 { get => mark_dxf2; set => mark_dxf2 = value; }
         public Vector Mark_Dxf3 { get => mark_dxf3; set => mark_dxf3 = value; }
         public Affinity_Matrix Trans_Affinity { get => trans_affinity; set => trans_affinity = value; }
+        public decimal Cutter_Radius { get => cutter_radius; set => cutter_radius = value; }
+        public Int16 Cutter_Type { get => cutter_type; set => cutter_type = value; }
+        public Vector Rtc_Limit { get => rtc_limit; set => rtc_limit = value; }
         //构造函数
         public Parameter_RW() { }
     } 
@@ -517,7 +532,10 @@ namespace Para_List
                 Mark_Dxf1 = Para_List.Parameter.Mark_Dxf1,
                 Mark_Dxf2 = Para_List.Parameter.Mark_Dxf2,
                 Mark_Dxf3 = Para_List.Parameter.Mark_Dxf3,
-                Trans_Affinity = Para_List.Parameter.Trans_Affinity
+                Trans_Affinity = Para_List.Parameter.Trans_Affinity,
+                Cutter_Radius = Para_List.Parameter.Cutter_Radius,
+                Cutter_Type = Para_List.Parameter.Cutter_Type,
+                Rtc_Limit = Para_List.Parameter.Rtc_Limit
             };
 
             //二进制 序列化
@@ -637,6 +655,9 @@ namespace Para_List
                     Para_List.Parameter.Mark_Dxf2 = parameter.Mark_Dxf2;
                     Para_List.Parameter.Mark_Dxf3 = parameter.Mark_Dxf3;
                     Para_List.Parameter.Trans_Affinity = parameter.Trans_Affinity;
+                    Para_List.Parameter.Cutter_Radius = parameter.Cutter_Radius;
+                    Para_List.Parameter.Cutter_Type = parameter.Cutter_Type;
+                    Para_List.Parameter.Rtc_Limit = parameter.Rtc_Limit;
                 }
             }
         }

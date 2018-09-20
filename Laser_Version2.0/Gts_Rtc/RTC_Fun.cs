@@ -40,7 +40,6 @@ namespace RTC_Fun
             {
                 Log.Commandhandler("加载D2_1to1.ct5出错", Rtc_Return);
             }
-
             //加载Program_File文件
             Rtc_Return = RTC5Wrap.load_program_file(null);
             if (Rtc_Return != 0u)
@@ -51,7 +50,7 @@ namespace RTC_Fun
             //assigns the previously loaded correction tables #1 or #2 to the scan head control ports
             //and activates image field correction.
             //  table #1 at primary connector (default)
-            RTC5Wrap.select_cor_table(1, 0);
+            RTC5Wrap.select_cor_table(1, 1);
 
             //stop_execution might have created an RTC5_TIMEOUT error
             //复位Rtc
@@ -90,7 +89,7 @@ namespace RTC_Fun
             RTC5Wrap.set_firstpulse_killer(Convert.ToUInt32(Para_List.Parameter.First_Pulse_Killer * Para_List.Parameter.Rtc_Period_Reference));
 
             //activates the home jump mode (for the X and Y axes) and defines the home position
-            RTC5Wrap.home_position(Convert.ToInt32(Para_List.Parameter.Rtc_Home.X), Convert.ToInt32(Para_List.Parameter.Rtc_Home.Y));
+            RTC5Wrap.home_position(Convert.ToInt32(Para_List.Parameter.Rtc_Home.Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Para_List.Parameter.Rtc_Home.X * Para_List.Parameter.Rtc_XPos_Reference));
 
             // Turn on the optical pump source and wait for 2 seconds.
             // (The following assumes that signal ANALOG OUT1 of the
