@@ -10,7 +10,7 @@ using System.Windows.Forms;
 using System.Timers;
 using GTS;
 using System.Threading;
-
+using Prompt;
 
 namespace Laser_Build_1._0
 {
@@ -41,8 +41,6 @@ namespace Laser_Build_1._0
 
         //指令返回值
         short Gts_return;
-        //指令返回 日志输出
-        Prompt.Log Gts_Log  = new Prompt.Log();
         private void Menu_5_Axis_Handle_Load(object sender, EventArgs e)
         {
             //启用定时器
@@ -209,13 +207,13 @@ namespace Laser_Build_1._0
             {
                 //输出Alarm清除 ON
                 Gts_return = MC.GT_SetDoBit(11, Axis_No, 0);
-                Gts_Log.Commandhandler("Menu_5_Axis_Handle_Gts_return_GT_SetDoBit", Gts_return);
+                Log.Commandhandler("Menu_5_Axis_Handle_Gts_return_GT_SetDoBit", Gts_return);
             }
             else if (Axis_No == 2)
             {
                 //输出Alarm清除 ON
                 Gts_return = MC.GT_SetDoBit(11, Axis_No, 0);
-                Gts_Log.Commandhandler("Menu_5_Axis_Handle_Gts_return_GT_SetDoBit", Gts_return);
+                Log.Commandhandler("Menu_5_Axis_Handle_Gts_return_GT_SetDoBit", Gts_return);
             }
             
         }
@@ -226,12 +224,12 @@ namespace Laser_Build_1._0
             {
                 //输出Alarm清除 OFF
                 Gts_return = MC.GT_SetDoBit(11, 1, 1);
-                Gts_Log.Commandhandler("Menu_5_Axis_Handle_Gts_return_GT_SetDoBit", Gts_return);
+                Log.Commandhandler("Menu_5_Axis_Handle_Gts_return_GT_SetDoBit", Gts_return);
             }else if (Axis_No == 2)
             {
                 //输出Alarm清除 OFF
                 Gts_return = MC.GT_SetDoBit(11, 2, 1);
-                Gts_Log.Commandhandler("Menu_5_Axis_Handle_Gts_return_GT_SetDoBit", Gts_return);
+                Log.Commandhandler("Menu_5_Axis_Handle_Gts_return_GT_SetDoBit", Gts_return);
             }
         }
         
@@ -519,13 +517,13 @@ namespace Laser_Build_1._0
                 {
                     //伺服使能 OFF
                     Gts_return = MC.GT_AxisOff(Axis_No);
-                    Gts_Log.Commandhandler("Menu_5_Axis_Handle_Gts_return_GT_AxisOff", Gts_return);
+                    Log.Commandhandler("Menu_5_Axis_Handle_Gts_return_GT_AxisOff", Gts_return);
                 }
                 else
                 {
                     //伺服使能 ON
                     Gts_return = MC.GT_AxisOn(Axis_No);
-                    Gts_Log.Commandhandler("Menu_5_Axis_Handle_Gts_return_GT_AxisOn", Gts_return);
+                    Log.Commandhandler("Menu_5_Axis_Handle_Gts_return_GT_AxisOn", Gts_return);
                 }
             }
             else if (Axis_No == 2)
@@ -534,13 +532,13 @@ namespace Laser_Build_1._0
                 {
                     //伺服使能 OFF
                     Gts_return = MC.GT_AxisOff(Axis_No);
-                    Gts_Log.Commandhandler("Menu_5_Axis_Handle_Gts_return_GT_AxisOff", Gts_return);
+                    Log.Commandhandler("Menu_5_Axis_Handle_Gts_return_GT_AxisOff", Gts_return);
                 }
                 else
                 {
                     //伺服使能 ON
                     Gts_return = MC.GT_AxisOn(Axis_No);
-                    Gts_Log.Commandhandler("Menu_5_Axis_Handle_Gts_return_GT_AxisOn", Gts_return);
+                    Log.Commandhandler("Menu_5_Axis_Handle_Gts_return_GT_AxisOn", Gts_return);
                 }
             }
         }
@@ -549,14 +547,14 @@ namespace Laser_Build_1._0
         {
             //清除轴报警状态：驱动器报警、跟随误差越限报警、限位触发报警
             Gts_return = MC.GT_ClrSts(Axis_No, 1);
-            Gts_Log.Commandhandler("Menu_5_Axis_Handle_Gts_return_GT_ClrSts", Gts_return);
+            Log.Commandhandler("Menu_5_Axis_Handle_Gts_return_GT_ClrSts", Gts_return);
         }
 
         private void button7_Click(object sender, EventArgs e)
         {
             //清除轴规划位置、实际位置
             Gts_return = MC.GT_ZeroPos(Axis_No, 1);
-            Gts_Log.Commandhandler("Menu_5_Axis_Handle_Gts_return_GT_ZeroPos", Gts_return);
+            Log.Commandhandler("Menu_5_Axis_Handle_Gts_return_GT_ZeroPos", Gts_return);
         }
     }
 }

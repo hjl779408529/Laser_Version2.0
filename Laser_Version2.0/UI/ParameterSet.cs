@@ -22,6 +22,8 @@ namespace Laser_Version2._0
         Vector Tmp_Mark = new Vector();
         //搜寻Mark
         Calibration Cal_Mark = new Calibration();
+        //触发数据
+        short Intrigue = 1;
         // 像素 毫米 比
         private void Set_txt_valueK_TextChanged(object sender, EventArgs e)
         {
@@ -51,7 +53,9 @@ namespace Laser_Version2._0
             Set_txt_markY2.Text = Para_List.Parameter.Mark2.Y.ToString();
             Set_txt_markX3.Text = Para_List.Parameter.Mark3.X.ToString();
             Set_txt_markY3.Text = Para_List.Parameter.Mark3.Y.ToString();
-            
+            numericUpDown1.Value = Intrigue;
+
+
         }
        
         //Mark1 X坐标
@@ -237,7 +241,22 @@ namespace Laser_Version2._0
         //触发拍照
         private void button5_Click(object sender, EventArgs e)
         {
-            Initialization.Initial.T_Client.Get_Cam_Deviation(2);//触发拍照 
+            Initialization.Initial.T_Client.Get_Cam_Deviation(Intrigue);//触发拍照 
+        }
+
+        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
+        {
+            Intrigue = (short)numericUpDown1.Value;
+        }
+
+        private void Re_Connect_Click(object sender, EventArgs e)
+        {
+            Initialization.Initial.T_Client.TCP_Start();
+        }
+
+        private void Disconnect_Tcp_Click(object sender, EventArgs e)
+        {
+            Initialization.Initial.T_Client.Tcp_Close();
         }
     }
 }

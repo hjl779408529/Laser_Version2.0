@@ -12,9 +12,9 @@ namespace Prompt
     class Log
     {
         // 该函数检测某条GT指令的执行结果，command为指令名称，error为指令执行返回值
-        ILog C_log = LogManager.GetLogger("log");
+        public static ILog C_log = LogManager.GetLogger("log");
         //用于Gts的执行Log记录
-        public void Commandhandler(string command, short error)
+        public static void Commandhandler(string command, short error)
         {
             string Log_Component = command + "--------" + Convert.ToString(error);
             // 如果指令执行返回值为非0，说明指令执行错误，向屏幕输出错误结果
@@ -30,7 +30,7 @@ namespace Prompt
             }*/
         }
         //用于Rtc的执行Log记录
-        public void Commandhandler(string command, uint error)
+        public static void Commandhandler(string command, uint error)
         {
             //执行的判断直接由 函数执行完返回值，直接判断，该Log直接生成日志项目
             string Log_Component = command + "--------" + Convert.ToString(error);
@@ -39,13 +39,13 @@ namespace Prompt
         }
 
         //用于程序的执行Log记录
-        public void Commandhandler(string command)
+        public static void Commandhandler(string command)
         {
             //生成错误日志
             C_log.Error(command);
         }
         //日志信息
-        public void Info(string command)
+        public static void Info(string command)
         {
             //生成日志
             C_log.Info(command);
@@ -97,8 +97,6 @@ namespace Prompt
         public static bool Timer_1s_Flag;
         //定义GTS函数调用返回值
         public static short Gts_Return;
-        //定义日志输出函数
-        Prompt.Log Gts_Log = new Prompt.Log();
 
         public void Refresh_IO_Thread(object sender, ElapsedEventArgs e)
         {
@@ -109,22 +107,22 @@ namespace Prompt
         {
             //读取通用输出的值
             Gts_Return = MC.GT_GetDo(12, out Exo_16bit);
-            Gts_Log.Commandhandler("Refresh--MC.GT_GetDo", Gts_Return);
+            Log.Commandhandler("Refresh--MC.GT_GetDo", Gts_Return);
             //读取通用输入的值
             Gts_Return = MC.GT_GetDi(4, out Exi_16bit);
-            Gts_Log.Commandhandler("Refresh--MC.GT_GetDi", Gts_Return);
+            Log.Commandhandler("Refresh--MC.GT_GetDi", Gts_Return);
             //读取Axis01状态
             Gts_Return = MC.GT_GetSts(1, out Axis01_Sta, 1, out Axis01_Clk);
-            Gts_Log.Commandhandler("Refresh_Axis01--MC.GT_GetSts", Gts_Return);
+            Log.Commandhandler("Refresh_Axis01--MC.GT_GetSts", Gts_Return);
             //读取Axis02状态
             Gts_Return = MC.GT_GetSts(2, out Axis02_Sta, 1, out Axis02_Clk);
-            Gts_Log.Commandhandler("Refresh_Axis02--MC.GT_GetSts", Gts_Return);
+            Log.Commandhandler("Refresh_Axis02--MC.GT_GetSts", Gts_Return);
             //读取Axis_Home_Sta状态
             Gts_Return = MC.GT_GetDi(3, out Axis_Home_Sta);
-            Gts_Log.Commandhandler("Refresh_Axis_Home_Sta--MC.GT_GetDi", Gts_Return);
+            Log.Commandhandler("Refresh_Axis_Home_Sta--MC.GT_GetDi", Gts_Return);
             //读取Axis_Clear_Sta状态
             Gts_Return = MC.GT_GetDo(11, out Axis_Clear_Sta);
-            Gts_Log.Commandhandler("Refresh_Axis_Clear_Sta--MC.GT_GetDo", Gts_Return);
+            Log.Commandhandler("Refresh_Axis_Clear_Sta--MC.GT_GetDo", Gts_Return);
 
             //读取规划位置
             Gts_Return = MC.GT_GetPrfPos(1, out Axis01_prfPos, 1, out Axis01_Clk);

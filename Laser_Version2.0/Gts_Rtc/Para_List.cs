@@ -48,13 +48,19 @@ namespace Para_List
         private static decimal arc_Compensation_A = 0.0m;//坐标误差范围判断  度
         private static decimal arc_Compensation_R = Convert.ToDecimal(Math.PI) * (arc_Compensation_A / 180.0m);//坐标误差范围判断  弧度
 
-        //坐标矫正变换参数
-        private static decimal calibration_x_len = 350.0m;//标定板X尺寸 mm
-        private static decimal calibration_y_len = 350.0m;//标定板Y尺寸 mm
-        private static decimal calibration_cell = 2.5m;//标定板尺寸 mm
-        private static Int16 calibration_row = Convert.ToInt16((calibration_x_len / calibration_cell) + 1), calibration_col = Convert.ToInt16((calibration_y_len / calibration_cell) + 1);//标定板的点位calibration横纵数
-        private static Int16 affinity_row = Convert.ToInt16(calibration_x_len / calibration_cell), affinity_col = Convert.ToInt16(calibration_y_len / calibration_cell);//仿射变换的横纵数 
-
+        //GTS坐标矫正变换参数
+        private static decimal gts_calibration_x_len = 350.0m;//标定板X尺寸 mm
+        private static decimal gts_calibration_y_len = 350.0m;//标定板Y尺寸 mm
+        private static decimal gts_calibration_cell = 2.5m;//标定板尺寸 mm
+        private static Int16 gts_calibration_row = Convert.ToInt16((gts_calibration_x_len / gts_calibration_cell) + 1), gts_calibration_col = Convert.ToInt16((gts_calibration_y_len / gts_calibration_cell) + 1);//标定板的点位gts_calibration横纵数
+        private static Int16 gts_affinity_row = Convert.ToInt16(gts_calibration_x_len / gts_calibration_cell), gts_affinity_col = Convert.ToInt16(gts_calibration_y_len / gts_calibration_cell);//仿射变换的横纵数 
+        
+        //RTC坐标矫正变换参数
+        private static decimal rtc_calibration_x_len = 350.0m;//标定板X尺寸 mm
+        private static decimal rtc_calibration_y_len = 350.0m;//标定板Y尺寸 mm
+        private static decimal rtc_calibration_cell = 2.5m;//标定板尺寸 mm
+        private static Int16 rtc_calibration_row = Convert.ToInt16((rtc_calibration_x_len / rtc_calibration_cell) + 1), rtc_calibration_col = Convert.ToInt16((rtc_calibration_y_len / rtc_calibration_cell) + 1);//标定板的点位rtc_calibration横纵数
+        private static Int16 rtc_affinity_row = Convert.ToInt16(rtc_calibration_x_len / rtc_calibration_cell), rtc_affinity_col = Convert.ToInt16(rtc_calibration_y_len / rtc_calibration_cell);//仿射变换的横纵数 
 
         //加工坐标系
         private static Vector work = new Vector(0,0);//加工坐标系
@@ -74,6 +80,8 @@ namespace Para_List
         private static Vector delta = new Vector(0,0);
         //定义图像中心点
         private static Vector pic_center = new Vector(0,0);
+        //定义矫正坐标点
+        private static Vector cal_org = new Vector(0, 0);
 
         //振镜参数
         private static UInt32 reset_completely = UInt32.MaxValue; //复位范围
@@ -167,13 +175,20 @@ namespace Para_List
         public static decimal Pos_Tolerance { get => pos_Tolerance; set => pos_Tolerance = value; }
         public static decimal Arc_Compensation_A { get => arc_Compensation_A; set => arc_Compensation_A = value; }
         public static decimal Arc_Compensation_R { get => arc_Compensation_R; set => arc_Compensation_R = value; }
-        public static decimal Calibration_X_Len { get => calibration_x_len; set => calibration_x_len = value; }
-        public static decimal Calibration_Y_Len { get => calibration_y_len; set => calibration_y_len = value; }
-        public static decimal Calibration_Cell { get => calibration_cell; set => calibration_cell = value; }
-        public static Int16 Calibration_Col { get => calibration_col; set => calibration_col = value; }
-        public static Int16 Calibration_Row { get => calibration_row; set => calibration_row = value; }
-        public static Int16 Affinity_Col { get => affinity_col; set => affinity_col = value; }
-        public static Int16 Affinity_Row { get => affinity_row; set => affinity_row = value; }
+        public static decimal Gts_Calibration_X_Len { get => gts_calibration_x_len; set => gts_calibration_x_len = value; }
+        public static decimal Gts_Calibration_Y_Len { get => gts_calibration_y_len; set => gts_calibration_y_len = value; }
+        public static decimal Gts_Calibration_Cell { get => gts_calibration_cell; set => gts_calibration_cell = value; }
+        public static Int16 Gts_Calibration_Col { get => gts_calibration_col; set => gts_calibration_col = value; }
+        public static Int16 Gts_Calibration_Row { get => gts_calibration_row; set => gts_calibration_row = value; }
+        public static Int16 Gts_Affinity_Col { get => gts_affinity_col; set => gts_affinity_col = value; }
+        public static Int16 Gts_Affinity_Row { get => gts_affinity_row; set => gts_affinity_row = value; }
+        public static decimal Rtc_Calibration_X_Len { get => rtc_calibration_x_len; set => rtc_calibration_x_len = value; }
+        public static decimal Rtc_Calibration_Y_Len { get => rtc_calibration_y_len; set => rtc_calibration_y_len = value; }
+        public static decimal Rtc_Calibration_Cell { get => rtc_calibration_cell; set => rtc_calibration_cell = value; }
+        public static Int16 Rtc_Calibration_Col { get => rtc_calibration_col; set => rtc_calibration_col = value; }
+        public static Int16 Rtc_Calibration_Row { get => rtc_calibration_row; set => rtc_calibration_row = value; }
+        public static Int16 Rtc_Affinity_Col { get => rtc_affinity_col; set => rtc_affinity_col = value; }
+        public static Int16 Rtc_Affinity_Row { get => rtc_affinity_row; set => rtc_affinity_row = value; }
         public static Vector Work { get => work; set => work = value; }
         public static Vector Laser { get => laser; set => laser = value; }
         public static decimal Cam_Reference { get => cam_reference; set => cam_reference = value; }
@@ -183,6 +198,8 @@ namespace Para_List
         public static Vector Cam_Rtc { get => cam_rtc; set => cam_rtc = value; }
         public static Vector Delta { get => delta; set => delta = value; }
         public static Vector Pic_Center { get => pic_center; set => pic_center = value; }
+        public static Vector Cal_Org { get => cal_org; set => cal_org = value; } 
+
         public static UInt32 Reset_Completely { get => reset_completely; set => reset_completely = value; }
         public static UInt32 Default_Card { get => default_card; set => default_card = value; }
         public static UInt32 Laser_Mode { get => laser_mode; set => laser_mode = value; }
@@ -269,13 +286,20 @@ namespace Para_List
         private decimal arc_Compensation_A;//坐标误差范围判断  度
         private decimal arc_Compensation_R;//坐标误差范围判断  弧度
 
-        //坐标矫正变换参数
-        private decimal calibration_x_len;//标定板X尺寸 mm
-        private decimal calibration_y_len;//标定板Y尺寸 mm
-        private decimal calibration_cell;//标定板间隔尺寸 mm 
-        private Int16 calibration_row, calibration_col;//标定板的点位calibration横纵数 row-行-x  col-列-y
-        private Int16 affinity_row, affinity_col;//仿射变换的横纵数 row-行-x  col-列-y
+        //GTS坐标矫正变换参数
+        private decimal gts_calibration_x_len;//标定板X尺寸 mm
+        private decimal gts_calibration_y_len;//标定板Y尺寸 mm
+        private decimal gts_calibration_cell;//标定板间隔尺寸 mm 
+        private Int16 gts_calibration_row, gts_calibration_col;//标定板的点位gts_calibration横纵数 row-行-x  col-列-y
+        private Int16 gts_affinity_row, gts_affinity_col;//仿射变换的横纵数 row-行-x  col-列-y
 
+
+        //RTC坐标矫正变换参数
+        private decimal rtc_calibration_x_len;//标定板X尺寸 mm
+        private decimal rtc_calibration_y_len;//标定板Y尺寸 mm
+        private decimal rtc_calibration_cell;//标定板间隔尺寸 mm 
+        private Int16 rtc_calibration_row, rtc_calibration_col;//标定板的点位rtc_calibration横纵数 row-行-x  col-列-y
+        private Int16 rtc_affinity_row, rtc_affinity_col;//仿射变换的横纵数 row-行-x  col-列-y
 
         //加工坐标系
         private Vector work;//加工坐标系
@@ -295,6 +319,8 @@ namespace Para_List
         private Vector delta;
         //定义图像中心点
         private Vector pic_center;
+        //定义矫正坐标点
+        private Vector cal_org;
 
         //振镜参数
         private UInt32 reset_completely; //复位范围
@@ -377,13 +403,20 @@ namespace Para_List
         public decimal Pos_Tolerance { get => pos_Tolerance; set => pos_Tolerance = value; }
         public decimal Arc_Compensation_A { get => arc_Compensation_A; set => arc_Compensation_A = value; }
         public decimal Arc_Compensation_R { get => arc_Compensation_R; set => arc_Compensation_R = value; }
-        public decimal Calibration_X_Len { get => calibration_x_len; set => calibration_x_len = value; }
-        public decimal Calibration_Y_Len { get => calibration_y_len; set => calibration_y_len = value; }
-        public decimal Calibration_Cell { get => calibration_cell; set => calibration_cell = value; }
-        public Int16 Calibration_Col { get => calibration_col; set => calibration_col = value; }
-        public Int16 Calibration_Row { get => calibration_row; set => calibration_row = value; }
-        public Int16 Affinity_Col { get => affinity_col; set => affinity_col = value; }
-        public Int16 Affinity_Row { get => affinity_row; set => affinity_row = value; }
+        public decimal Gts_Calibration_X_Len { get => gts_calibration_x_len; set => gts_calibration_x_len = value; }
+        public decimal Gts_Calibration_Y_Len { get => gts_calibration_y_len; set => gts_calibration_y_len = value; }
+        public decimal Gts_Calibration_Cell { get => gts_calibration_cell; set => gts_calibration_cell = value; }
+        public Int16 Gts_Calibration_Col { get => gts_calibration_col; set => gts_calibration_col = value; }
+        public Int16 Gts_Calibration_Row { get => gts_calibration_row; set => gts_calibration_row = value; }
+        public Int16 Gts_Affinity_Col { get => gts_affinity_col; set => gts_affinity_col = value; }
+        public Int16 Gts_Affinity_Row { get => gts_affinity_row; set => gts_affinity_row = value; }
+        public decimal Rtc_Calibration_X_Len { get => rtc_calibration_x_len; set => rtc_calibration_x_len = value; }
+        public decimal Rtc_Calibration_Y_Len { get => rtc_calibration_y_len; set => rtc_calibration_y_len = value; }
+        public decimal Rtc_Calibration_Cell { get => rtc_calibration_cell; set => rtc_calibration_cell = value; }
+        public Int16 Rtc_Calibration_Col { get => rtc_calibration_col; set => rtc_calibration_col = value; }
+        public Int16 Rtc_Calibration_Row { get => rtc_calibration_row; set => rtc_calibration_row = value; }
+        public Int16 Rtc_Affinity_Col { get => rtc_affinity_col; set => rtc_affinity_col = value; }
+        public Int16 Rtc_Affinity_Row { get => rtc_affinity_row; set => rtc_affinity_row = value; }
         public Vector Work { get => work; set => work = value; }
         public Vector Laser { get => laser; set => laser = value; }
         public decimal Cam_Reference { get => cam_reference; set => cam_reference = value; }
@@ -393,6 +426,7 @@ namespace Para_List
         public Vector Cam_Rtc { get => cam_rtc; set => cam_rtc = value; }
         public Vector Delta { get => delta; set => delta = value; }
         public Vector Pic_Center { get => pic_center; set => pic_center = value; }
+        public Vector Cal_Org { get => cal_org; set => cal_org = value; }        
         public UInt32 Reset_Completely { get => reset_completely; set => reset_completely = value; }
         public UInt32 Default_Card { get => default_card; set => default_card = value; }
         public UInt32 Laser_Mode { get => laser_mode; set => laser_mode = value; }
@@ -477,13 +511,20 @@ namespace Para_List
                 Pos_Tolerance = Para_List.Parameter.Pos_Tolerance,
                 Arc_Compensation_A = Para_List.Parameter.Arc_Compensation_A,
                 Arc_Compensation_R = Para_List.Parameter.Arc_Compensation_R,
-                Calibration_X_Len = Para_List.Parameter.Calibration_X_Len,
-                Calibration_Y_Len = Para_List.Parameter.Calibration_Y_Len,
-                Calibration_Cell = Para_List.Parameter.Calibration_Cell,
-                Calibration_Col = Para_List.Parameter.Calibration_Col,
-                Calibration_Row = Para_List.Parameter.Calibration_Row,
-                Affinity_Col = Para_List.Parameter.Affinity_Col,
-                Affinity_Row = Para_List.Parameter.Affinity_Row,
+                Gts_Calibration_X_Len = Para_List.Parameter.Gts_Calibration_X_Len,
+                Gts_Calibration_Y_Len = Para_List.Parameter.Gts_Calibration_Y_Len,
+                Gts_Calibration_Cell = Para_List.Parameter.Gts_Calibration_Cell,
+                Gts_Calibration_Col = Para_List.Parameter.Gts_Calibration_Col,
+                Gts_Calibration_Row = Para_List.Parameter.Gts_Calibration_Row,
+                Gts_Affinity_Col = Para_List.Parameter.Gts_Affinity_Col,
+                Gts_Affinity_Row = Para_List.Parameter.Gts_Affinity_Row,
+                Rtc_Calibration_X_Len = Para_List.Parameter.Rtc_Calibration_X_Len,
+                Rtc_Calibration_Y_Len = Para_List.Parameter.Rtc_Calibration_Y_Len,
+                Rtc_Calibration_Cell = Para_List.Parameter.Rtc_Calibration_Cell,
+                Rtc_Calibration_Col = Para_List.Parameter.Rtc_Calibration_Col,
+                Rtc_Calibration_Row = Para_List.Parameter.Rtc_Calibration_Row,
+                Rtc_Affinity_Col = Para_List.Parameter.Rtc_Affinity_Col,
+                Rtc_Affinity_Row = Para_List.Parameter.Rtc_Affinity_Row,
                 Work = Para_List.Parameter.Work,
                 Laser = Para_List.Parameter.Laser,
                 Cam_Reference = Para_List.Parameter.Cam_Reference,
@@ -493,6 +534,7 @@ namespace Para_List
                 Cam_Rtc = Para_List.Parameter.Cam_Rtc,
                 Delta = Para_List.Parameter.Delta,
                 Pic_Center = Para_List.Parameter.Pic_Center,
+                Cal_Org = Para_List.Parameter.Cal_Org,
                 Reset_Completely = Para_List.Parameter.Reset_Completely,
                 Default_Card = Para_List.Parameter.Default_Card,
                 Laser_Mode = Para_List.Parameter.Laser_Mode,
@@ -599,13 +641,20 @@ namespace Para_List
                     Para_List.Parameter.Pos_Tolerance = parameter.Pos_Tolerance;
                     Para_List.Parameter.Arc_Compensation_A = parameter.Arc_Compensation_A;
                     Para_List.Parameter.Arc_Compensation_R = parameter.Arc_Compensation_R;
-                    Para_List.Parameter.Calibration_X_Len = parameter.Calibration_X_Len;
-                    Para_List.Parameter.Calibration_Y_Len = parameter.Calibration_Y_Len;
-                    Para_List.Parameter.Calibration_Cell = parameter.Calibration_Cell;
-                    Para_List.Parameter.Calibration_Col = parameter.Calibration_Col;
-                    Para_List.Parameter.Calibration_Row = parameter.Calibration_Row;
-                    Para_List.Parameter.Affinity_Col = parameter.Affinity_Col;
-                    Para_List.Parameter.Affinity_Row = parameter.Affinity_Row;
+                    Para_List.Parameter.Gts_Calibration_X_Len = parameter.Gts_Calibration_X_Len;
+                    Para_List.Parameter.Gts_Calibration_Y_Len = parameter.Gts_Calibration_Y_Len;
+                    Para_List.Parameter.Gts_Calibration_Cell = parameter.Gts_Calibration_Cell;
+                    Para_List.Parameter.Gts_Calibration_Col = parameter.Gts_Calibration_Col;
+                    Para_List.Parameter.Gts_Calibration_Row = parameter.Gts_Calibration_Row;
+                    Para_List.Parameter.Gts_Affinity_Col = parameter.Gts_Affinity_Col;
+                    Para_List.Parameter.Gts_Affinity_Row = parameter.Gts_Affinity_Row;
+                    Para_List.Parameter.Rtc_Calibration_X_Len = parameter.Rtc_Calibration_X_Len;
+                    Para_List.Parameter.Rtc_Calibration_Y_Len = parameter.Rtc_Calibration_Y_Len;
+                    Para_List.Parameter.Rtc_Calibration_Cell = parameter.Rtc_Calibration_Cell;
+                    Para_List.Parameter.Rtc_Calibration_Col = parameter.Rtc_Calibration_Col;
+                    Para_List.Parameter.Rtc_Calibration_Row = parameter.Rtc_Calibration_Row;
+                    Para_List.Parameter.Rtc_Affinity_Col = parameter.Rtc_Affinity_Col;
+                    Para_List.Parameter.Rtc_Affinity_Row = parameter.Rtc_Affinity_Row;
                     Para_List.Parameter.Work = parameter.Work;
                     Para_List.Parameter.Laser = parameter.Laser;
                     Para_List.Parameter.Cam_Reference = parameter.Cam_Reference;
@@ -615,6 +664,7 @@ namespace Para_List
                     Para_List.Parameter.Cam_Rtc = parameter.Cam_Rtc;
                     Para_List.Parameter.Delta = parameter.Delta;
                     Para_List.Parameter.Pic_Center = parameter.Pic_Center;
+                    Para_List.Parameter.Cal_Org = parameter.Cal_Org;
                     Para_List.Parameter.Reset_Completely = parameter.Reset_Completely;
                     Para_List.Parameter.Default_Card = parameter.Default_Card;
                     Para_List.Parameter.Laser_Mode = parameter.Laser_Mode;

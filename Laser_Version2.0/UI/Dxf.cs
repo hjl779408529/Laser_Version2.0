@@ -23,6 +23,7 @@ using Emgu.CV;
 using Emgu.CV.Structure;
 using Emgu.CV.CvEnum;
 using Emgu.Util;
+using Laser_Version2._0;
 
 //多段线、多边形、样条曲线---进行圆弧处理数据
 public struct Lwpolyline_Arc
@@ -78,6 +79,10 @@ namespace Laser_Build_1._0
         GTS_Fun.Axis_Home axis01_Home = new GTS_Fun.Axis_Home();
         GTS_Fun.Axis_Home axis02_Home = new GTS_Fun.Axis_Home();
         GTS_Fun.Interpolation interpolation = new GTS_Fun.Interpolation();
+
+        CSV_RW Csv_RW_Test = new CSV_RW(); 
+
+        Calibration Generate_Affinity_Matrix = new Calibration();
         private void Dxf_Load(object sender, EventArgs e)
         {
             //启用定时器
@@ -115,11 +120,11 @@ namespace Laser_Build_1._0
             textBox13.Text = Convert.ToString(Para_List.Parameter.Circle_endVel);
 
             //校准步距
-            textBox15.Text = Convert.ToString(Para_List.Parameter.Calibration_Cell);
+            textBox15.Text = Convert.ToString(Para_List.Parameter.Gts_Calibration_Cell);
 
             //标定板尺寸
-            textBox17.Text = Convert.ToString(Para_List.Parameter.Calibration_X_Len);
-            textBox16.Text = Convert.ToString(Para_List.Parameter.Calibration_Y_Len);
+            textBox17.Text = Convert.ToString(Para_List.Parameter.Gts_Calibration_X_Len);
+            textBox16.Text = Convert.ToString(Para_List.Parameter.Gts_Calibration_Y_Len);
 
             //相机与振镜 中心差值
             textBox19.Text = Convert.ToString(Para_List.Parameter.Cam_Rtc.X);
@@ -897,21 +902,21 @@ namespace Laser_Build_1._0
                     MessageBox.Show("请正确输入数字");
                     return;
                 }
-                Para_List.Parameter.Calibration_Cell = tmp;
+                Para_List.Parameter.Gts_Calibration_Cell = tmp;
             });
         }
 
         //标定板横纵计算
         private void button18_Click(object sender, EventArgs e)
         {
-            Para_List.Parameter.Calibration_Row = Convert.ToInt16((Para_List.Parameter.Calibration_X_Len / Para_List.Parameter.Calibration_Cell) + 1);
-            Para_List.Parameter.Calibration_Col = Convert.ToInt16((Para_List.Parameter.Calibration_Y_Len / Para_List.Parameter.Calibration_Cell) + 1);
-            Para_List.Parameter.Affinity_Row = Convert.ToInt16(Para_List.Parameter.Calibration_X_Len / Para_List.Parameter.Calibration_Cell);
-            Para_List.Parameter.Affinity_Col = Convert.ToInt16(Para_List.Parameter.Calibration_Y_Len / Para_List.Parameter.Calibration_Cell);
-            richTextBox1.AppendText("Calibration_Row:" + Para_List.Parameter.Calibration_Row + "\r\n");
-            richTextBox1.AppendText("Calibration_Col:" + Para_List.Parameter.Calibration_Col + "\r\n");
-            richTextBox1.AppendText("Affinity_Row:" + Para_List.Parameter.Affinity_Row + "\r\n");
-            richTextBox1.AppendText("Affinity_Col:" + Para_List.Parameter.Affinity_Col + "\r\n");
+            Para_List.Parameter.Gts_Calibration_Row = Convert.ToInt16((Para_List.Parameter.Gts_Calibration_X_Len / Para_List.Parameter.Gts_Calibration_Cell) + 1);
+            Para_List.Parameter.Gts_Calibration_Col = Convert.ToInt16((Para_List.Parameter.Gts_Calibration_Y_Len / Para_List.Parameter.Gts_Calibration_Cell) + 1);
+            Para_List.Parameter.Gts_Affinity_Row = Convert.ToInt16(Para_List.Parameter.Gts_Calibration_X_Len / Para_List.Parameter.Gts_Calibration_Cell);
+            Para_List.Parameter.Gts_Affinity_Col = Convert.ToInt16(Para_List.Parameter.Gts_Calibration_Y_Len / Para_List.Parameter.Gts_Calibration_Cell);
+            richTextBox1.AppendText("Calibration_Row:" + Para_List.Parameter.Gts_Calibration_Row + "\r\n");
+            richTextBox1.AppendText("Calibration_Col:" + Para_List.Parameter.Gts_Calibration_Col + "\r\n");
+            richTextBox1.AppendText("Affinity_Row:" + Para_List.Parameter.Gts_Affinity_Row + "\r\n");
+            richTextBox1.AppendText("Affinity_Col:" + Para_List.Parameter.Gts_Affinity_Col + "\r\n");
         }
         //标定板X长度
         private void textBox17_TextChanged(object sender, EventArgs e)
@@ -923,7 +928,7 @@ namespace Laser_Build_1._0
                     MessageBox.Show("请正确输入数字");
                     return;
                 }
-                Para_List.Parameter.Calibration_X_Len = tmp;
+                Para_List.Parameter.Gts_Calibration_X_Len = tmp;
             });
         }
         //标定板Y长度
@@ -936,7 +941,7 @@ namespace Laser_Build_1._0
                     MessageBox.Show("请正确输入数字");
                     return;
                 }
-                Para_List.Parameter.Calibration_Y_Len = tmp;
+                Para_List.Parameter.Gts_Calibration_Y_Len = tmp;
             });
         }            
         
@@ -952,7 +957,7 @@ namespace Laser_Build_1._0
         {
             Para_List.Serialize_Parameter serialize_Parameter = new Para_List.Serialize_Parameter();
             serialize_Parameter.Reserialize("Para.xml");
-            richTextBox1.AppendText("参数读取成功！！！" + Para_List.Parameter.Affinity_Row + "\r\n");
+            richTextBox1.AppendText("参数读取成功！！！" + Para_List.Parameter.Gts_Affinity_Row + "\r\n");
         }               
 
         //清除调试信息窗口
@@ -964,16 +969,14 @@ namespace Laser_Build_1._0
         //相机校准
         private void button16_Click(object sender, EventArgs e)
         {
-            Calibration.Exit_Flag = false;
             Thread Correct_Data_thread = new Thread(Correct_Data);
             Correct_Data_thread.Start();
-            Calibration.Exit_Flag = false;
         }
 
         private void Correct_Data()
         {
-            Calibration generate_Affinity_Matrix = new Calibration();
-            generate_Affinity_Matrix.Get_Datas();
+            Calibration.Exit_Flag = false;
+            Generate_Affinity_Matrix.Get_Datas();
 
         }
         //相机校准退出
@@ -1130,8 +1133,7 @@ namespace Laser_Build_1._0
             richTextBox1.AppendText("Mark_Dxf2 X：" + Para_List.Parameter.Mark_Dxf2.X + "  Y：" + Para_List.Parameter.Mark_Dxf2.Y + "\r\n");
             richTextBox1.AppendText("Mark_Dxf3 X：" + Para_List.Parameter.Mark_Dxf3.X + "  Y：" + Para_List.Parameter.Mark_Dxf3.Y + "\r\n");
             //搜寻Mark
-            Calibration Cal_Mark = new Calibration();
-            Para_List.Parameter.Trans_Affinity = Cal_Mark.Cal_Affinity();
+            Para_List.Parameter.Trans_Affinity = Gts_Cal_Data_Resolve.Cal_Affinity();
 
         }
         //生成Rtc标定数据
@@ -1216,6 +1218,59 @@ namespace Laser_Build_1._0
                 }
             }
 
+        }
+        //校准相机坐标原点
+        private void Cal_Org_Point_Click(object sender, EventArgs e)
+        {
+            Generate_Affinity_Matrix.Calibrate_Org();
+            richTextBox1.AppendText("矫正后数据 X：" + Para_List.Parameter.Cal_Org.X+", Y：" + Para_List.Parameter.Cal_Org.Y + "\r\n");
+
+        }
+        //csv文件测试
+        private void Csv_Test_Click(object sender, EventArgs e)
+        {
+            //RTC数据转换为 可用格式
+            //DataTable New_Data =  CSV_RW.OpenCSV(@"./\Config/Rtc_Correct.csv");
+            //int i, j;
+            //for (i = 0; i < New_Data.Columns.Count; i++)
+            //{
+            //    richTextBox1.AppendText(i +" 列名：" + New_Data.Columns[i].ColumnName + "\r\n");
+            //}
+            ////建立变量
+            //List<Correct_Data> Result = new List<Correct_Data>();
+            //for (i = 0; i < New_Data.Rows.Count; i++)
+            //{
+            //    richTextBox1.AppendText(New_Data.Rows[i][0] + "  " + New_Data.Rows[i][1] + "  " +  New_Data.Rows[i][2] + "  " + New_Data.Rows[i][3] + "  " + "\r\n");
+            //    if ((decimal.TryParse(New_Data.Rows[i][0].ToString(), out decimal x0)) && (decimal.TryParse(New_Data.Rows[i][1].ToString(), out decimal y0)) && (decimal.TryParse(New_Data.Rows[i][2].ToString(), out decimal xm)) && (decimal.TryParse(New_Data.Rows[i][3].ToString(), out decimal ym)))
+            //    {
+            //        Result.Add(new Correct_Data(x0,y0,xm,ym));
+            //    }
+            //}
+            //Serialize_Data.Serialize_Correct_Data(Result, "Rtc_Correct_Data.xml");
+
+            //生成RTC仿射变换参数
+            //Rtc_Cal_Data_Resolve.Resolve(Serialize_Data.Reserialize_Correct_Data("Rtc_Correct_Data.xml"));
+
+            //生成全新GTS校准文件
+            //Gts_Cal_Data_Resolve.Resolve(Serialize_Data.Reserialize_Correct_Data("Correct_Data_9.22.xml"));
+
+            //将Affinity数据转换为CSV并保存
+            //CSV_RW.SaveCSV(CSV_RW.Affinity_Matrix_DataTable(Serialize_Data.Reserialize_Affinity_Matrix("Gts_Affinity_Matrix.xml")), "Gts_Affinity_Matrix");
+
+            //将Gts Correctdata数据转换为CSV并保存
+            CSV_RW.SaveCSV(CSV_RW.Correct_Data_DataTable(Serialize_Data.Reserialize_Correct_Data("Gts_Correct_Data.xml")), "Gts_Correct_Data");
+
+        }
+        //RTC矫正加工
+        private void Correct_Rtc_Click(object sender, EventArgs e)
+        {
+            Thread Integrate_thread = new Thread(Integrated_Correct_Start);
+            Integrate_thread.Start();
+
+        }
+        private void Integrated_Correct_Start()
+        {
+            integrated.Rts_Gts_Correct(Rtc_List_Data);
         }
 
         //Y坐标

@@ -11,7 +11,9 @@ namespace Laser_Build_1._0
     {
         //退出执行
         public bool Exit_Flag = false;
-        
+        public bool Exit_Flag_00 = false; 
+        public bool Exit_Flag_01 = false;
+        public bool Exit_Flag_02 = false;
         //定义Rtc函数
         RTC_Fun.Motion Rtc_Motion = new RTC_Fun.Motion(); 
         //定义Gts函数
@@ -19,7 +21,7 @@ namespace Laser_Build_1._0
         GTS_Fun.Axis_Home axis01_Home = new GTS_Fun.Axis_Home();
         GTS_Fun.Axis_Home axis02_Home = new GTS_Fun.Axis_Home();
         //该函数，利用传入的数据，将RTC和GTS数据配合，进行裁切
-        public void Rts_Gts(List<List<Interpolation_Data>> List_Datas) 
+        public void Rts_Gts(List<List<Interpolation_Data>> List_Datas)
         {
             //初始振镜回Home
             Rtc_Motion.Home();
@@ -46,13 +48,13 @@ namespace Laser_Build_1._0
             //临时变量
             int i = 0, j = 0;
             //数据处理
-            for (i=0; i<List_Datas.Count; i++)//外层数据
+            for (i = 0; i < List_Datas.Count; i++)//外层数据
             {
-                for (j=0; j<List_Datas[i].Count; j++)//内层数据
+                for (j = 0; j < List_Datas[i].Count; j++)//内层数据
                 {
                     if (List_Datas[i][j].Work == 10)//Gts加工数据
                     {
-                        if (List_Datas[i][j].Lift_flag==1)//抬刀标志
+                        if (List_Datas[i][j].Lift_flag == 1)//抬刀标志
                         {
                             //关闭激光
                             Rtc_Motion.Close_Laser();
@@ -66,7 +68,7 @@ namespace Laser_Build_1._0
                             //定位到零点
                             Rtc_Motion.Home();
                             //Gts移动到启动位置 上一list数据的结尾数据或本次的结尾;待测试
-                            Gts_Fun.Gts_Ready(List_Datas[i][List_Datas[i].Count-1].End_x, List_Datas[i][List_Datas[i].Count - 1].End_y);
+                            Gts_Fun.Gts_Ready(List_Datas[i][List_Datas[i].Count - 1].End_x, List_Datas[i][List_Datas[i].Count - 1].End_y);
                             //打开激光
                             Rtc_Motion.Open_Laser();
 
@@ -92,13 +94,86 @@ namespace Laser_Build_1._0
                             //关闭激光
                             Rtc_Motion.Close_Laser();
                             //Gts移动到准备位置 本次开头
-                            Gts_Fun.Gts_Ready(List_Datas[i][0].Gts_x, List_Datas[i][0].Gts_y); 
+                            Gts_Fun.Gts_Ready(List_Datas[i][0].Gts_x, List_Datas[i][0].Gts_y);
                             //启动加工
                             Rtc_Motion.Draw(List_Datas[i], 1);
 
                             //关闭激光
                             Rtc_Motion.Close_Laser();
-                            
+
+                        }
+                    }
+                    break;
+                }
+                //退出执行
+                if (Exit_Flag)
+                {
+                    Exit_Flag = false;
+                    return;
+                }
+            }
+        }
+        //该函数，利用传入的数据，将RTC和GTS数据配合，进行裁切 带入RTC校准
+        public void Rts_Gts_Correct(List<List<Interpolation_Data>> List_Datas)
+        {
+            //初始振镜回Home
+            Rtc_Motion.Home();
+
+            //临时变量
+            int i = 0, j = 0;
+            //数据处理
+            for (i = 0; i < List_Datas.Count; i++)//外层数据
+            {
+                for (j = 0; j < List_Datas[i].Count; j++)//内层数据
+                {
+                    if (List_Datas[i][j].Work == 10)//Gts加工数据
+                    {
+                        if (List_Datas[i][j].Lift_flag == 1)//抬刀标志
+                        {
+                            //关闭激光
+                            Rtc_Motion.Close_Laser();
+                            //启动Gts运动
+                            Gts_Fun.Integrate(List_Datas[i]);
+                        }
+                        else
+                        {
+                            //关闭激光
+                            Rtc_Motion.Close_Laser();
+                            //定位到零点
+                            Rtc_Motion.Home();
+                            //Gts移动到启动位置 上一list数据的结尾数据或本次的结尾;待测试
+                            Gts_Fun.Gts_Ready(List_Datas[i][List_Datas[i].Count - 1].End_x, List_Datas[i][List_Datas[i].Count - 1].End_y);
+                            //打开激光
+                            Rtc_Motion.Open_Laser();
+
+                            //启动Gts运动
+                            Gts_Fun.Integrate(List_Datas[i]);
+
+                            //关闭激光
+                            Rtc_Motion.Close_Laser();
+
+                        }
+                    }
+                    else if (List_Datas[i][j].Work == 20)//Rtc加工数据
+                    {
+                        if (List_Datas[i][j].Lift_flag == 1)//抬刀标志
+                        {
+                            //关闭激光
+                            Rtc_Motion.Close_Laser();
+                            //启动RTC加工
+                            Rtc_Motion.Draw_Correct(List_Datas[i], 1);
+                        }
+                        else
+                        {
+                            //关闭激光
+                            Rtc_Motion.Close_Laser();
+                            //Gts移动到准备位置 本次开头
+                            Gts_Fun.Gts_Ready(List_Datas[i][0].Gts_x, List_Datas[i][0].Gts_y);
+                            //启动加工
+                            Rtc_Motion.Draw_Correct(List_Datas[i], 1);
+                            //关闭激光
+                            Rtc_Motion.Close_Laser();
+
                         }
                     }
                     break;

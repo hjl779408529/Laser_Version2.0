@@ -6,7 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Windows.Forms;
 using System.Threading;
-
+using Prompt;
 namespace Laser_Build_1._0
 {
     public class Tclient
@@ -37,9 +37,17 @@ namespace Laser_Build_1._0
             if (client != null && client.Connected)
             {
                 asyncread(client);
-                MessageBox.Show("Connect");
+                Log.Commandhandler("相机Tcp 连接成功！！！");
 
             }
+            else
+            {
+                Log.Commandhandler("相机Tcp 连接失败！！！");
+            }
+        }
+        public void Tcp_Close()
+        {
+            client.Close();
         }
         private void ClientAccpent(IAsyncResult ar)
         {
@@ -106,7 +114,7 @@ namespace Laser_Build_1._0
                     {
                         Receive_Cordinate = new Vector(d_tmp_x, d_tmp_y);
                         Rec_Ok = true;
-                        MessageBox.Show(string.Format("(X:{0},Y:{1})", Receive_Cordinate.X * Para_List.Parameter.Cam_Reference, Receive_Cordinate.Y * Para_List.Parameter.Cam_Reference));
+                        //MessageBox.Show(string.Format("(X:{0},Y:{1})", Receive_Cordinate.X * Para_List.Parameter.Cam_Reference, Receive_Cordinate.Y * Para_List.Parameter.Cam_Reference));
                     }
                     else
                     {

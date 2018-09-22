@@ -9,6 +9,7 @@ using RTC5Import;
 using Laser_Version2._0;
 using System.Windows.Forms;
 using Laser_Build_1._0;
+using Prompt;
 
 namespace Initialization
 {
@@ -17,8 +18,6 @@ namespace Initialization
         //GTS初始化内容
         //定义GTS函数调用返回值
         short Com_Return;
-        //定义日志输出函数
-        readonly Prompt.Log Log = new Prompt.Log();
         //调用Factory
         GTS_Fun.Factory Gts_Factory = new GTS_Fun.Factory();
         RTC_Fun.Factory Rtc_Factory = new RTC_Fun.Factory();

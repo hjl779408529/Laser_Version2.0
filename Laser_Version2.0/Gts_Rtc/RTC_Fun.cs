@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
+using Laser_Build_1._0;
+using Prompt;
 using RTC5Import;
 
 namespace RTC_Fun
@@ -11,8 +15,6 @@ namespace RTC_Fun
     {
         //Rtc执行返回值
         uint Rtc_Return;
-        //定义日志输出函数
-        readonly Prompt.Log Log = new Prompt.Log();
         public void Reset()
         {
             //初始化Dll
@@ -142,7 +144,26 @@ namespace RTC_Fun
 
     class Motion 
     {
-       
+        public static List<Affinity_Matrix> affinity_Matrices;//校准数据集合
+        public static bool Exit_Flag = false;
+        //构造函数
+        public Motion()
+        {
+            string File_Path = @"./\Config/" + "Rtc_Affinity_Matrix.xml";
+
+            if (File.Exists(File_Path))
+            {
+                //获取标定板标定数据
+                affinity_Matrices = new List<Affinity_Matrix>(Serialize_Data.Reserialize_Affinity_Matrix("Rtc_Affinity_Matrix.xml"));
+            }
+            else
+            {
+                affinity_Matrices = new List<Affinity_Matrix>();
+                MessageBox.Show("Rtc仿射矫正文件不存在，禁止加工，请检查！");
+                Log.Info("Rtc仿射矫正文件不存在，禁止加工，请检查！");
+            }
+
+        }
         //关闭激光
         public void Close_Laser()
         {
@@ -169,7 +190,6 @@ namespace RTC_Fun
             //goto 指定点
             RTC5Wrap.goto_xy(-Convert.ToInt32(y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(x * Para_List.Parameter.Rtc_XPos_Reference));
         }
-
         //x方向相对位移
         public void Inc_X(decimal Distance, UInt32 Control, UInt32 List_No)//距离、控制方式、list区域        
         {
@@ -338,7 +358,6 @@ namespace RTC_Fun
                 RTC5Wrap.get_status(out Busy, out uint Position);
             } while (Busy != 0U);
         }
-
         //执行指定的Interpolation_Data 图形数据
         public void Draw(List<Interpolation_Data> Rtc_Datas,UInt32 List_No)
         {
@@ -398,6 +417,117 @@ namespace RTC_Fun
             do
             {
                 RTC5Wrap.get_status(out Busy, out uint Position);
+                //退出
+                if (Exit_Flag)
+                {
+                    Draw_Stop();
+                    Exit_Flag = false;
+                    return;
+                }
+            } while (Busy != 0U);
+        }
+        public void Draw_Stop()
+        {
+            //终止运行
+            RTC5Wrap.stop_execution();
+        }
+        //执行指定的Interpolation_Data 使用校准数据进行坐标校准 图形数据
+        public void Draw_Correct(List<Interpolation_Data> Rtc_Datas, UInt32 List_No) 
+        {
+
+            //临时定位变量
+            Int16 R0_m, R0_n, End_m, End_n, Center_m, Center_n; 
+            //定义处理的变量
+            decimal Tmp_R0_X;
+            decimal Tmp_R0_Y;
+            decimal Tmp_End_X;
+            decimal Tmp_End_Y;
+            decimal Tmp_Center_X;
+            decimal Tmp_Center_Y; 
+            //  wait list List_No to be not busy
+            //  load_list( List_No, 0) returns 1 if successful, otherwise 0
+            //  执行到POS 0
+            do
+            {
+
+            }
+            while (RTC5Wrap.load_list(List_No, 0u) == 0);
+            // Transmit the following list commands to the list buffer.
+            //RTC5Wrap.set_start_list(List_No);
+
+            //获取数据落点
+            R0_m = Convert.ToInt16((Rtc_Datas[0].Rtc_x + 25) / Para_List.Parameter.Rtc_Calibration_Cell);
+            R0_n = Convert.ToInt16((Rtc_Datas[0].Rtc_y + 25) / Para_List.Parameter.Rtc_Calibration_Cell);
+
+            //终点计算
+            Tmp_R0_X = Rtc_Datas[0].Rtc_x * affinity_Matrices[R0_m * Para_List.Parameter.Rtc_Affinity_Col + R0_n].Cos_Value + Rtc_Datas[0].Rtc_y * affinity_Matrices[R0_m * Para_List.Parameter.Rtc_Affinity_Col + R0_n].Sin_Value + affinity_Matrices[R0_m * Para_List.Parameter.Rtc_Affinity_Col + R0_n].Delta_X;
+            Tmp_R0_Y = Rtc_Datas[0].Rtc_y * affinity_Matrices[R0_m * Para_List.Parameter.Rtc_Affinity_Col + R0_n].Cos_Value - Rtc_Datas[0].Rtc_x * affinity_Matrices[R0_m * Para_List.Parameter.Rtc_Affinity_Col + R0_n].Sin_Value + affinity_Matrices[R0_n * Para_List.Parameter.Rtc_Affinity_Col + R0_n].Delta_Y;
+            
+            //初始Jump到启动点位
+            RTC5Wrap.jump_abs(Convert.ToInt32(-Tmp_R0_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_R0_X * Para_List.Parameter.Rtc_XPos_Reference));
+
+            //生成数据
+            foreach (var o in Rtc_Datas)
+            {
+
+                //获取数据落点
+                End_m = Convert.ToInt16((o.End_x + 25) / Para_List.Parameter.Rtc_Calibration_Cell);
+                End_n = Convert.ToInt16((o.End_y + 25) / Para_List.Parameter.Rtc_Calibration_Cell);
+                Center_m = Convert.ToInt16((o.Center_x + 25) / Para_List.Parameter.Rtc_Calibration_Cell);
+                Center_n = Convert.ToInt16((o.Center_y + 25) / Para_List.Parameter.Rtc_Calibration_Cell);
+
+                //终点计算
+                Tmp_End_X = o.End_x * affinity_Matrices[End_m * Para_List.Parameter.Rtc_Affinity_Col + End_n].Cos_Value + o.End_y * affinity_Matrices[End_m * Para_List.Parameter.Rtc_Affinity_Col + End_n].Sin_Value + affinity_Matrices[End_m * Para_List.Parameter.Rtc_Affinity_Col + End_n].Delta_X;
+                Tmp_End_Y = o.End_y * affinity_Matrices[End_m * Para_List.Parameter.Rtc_Affinity_Col + End_n].Cos_Value - o.End_x * affinity_Matrices[End_m * Para_List.Parameter.Rtc_Affinity_Col + End_n].Sin_Value + affinity_Matrices[End_n * Para_List.Parameter.Rtc_Affinity_Col + End_n].Delta_Y;
+                Tmp_Center_X = o.Center_x * affinity_Matrices[Center_m * Para_List.Parameter.Rtc_Affinity_Col + Center_n].Cos_Value + o.Center_y * affinity_Matrices[Center_m * Para_List.Parameter.Rtc_Affinity_Col + Center_n].Sin_Value + affinity_Matrices[Center_m * Para_List.Parameter.Rtc_Affinity_Col + Center_n].Delta_X;
+                Tmp_Center_Y = o.Center_y * affinity_Matrices[Center_m * Para_List.Parameter.Rtc_Affinity_Col + Center_n].Cos_Value - o.Center_x * affinity_Matrices[Center_m * Para_List.Parameter.Rtc_Affinity_Col + Center_n].Sin_Value + affinity_Matrices[Center_n * Para_List.Parameter.Rtc_Affinity_Col + Center_n].Delta_Y;
+
+                if (o.Type == 11)//arc_abs 绝对圆弧
+                {
+                    RTC5Wrap.arc_abs(Convert.ToInt32(-Tmp_Center_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_Center_X * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToDouble(o.Angle));
+                }
+                else if (o.Type == 12)//arc_rel
+                {
+                    RTC5Wrap.arc_rel(Convert.ToInt32(-Tmp_Center_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_Center_X * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToDouble(o.Angle));
+                }
+                else if (o.Type == 13)//jump_abs
+                {
+                    RTC5Wrap.jump_abs(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_XPos_Reference));
+                }
+                else if (o.Type == 14)//jump_rel
+                {
+                    RTC5Wrap.jump_rel(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_XPos_Reference));
+                }
+                else if (o.Type == 15)//mark_abs
+                {
+                    RTC5Wrap.mark_abs(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_XPos_Reference));
+                }
+                else if (o.Type == 16)//mark_rel
+                {
+                    RTC5Wrap.mark_rel(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_XPos_Reference));
+                }
+            }
+            //结束Jump到启动点位
+            RTC5Wrap.jump_abs(0, 0);
+
+            //设置List结束位置
+            RTC5Wrap.set_end_of_list();
+
+            //启动执行
+            RTC5Wrap.execute_list(1u);
+
+            //Busy 运行等待结束
+            uint Busy;
+            do
+            {
+                RTC5Wrap.get_status(out Busy, out uint Position);
+                //退出
+                if (Exit_Flag)
+                {
+                    Draw_Stop();
+                    Exit_Flag = false;
+                    return;
+                }
             } while (Busy != 0U);
         }
         //执行list Interpolation_Data 数据
@@ -413,7 +543,7 @@ namespace RTC_Fun
             while (RTC5Wrap.load_list(List_No, 0u) == 0);
             // Transmit the following list commands to the list buffer.
             RTC5Wrap.set_start_list(List_No);
-           
+
             //生成数据
             foreach (var n in Rtc_Datas)
             {

@@ -123,6 +123,7 @@
   <ItemGroup>
     <Compile Include="Basler_Net_Cam.cs" />
     <Compile Include="Cam_pic\Basler_Camera.cs" />
+    <Compile Include="CSV_RW.cs" />
     <Compile Include="Data\Correct_Data.cs" />
     <Compile Include="CRCTOOL.cs" />
     <Compile Include="Data\Data_Resolve.cs" />
@@ -195,10 +196,10 @@
     <Compile Include="RS232.cs" />
     <Compile Include="Gts_Rtc\RTC5Wrap.cs" />
     <Compile Include="Gts_Rtc\RTC_Fun.cs" />
-    <Compile Include="UI\Rtc_Handle.cs">
+    <Compile Include="Rtc_Handle.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UI\Rtc_Handle.Designer.cs">
+    <Compile Include="Rtc_Handle.Designer.cs">
       <DependentUpon>Rtc_Handle.cs</DependentUpon>
     </Compile>
     <Compile Include="Tclient.cs" />
@@ -239,7 +240,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="UI\Rtc_Handle.resx">
+    <EmbeddedResource Include="Rtc_Handle.resx">
       <DependentUpon>Rtc_Handle.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />

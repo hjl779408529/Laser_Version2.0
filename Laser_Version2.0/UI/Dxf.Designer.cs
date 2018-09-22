@@ -98,6 +98,9 @@
             this.textBox23 = new System.Windows.Forms.TextBox();
             this.button21 = new System.Windows.Forms.Button();
             this.Cutter_Compensation = new System.Windows.Forms.Button();
+            this.Cal_Org_Point = new System.Windows.Forms.Button();
+            this.Csv_Test = new System.Windows.Forms.Button();
+            this.Correct_Rtc = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // button2
@@ -773,11 +776,47 @@
             this.Cutter_Compensation.UseVisualStyleBackColor = true;
             this.Cutter_Compensation.Click += new System.EventHandler(this.Cutter_Compensation_Click);
             // 
+            // Cal_Org_Point
+            // 
+            this.Cal_Org_Point.Location = new System.Drawing.Point(368, 720);
+            this.Cal_Org_Point.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Cal_Org_Point.Name = "Cal_Org_Point";
+            this.Cal_Org_Point.Size = new System.Drawing.Size(154, 50);
+            this.Cal_Org_Point.TabIndex = 109;
+            this.Cal_Org_Point.Text = "坐标原点矫正";
+            this.Cal_Org_Point.UseVisualStyleBackColor = true;
+            this.Cal_Org_Point.Click += new System.EventHandler(this.Cal_Org_Point_Click);
+            // 
+            // Csv_Test
+            // 
+            this.Csv_Test.Location = new System.Drawing.Point(542, 717);
+            this.Csv_Test.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Csv_Test.Name = "Csv_Test";
+            this.Csv_Test.Size = new System.Drawing.Size(154, 50);
+            this.Csv_Test.TabIndex = 110;
+            this.Csv_Test.Text = "Csv测试";
+            this.Csv_Test.UseVisualStyleBackColor = true;
+            this.Csv_Test.Click += new System.EventHandler(this.Csv_Test_Click);
+            // 
+            // Correct_Rtc
+            // 
+            this.Correct_Rtc.Location = new System.Drawing.Point(542, 801);
+            this.Correct_Rtc.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Correct_Rtc.Name = "Correct_Rtc";
+            this.Correct_Rtc.Size = new System.Drawing.Size(154, 50);
+            this.Correct_Rtc.TabIndex = 111;
+            this.Correct_Rtc.Text = "Rtc矫正加工";
+            this.Correct_Rtc.UseVisualStyleBackColor = true;
+            this.Correct_Rtc.Click += new System.EventHandler(this.Correct_Rtc_Click);
+            // 
             // Dxf
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1418, 860);
+            this.ClientSize = new System.Drawing.Size(1550, 860);
+            this.Controls.Add(this.Correct_Rtc);
+            this.Controls.Add(this.Csv_Test);
+            this.Controls.Add(this.Cal_Org_Point);
             this.Controls.Add(this.Cutter_Compensation);
             this.Controls.Add(this.button21);
             this.Controls.Add(this.label24);
@@ -931,5 +970,8 @@
         private System.Windows.Forms.TextBox textBox23;
         private System.Windows.Forms.Button button21;
         private System.Windows.Forms.Button Cutter_Compensation;
+        private System.Windows.Forms.Button Cal_Org_Point;
+        private System.Windows.Forms.Button Csv_Test;
+        private System.Windows.Forms.Button Correct_Rtc;
     }
 }

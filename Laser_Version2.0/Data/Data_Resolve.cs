@@ -15,6 +15,7 @@ using netDxf.Tables;
 using netDxf.Units;
 using System.Xml.Serialization;
 using Laser_Version2._0;
+using Prompt;
 
 namespace Laser_Build_1._0
 {
@@ -27,8 +28,7 @@ namespace Laser_Build_1._0
             //定义文件名
             string Dxf_filename = "Sample.dxf";
             DxfDocument Result = new DxfDocument();
-            //定义Log
-            Prompt.Log log = new Prompt.Log();
+
             //获取文件名
             OpenFileDialog openfile = new OpenFileDialog();
             if (openfile.ShowDialog() == DialogResult.OK)
@@ -40,7 +40,7 @@ namespace Laser_Build_1._0
             FileInfo fileInfo = new FileInfo(Dxf_filename);
             if (!fileInfo.Exists)
             {
-                log.Commandhandler(Dxf_filename + "----文件不存在！！！" + "\r\n");
+                Log.Commandhandler(Dxf_filename + "----文件不存在！！！" + "\r\n");
                 return Result;
             }
             DxfVersion dxfVersion = DxfDocument.CheckDxfFileVersion(Dxf_filename, out bool isBinary);
@@ -48,7 +48,7 @@ namespace Laser_Build_1._0
             // 检查Dxf文件版本是否正确
             if (dxfVersion < DxfVersion.AutoCad2000)
             {
-                log.Commandhandler(Dxf_filename + "---文件版本不支持" + "\r\n");
+                Log.Commandhandler(Dxf_filename + "---文件版本不支持" + "\r\n");
                 return Result;
             }
 
@@ -58,7 +58,7 @@ namespace Laser_Build_1._0
             // this might be the case of a corrupt file or a problem in the library
             if (Result == null)
             {
-                log.Commandhandler("Dxf文件读取失败" + "\r\n");
+                Log.Commandhandler("Dxf文件读取失败" + "\r\n");
                 return Result;
             }
 
@@ -322,21 +322,21 @@ namespace Laser_Build_1._0
 
                 Temp_Data = O;
                 //获取坐标坐落区域
-                Start_m = Convert.ToInt16(O.Start_x / Para_List.Parameter.Calibration_Cell);
-                Start_n = Convert.ToInt16(O.Start_y / Para_List.Parameter.Calibration_Cell);
-                End_m = Convert.ToInt16(O.End_x / Para_List.Parameter.Calibration_Cell);
-                End_n = Convert.ToInt16(O.End_y / Para_List.Parameter.Calibration_Cell);
-                Center_m = Convert.ToInt16(O.Center_x / Para_List.Parameter.Calibration_Cell);
-                Center_n = Convert.ToInt16(O.Center_y / Para_List.Parameter.Calibration_Cell);
+                Start_m = Convert.ToInt16(O.Start_x / Para_List.Parameter.Gts_Calibration_Cell);
+                Start_n = Convert.ToInt16(O.Start_y / Para_List.Parameter.Gts_Calibration_Cell);
+                End_m = Convert.ToInt16(O.End_x / Para_List.Parameter.Gts_Calibration_Cell);
+                End_n = Convert.ToInt16(O.End_y / Para_List.Parameter.Gts_Calibration_Cell);
+                Center_m = Convert.ToInt16(O.Center_x / Para_List.Parameter.Gts_Calibration_Cell);
+                Center_n = Convert.ToInt16(O.Center_y / Para_List.Parameter.Gts_Calibration_Cell);
                 //起点计算
-                Temp_Data.Start_x = O.Start_x * affinity_Matrices[Start_m * Para_List.Parameter.Affinity_Col + Start_n].Cos_Value + O.Start_y * affinity_Matrices[Start_m * Para_List.Parameter.Affinity_Col + Start_n].Sin_Value + affinity_Matrices[Start_m * Para_List.Parameter.Affinity_Col + Start_n].Delta_X;
-                Temp_Data.Start_y = O.Start_y * affinity_Matrices[Start_m * Para_List.Parameter.Affinity_Col + Start_n].Cos_Value - O.Start_x * affinity_Matrices[Start_m * Para_List.Parameter.Affinity_Col + Start_n].Sin_Value + affinity_Matrices[Start_n * Para_List.Parameter.Affinity_Col + Start_n].Delta_Y;
+                Temp_Data.Start_x = O.Start_x * affinity_Matrices[Start_m * Para_List.Parameter.Gts_Affinity_Col + Start_n].Cos_Value + O.Start_y * affinity_Matrices[Start_m * Para_List.Parameter.Gts_Affinity_Col + Start_n].Sin_Value + affinity_Matrices[Start_m * Para_List.Parameter.Gts_Affinity_Col + Start_n].Delta_X;
+                Temp_Data.Start_y = O.Start_y * affinity_Matrices[Start_m * Para_List.Parameter.Gts_Affinity_Col + Start_n].Cos_Value - O.Start_x * affinity_Matrices[Start_m * Para_List.Parameter.Gts_Affinity_Col + Start_n].Sin_Value + affinity_Matrices[Start_n * Para_List.Parameter.Gts_Affinity_Col + Start_n].Delta_Y;
                 //终点计算
-                Temp_Data.End_x = O.End_x * affinity_Matrices[End_m * Para_List.Parameter.Affinity_Col + End_n].Cos_Value + O.End_y * affinity_Matrices[End_m * Para_List.Parameter.Affinity_Col + End_n].Sin_Value + affinity_Matrices[End_m * Para_List.Parameter.Affinity_Col + End_n].Delta_X;
-                Temp_Data.End_y = O.End_y * affinity_Matrices[End_m * Para_List.Parameter.Affinity_Col + End_n].Cos_Value - O.End_x * affinity_Matrices[End_m * Para_List.Parameter.Affinity_Col + End_n].Sin_Value + affinity_Matrices[End_n * Para_List.Parameter.Affinity_Col + End_n].Delta_Y;
+                Temp_Data.End_x = O.End_x * affinity_Matrices[End_m * Para_List.Parameter.Gts_Affinity_Col + End_n].Cos_Value + O.End_y * affinity_Matrices[End_m * Para_List.Parameter.Gts_Affinity_Col + End_n].Sin_Value + affinity_Matrices[End_m * Para_List.Parameter.Gts_Affinity_Col + End_n].Delta_X;
+                Temp_Data.End_y = O.End_y * affinity_Matrices[End_m * Para_List.Parameter.Gts_Affinity_Col + End_n].Cos_Value - O.End_x * affinity_Matrices[End_m * Para_List.Parameter.Gts_Affinity_Col + End_n].Sin_Value + affinity_Matrices[End_n * Para_List.Parameter.Gts_Affinity_Col + End_n].Delta_Y;
                 //圆心计算
-                Temp_Data.Center_x = O.Center_x * affinity_Matrices[Center_m * Para_List.Parameter.Affinity_Col + Center_n].Cos_Value + O.Center_y * affinity_Matrices[Center_m * Para_List.Parameter.Affinity_Col + Center_n].Sin_Value + affinity_Matrices[Center_m * Para_List.Parameter.Affinity_Col + Center_n].Delta_X;
-                Temp_Data.Center_y = O.Center_y * affinity_Matrices[Center_m * Para_List.Parameter.Affinity_Col + Center_n].Cos_Value - O.Center_x * affinity_Matrices[Center_m * Para_List.Parameter.Affinity_Col + Center_n].Sin_Value + affinity_Matrices[Center_n * Para_List.Parameter.Affinity_Col + Center_n].Delta_Y;
+                Temp_Data.Center_x = O.Center_x * affinity_Matrices[Center_m * Para_List.Parameter.Gts_Affinity_Col + Center_n].Cos_Value + O.Center_y * affinity_Matrices[Center_m * Para_List.Parameter.Gts_Affinity_Col + Center_n].Sin_Value + affinity_Matrices[Center_m * Para_List.Parameter.Gts_Affinity_Col + Center_n].Delta_X;
+                Temp_Data.Center_y = O.Center_y * affinity_Matrices[Center_m * Para_List.Parameter.Gts_Affinity_Col + Center_n].Cos_Value - O.Center_x * affinity_Matrices[Center_m * Para_List.Parameter.Gts_Affinity_Col + Center_n].Sin_Value + affinity_Matrices[Center_n * Para_List.Parameter.Gts_Affinity_Col + Center_n].Delta_Y;
 
                 //追加数据至Result
                 Result.Add(Temp_Data);
@@ -374,8 +374,24 @@ namespace Laser_Build_1._0
                 Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
                 Temp_Data.Lift_flag = 1;//抬刀标志
                 Temp_Data.Repeat = 0;//重复次数
-                Temp_Data.End_x = Arc_Line_Datas[0].Start_x;
-                Temp_Data.End_y = Arc_Line_Datas[0].Start_y;
+                //强制约束接入点为直线
+                if (Arc_Line_Datas.Min(o => o.Type) == 1)
+                {
+                    for (i = 0; i < Arc_Line_Datas.Count; i++)
+                    {
+                        if (Arc_Line_Datas[i].Type == 1)
+                        {
+                            Temp_Data.End_x = Arc_Line_Datas[i].Start_x;
+                            Temp_Data.End_y = Arc_Line_Datas[i].Start_y;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    Temp_Data.End_x = Arc_Line_Datas[0].Start_x;
+                    Temp_Data.End_y = Arc_Line_Datas[0].Start_y;
+                }
 
                 //提交进入Arc_Data
                 Single_Data.Add(new Interpolation_Data(Temp_Data));
@@ -500,8 +516,24 @@ namespace Laser_Build_1._0
                         Temp_Data.Lift_flag = 1;//抬刀标志
                         Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
                         Temp_Data.Repeat = 0;//重复次数
-                        Temp_Data.End_x = Arc_Line_Datas[0].Start_x;
-                        Temp_Data.End_y = Arc_Line_Datas[0].Start_y;
+                        //强制约束接入点为直线
+                        if (Arc_Line_Datas.Min(o => o.Type) == 1)
+                        {
+                            for (i = 0; i < Arc_Line_Datas.Count; i++)
+                            {
+                                if (Arc_Line_Datas[i].Type == 1)
+                                {
+                                    Temp_Data.End_x = Arc_Line_Datas[i].Start_x;
+                                    Temp_Data.End_y = Arc_Line_Datas[i].Start_y;
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Temp_Data.End_x = Arc_Line_Datas[0].Start_x;
+                            Temp_Data.End_y = Arc_Line_Datas[0].Start_y;
+                        }
 
                         //提交进入Arc_Data
                         Single_Data.Add(new Interpolation_Data(Temp_Data));
@@ -835,10 +867,56 @@ namespace Laser_Build_1._0
             //返回结果
             return Result;
         }
+        //数据整合
+        public List<List<Interpolation_Data>> Converge_Data(List<List<Interpolation_Data>> Arc_Line_Data, List<List<Interpolation_Data>> LW_Data, List<List<Interpolation_Data>> Circle_Data)
+        {
+            List<List<Interpolation_Data>> Result = new List<List<Interpolation_Data>>();
+            Result.AddRange(new List<List<Interpolation_Data>>(Arc_Line_Data));
+            Result.AddRange(new List<List<Interpolation_Data>>(LW_Data));
+            Result.AddRange(new List<List<Interpolation_Data>>(Circle_Data));
+            //临时数据
+            Interpolation_Data Temp_Data = new Interpolation_Data();
+            //获取坐标点
+            GTS_Fun.Interpolation interpolation = new GTS_Fun.Interpolation();
+            Vector Start_Coordinate = new Vector(interpolation.Get_Coordinate());
+            //数据处理合并为走刀直线添加起点坐标
+            for (int cal = 0; cal < Result.Count; cal++)
+            {
+                //当前序号 数量为1、加工类型1 直线、加工方式10 GTS
+                //当前+1序号 数量大于1、加工方式20 RTX
+                if (cal==0)
+                {
+                    if ((Result[cal].Count == 1) && (Result[cal][0].Type==1) && (Result[cal][0].Lift_flag == 1))
+                    {
+                        Temp_Data.Empty();
+                        Temp_Data = Result[cal][0];
+                        Temp_Data.Start_x = Start_Coordinate.X;
+                        Temp_Data.Start_y = Start_Coordinate.Y;
+                        //重新赋值
+                        Result[cal][0] = new Interpolation_Data(Temp_Data);
+                    }                    
+                }
+                else
+                {
+                    if ((Result[cal].Count == 1) && (Result[cal][0].Type == 1) && (Result[cal][0].Lift_flag == 1))
+                    {
+                        Temp_Data.Empty();
+                        Temp_Data = Result[cal][0];
+                        Temp_Data.Start_x = Result[cal - 1][Result[cal - 1].Count - 1].End_x;
+                        Temp_Data.Start_y = Result[cal - 1][Result[cal - 1].Count - 1].End_y;
+                        //重新赋值
+                        Result[cal][0] = new Interpolation_Data(Temp_Data);
+                    }
+                }
+            }
+            //返回结果
+            return Result;
+        }
 
         /***************************************************刀具补偿****************************************************************/
         public List<List<Interpolation_Data>> Cutter_Compensation(List<List<Interpolation_Data>> In_Data)
         {
+            //整体原则 不修改传入数据，直接将结果反馈回Result
             //结果变量
             List<List<Interpolation_Data>> Result = new List<List<Interpolation_Data>>();//返回值
             List<Interpolation_Data> Temp_Interpolation_List_Data = new List<Interpolation_Data>();//二级层
@@ -849,6 +927,7 @@ namespace Laser_Build_1._0
             int i = 0;
             int j = 0;
             int m = 0;
+            List<Vector> Temp_Vector = new List<Vector>();//用于获取交点的数据
             //初始清除
             Result.Clear();
             Temp_Interpolation_List_Data.Clear();
@@ -870,7 +949,7 @@ namespace Laser_Build_1._0
                         //获取赋值
                         Temp_Data =new Interpolation_Data(In_Data[i][j]);
                         //数据处理
-                        if (In_Data[i][j].Type == 1)//直线
+                        if (In_Data[i][j].Type == 1)//直线  修正终点 end_x,end_y
                         {
                             if (i <= In_Data.Count - 2) //确保不超出List索引
                             {
@@ -888,7 +967,19 @@ namespace Laser_Build_1._0
                                     }
                                     else if (In_Data[i + 1][0].Type == 2)// 圆弧
                                     {
-
+                                        Temp_Vector = Cal_Cross_Data(In_Data[i][j], In_Data[i + 1][0]);//计算当前层 与 下级层第一个切入圆弧的交点
+                                        if (Temp_Vector.Count >= 1)
+                                        {
+                                            Temp_Data.End_x = Temp_Vector[0].X;
+                                            Temp_Data.End_y = Temp_Vector[0].Y;
+                                        }
+                                        //追加数据
+                                        Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
+                                        //追加返回值
+                                        Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
+                                        //数据清空
+                                        Temp_Data.Empty();
+                                        Temp_Interpolation_List_Data.Clear();
                                     }
                                     else if (In_Data[i + 1][0].Type == 3)//整圆
                                     {
@@ -920,13 +1011,43 @@ namespace Laser_Build_1._0
                                 }
                                 else//多级数据
                                 {
-
+                                    //判断是否是封闭图形
+                                    if (Differ_Err(In_Data[i + 1][0].Start_x, In_Data[i + 1][0].Start_y, In_Data[i + 1][In_Data[i + 1].Count-1].End_x, In_Data[i + 1][In_Data[i + 1].Count - 1].End_y))
+                                    {
+                                        Temp_Vector = Cal_Cross_Data(In_Data[i + 1][In_Data[i + 1].Count - 1], In_Data[i + 1][0]);//计算当前层 与 下级层
+                                        if (Temp_Vector.Count >= 1)
+                                        {
+                                            Temp_Data.End_x = Temp_Vector[0].X;
+                                            Temp_Data.End_y = Temp_Vector[0].Y;
+                                        }
+                                        //追加数据
+                                        Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
+                                        //追加返回值
+                                        Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
+                                        //数据清空
+                                        Temp_Data.Empty();
+                                        Temp_Interpolation_List_Data.Clear();
+                                    }
+                                    else
+                                    {
+                                        //追加返回值
+                                        Result.Add(new List<Interpolation_Data>(In_Data[i]));
+                                        //数据清空
+                                        Temp_Data.Empty();
+                                        Temp_Interpolation_List_Data.Clear();
+                                    }                                    
                                 }
                             }
                         }
-                        else if (In_Data[i][j].Type == 2)// 圆弧
+                        else if (In_Data[i][j].Type == 2)// 圆弧  圆弧暂不处理
                         {
-
+                            //追加数据
+                            Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
+                            //追加返回值
+                            Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
+                            //数据清空
+                            Temp_Data.Empty();
+                            Temp_Interpolation_List_Data.Clear();
                         }
                         else if (In_Data[i][j].Type == 3)//整圆
                         {
@@ -962,13 +1083,46 @@ namespace Laser_Build_1._0
                     }
                 }
                 else if (In_Data[i].Count >= 2) //二级层，整合元素数量大于等于2，说明封闭图形
-                {
-                    //考虑圆弧半径大小，Radius >= 20mm由Gts加工，Radius < 20mm由Rtc加工
-                    for (m = 0; m < In_Data[i].Count; m++)
+                {                    
+                    //判断是否是封闭图形
+                    if (Differ_Err(In_Data[i][0].Start_x, In_Data[i][0].Start_y, In_Data[i][In_Data[i].Count - 1].End_x, In_Data[i][In_Data[i].Count - 1].End_y))
                     {
+                        for (m = 0; m < In_Data[i].Count; m++)
+                        {
+                            if (m == 0)
+                            {
+                                //获取赋值
+                                Temp_Data = new Interpolation_Data(In_Data[i][0]);
+                                Temp_Vector = Cal_Cross_Data(In_Data[i][In_Data[i].Count - 1], In_Data[i][0]);//计算结尾层 与 0层
+                                if (Temp_Vector.Count >= 1)
+                                {
+                                    Temp_Data.Start_x = Temp_Vector[0].X;
+                                    Temp_Data.Start_y = Temp_Vector[0].Y;
+                                }
+                                //追加数据
+                                Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
+                            }
+                            else if ((m > 0) && (m<= In_Data[i].Count-2))
+                            {
+
+                            }
+                            else if (m == (In_Data[i].Count - 1))
+                            {
+
+                            }
 
 
+                        }
                     }
+                    else
+                    {
+                        Temp_Interpolation_List_Data = new List<Interpolation_Data>(In_Data[i]);
+                    }
+                    //追加返回值
+                    Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
+                    //数据清空
+                    Temp_Data.Empty();
+                    Temp_Interpolation_List_Data.Clear();
                 }
             }
             //返回结果
@@ -2040,6 +2194,7 @@ namespace Laser_Build_1._0
             Vector_Calculate Vec_Cal = new Vector_Calculate();
             List<Vector> Result = new List<Vector>();
             decimal Radius = 0.0m;
+            
             //钻孔、落料、无三种模式切换
             //刀具补偿类型 0-不补偿、1-钻孔、2-落料
             if (Para_List.Parameter.Cutter_Type==0)
@@ -2064,7 +2219,7 @@ namespace Laser_Build_1._0
                 //计算等距线交点
                 if (Angle == 180) //角度为180,共线且方向相反
                 {
-                    MessageBox.Show("两直线所在向量夹角为0，数据错误！！");
+                    Log.Info("两直线所在向量夹角为180，数据错误！！！");
                     Result.Add(new Vector(0, 0));
                 }
                 else if (Angle == 0) //角度为0,共线
@@ -2101,19 +2256,24 @@ namespace Laser_Build_1._0
                 //目前只考虑 外切
                 if (Angle_Line_Tangent == 180) //角度为180,共线且方向相反
                 {
-                    MessageBox.Show("两直线所在向量夹角为0，数据错误！！");
-                    Result.Add(new Vector(0, 0));
+                    Log.Info("直线与圆弧切线方向夹角为 180，数据错误！！！");
+                    Result.Add(new Vector(Indata_1.End_x, Indata_1.End_y));
                 }
                 else if (Angle_Line_Tangent == 0) //角度为0,共线同向
                 {
                     Result.Add(new Vector(Indata_1.End_x - Radius * Line.Y, Indata_1.End_y + Radius * Line.X));
+                }
+                else
+                {
+                    Log.Info("直线与圆弧非外切，沿用原坐标！！！");
+                    Result.Add(new Vector(Indata_1.End_x, Indata_1.End_y));
                 }
             }
             else if ((Indata_1.Type == 2) && (Indata_2.Type == 1))//圆弧和直线
             {
                 //向量以交点为起始点，分别指向当前刀具加工方向，下一段刀具加工方向
                 Vector Line = new Vector(Indata_1.End_x - Indata_1.Start_x, Indata_1.End_y - Indata_1.Start_y);
-                Vector Center_Start = new Vector(Indata_2.Center_x - Indata_2.Start_x, Indata_2.Center_y - Indata_2.Start_y);
+                Vector Center_Start = new Vector(Indata_2.Center_x - Indata_2.End_x, Indata_2.Center_y - Indata_2.End_y);
                 //圆弧方向  顺圆弧、逆圆弧
                 decimal R = 0.0m;
                 if (Indata_2.Circle_dir == 0)
@@ -2134,17 +2294,23 @@ namespace Laser_Build_1._0
                 //目前只考虑 外切
                 if (Angle_Line_Tangent == 180) //角度为180,共线且方向相反
                 {
-                    MessageBox.Show("两直线所在向量夹角为0，数据错误！！");
+                    Log.Info("圆弧切线方向与直线夹角为 180，数据错误！！！");
                     Result.Add(new Vector(0, 0));
                 }
                 else if (Angle_Line_Tangent == 0) //角度为0,共线同向
                 {
-                    Result.Add(new Vector(Indata_1.Start_x - Radius * Line.Y, Indata_1.Start_y + Radius * Line.X));
+                    Result.Add(new Vector(Indata_2.Start_x - Radius * Line.Y, Indata_2.Start_y + Radius * Line.X));
+                }
+                else
+                {
+                    Log.Info("圆弧与直线非外切，沿用原坐标！！！");
+                    Result.Add(new Vector(Indata_2.Start_x, Indata_2.Start_y)); 
                 }
             }
             else if ((Indata_1.Type == 2) && (Indata_2.Type == 2))//圆弧和圆弧
             {
-
+                Log.Info("圆弧与圆弧 数据不处理，沿用原坐标！！！");
+                Result.Add(new Vector(Indata_1.End_x, Indata_1.End_y));
             }  
             //结果返回
             return Result;
@@ -2164,7 +2330,7 @@ namespace Laser_Build_1._0
             }
             return new Extreme(Tem_Dat_X.Max(), Tem_Dat_X.Min(), Tem_Dat_Y.Max(), Tem_Dat_Y.Min(),Math.Abs(Tem_Dat_X.Max() - Tem_Dat_X.Min()), Math.Abs(Tem_Dat_Y.Max() - Tem_Dat_Y.Min()));
         }
-        //反序列化 标定板标定数据
+        //反序列化 标定板标定数据 
         private List<Affinity_Matrix> Reserialize_Affinity_Matrix(string fileName)
         {
 

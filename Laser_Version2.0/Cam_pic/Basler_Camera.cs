@@ -16,6 +16,7 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Serialization;
 using System.Runtime.InteropServices;
+using Prompt;
 
 namespace Laser_Build_1._0
 {
@@ -25,8 +26,7 @@ namespace Laser_Build_1._0
         // The name of the pylon feature stream file.
         const string filename = @"./\Config/" +"CameraParameters.pfs";
         public Camera camera;
-        //定义日志输出函数
-        readonly Prompt.Log Log = new Prompt.Log();
+
         //定义拍摄完成标志
         private bool Flag = false;
         //定义输出值
