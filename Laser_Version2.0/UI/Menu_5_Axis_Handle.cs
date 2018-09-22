@@ -34,11 +34,6 @@ namespace Laser_Build_1._0
         //定义轴号选择
         short Axis_No = 1;
 
-        
-        //生成所需的函数
-        GTS_Fun.Motion motion = new GTS_Fun.Motion();
-        GTS_Fun.Axis_Home axis_Home = new GTS_Fun.Axis_Home();
-
         //指令返回值
         short Gts_return;
         private void Menu_5_Axis_Handle_Load(object sender, EventArgs e)
@@ -250,12 +245,12 @@ namespace Laser_Build_1._0
         //平滑停止
         private void button9_Click(object sender, EventArgs e)
         {
-            motion.Smooth_Stop(Axis_No); //平滑停止轴         
+            GTS_Fun.Motion.Smooth_Stop(Axis_No); //平滑停止轴         
         }
         //紧急停止
         private void button10_Click(object sender, EventArgs e)
         {
-            motion.Emg_Stop(Axis_No);//紧急停止轴
+            GTS_Fun.Motion.Emg_Stop(Axis_No);//紧急停止轴
         }
         //jog+
         private void button12_MouseDown(object sender, MouseEventArgs e)
@@ -266,11 +261,11 @@ namespace Laser_Build_1._0
                 {
                     if (Point_Con == 0)//连动模式
                     {
-                        motion.Jog(Axis_No, 0,mannualVel, acc, dcc);
+                        GTS_Fun.Motion.Jog(Axis_No, 0,mannualVel, acc, dcc);
                     }
                     else//点动模式
                     {
-                        motion.Inc(Axis_No, acc, dcc, 20,step, mannualVel);
+                        GTS_Fun.Motion.Inc(Axis_No, acc, dcc, 20,step, mannualVel);
                     }
                 }
             }
@@ -280,11 +275,11 @@ namespace Laser_Build_1._0
                 {
                     if (Point_Con == 0)//连动模式
                     {
-                        motion.Jog(Axis_No, 0, mannualVel, acc, dcc);
+                        GTS_Fun.Motion.Jog(Axis_No, 0, mannualVel, acc, dcc);
                     }
                     else//点动模式
                     {
-                        motion.Inc(Axis_No, acc, dcc, 20, step, mannualVel);
+                        GTS_Fun.Motion.Inc(Axis_No, acc, dcc, 20, step, mannualVel);
                     }
                 }
             }            
@@ -299,11 +294,11 @@ namespace Laser_Build_1._0
                 {
                     if (Point_Con == 0)//连动模式
                     {
-                        motion.Jog(Axis_No, 1, mannualVel, acc, dcc);
+                        GTS_Fun.Motion.Jog(Axis_No, 1, mannualVel, acc, dcc);
                     }
                     else//点动模式
                     {
-                        motion.Inc(Axis_No, acc, dcc, 20, -step, mannualVel);
+                        GTS_Fun.Motion.Inc(Axis_No, acc, dcc, 20, -step, mannualVel);
                     }
                 }
             }
@@ -313,11 +308,11 @@ namespace Laser_Build_1._0
                 {
                     if (Point_Con == 0)//连动模式
                     {
-                        motion.Jog(Axis_No, 1, mannualVel, acc, dcc);
+                        GTS_Fun.Motion.Jog(Axis_No, 1, mannualVel, acc, dcc);
                     }
                     else//点动模式
                     {
-                        motion.Inc(Axis_No, acc, dcc, 20, -step, mannualVel);
+                        GTS_Fun.Motion.Inc(Axis_No, acc, dcc, 20, -step, mannualVel);
                     }
                 }
             }
@@ -326,8 +321,8 @@ namespace Laser_Build_1._0
         private void button12_MouseUp(object sender, MouseEventArgs e)
         {
             if (Point_Con == 0)//连动模式
-            {               
-                motion.Smooth_Stop(Axis_No); ;//停止轴
+            {
+                GTS_Fun.Motion.Smooth_Stop(Axis_No); ;//停止轴
             }            
         }
         //jog-停止运行
@@ -335,7 +330,7 @@ namespace Laser_Build_1._0
         {
             if (Point_Con == 0)//连动模式
             {
-                motion.Smooth_Stop(Axis_No); ;//停止轴
+                GTS_Fun.Motion.Smooth_Stop(Axis_No); ;//停止轴
             }
         }
         //轴编号切换
@@ -357,14 +352,14 @@ namespace Laser_Build_1._0
             {
                 if (Prompt.Refresh.Axis01_EN)
                 {
-                    axis_Home.Home(1);
+                    GTS_Fun.Axis_Home.Home(1);
                 }
             }
             else if (Axis_No == 2)
             {
                 if (Prompt.Refresh.Axis02_EN)
                 {
-                    axis_Home.Home(2);
+                    GTS_Fun.Axis_Home.Home(2);
                 }
             }
         }
@@ -503,8 +498,7 @@ namespace Laser_Build_1._0
         //复位
         private void button17_Click(object sender, EventArgs e)
         {
-            GTS_Fun.Factory Reset = new GTS_Fun.Factory();
-            Reset.Reset();
+            GTS_Fun.Factory.Reset();
         }
 
         //伺服使能切换

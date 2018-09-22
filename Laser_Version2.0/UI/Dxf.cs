@@ -69,20 +69,9 @@ namespace Laser_Build_1._0
         //rtc和gts解析数据
         List<List<Interpolation_Data>> Rtc_List_Data = new List<List<Interpolation_Data>>();
 
-        //定义整合加工函数
-        Integrated integrated = new Integrated();
         //定义补偿函数 
-        Data_Resolve Data_Cal = new Data_Resolve();        
+        Data_Resolve Data_Cal = new Data_Resolve(); 
 
-        //生成所需的函数
-        GTS_Fun.Motion motion = new GTS_Fun.Motion();
-        GTS_Fun.Axis_Home axis01_Home = new GTS_Fun.Axis_Home();
-        GTS_Fun.Axis_Home axis02_Home = new GTS_Fun.Axis_Home();
-        GTS_Fun.Interpolation interpolation = new GTS_Fun.Interpolation();
-
-        CSV_RW Csv_RW_Test = new CSV_RW(); 
-
-        Calibration Generate_Affinity_Matrix = new Calibration();
         private void Dxf_Load(object sender, EventArgs e)
         {
             //启用定时器
@@ -620,7 +609,7 @@ namespace Laser_Build_1._0
         {
             if (Prompt.Refresh.Axis01_EN)
             {
-                axis01_Home.Home(1);
+                GTS_Fun.Axis_Home.Home(1);
             }
         }
 
@@ -628,14 +617,14 @@ namespace Laser_Build_1._0
         {
             if (Prompt.Refresh.Axis02_EN)
             {
-                axis02_Home.Home(2);
+                GTS_Fun.Axis_Home.Home(2);
             }
         }
 
         //建立直角坐标系
         private void button2_Click(object sender, EventArgs e)
         {
-            interpolation.Coordination(Para_List.Parameter.Work.X, Para_List.Parameter.Work.Y);
+            GTS_Fun.Interpolation.Coordination(Para_List.Parameter.Work.X, Para_List.Parameter.Work.Y);
         }      
         //DXF 窗口关闭
         private void Dxf_FormClosed(object sender, FormClosedEventArgs e)
@@ -976,7 +965,7 @@ namespace Laser_Build_1._0
         private void Correct_Data()
         {
             Calibration.Exit_Flag = false;
-            Generate_Affinity_Matrix.Get_Datas();
+            Calibration.Get_Datas();
 
         }
         //相机校准退出
@@ -993,13 +982,13 @@ namespace Laser_Build_1._0
         }
         private void Integrated_Start()
         {
-            integrated.Rts_Gts(Rtc_List_Data);
+            Integrated.Rts_Gts(Rtc_List_Data);
         }
         
         //整合加工终止 
         private void button19_Click(object sender, EventArgs e)
         {
-            integrated.Exit_Flag = true;
+            Integrated.Exit_Flag = true;
         }
         
         //取list极值值 或 数据拆分
@@ -1049,7 +1038,7 @@ namespace Laser_Build_1._0
         //定位坐标原点
         private void button10_Click(object sender, EventArgs e)
         {
-            interpolation.Gts_Ready(0,0);
+            GTS_Fun.Interpolation.Gts_Ready(0,0);
         }
         //相机与振镜 中心差值X/mm
         private void textBox19_TextChanged(object sender, EventArgs e)
@@ -1182,7 +1171,7 @@ namespace Laser_Build_1._0
         //提取坐标
         private void button11_Click(object sender, EventArgs e)
         {
-            Vector Tem =new Vector(interpolation.Get_Coordinate());
+            Vector Tem =new Vector(GTS_Fun.Interpolation.Get_Coordinate());
             MessageBox.Show("X坐标："+ Convert.ToString(Tem.X) + "  Y坐标：" + Convert.ToString(Tem.Y));
         }
         decimal Cor_x, Cor_y;
@@ -1222,7 +1211,7 @@ namespace Laser_Build_1._0
         //校准相机坐标原点
         private void Cal_Org_Point_Click(object sender, EventArgs e)
         {
-            Generate_Affinity_Matrix.Calibrate_Org();
+            Calibration.Calibrate_Org();
             richTextBox1.AppendText("矫正后数据 X：" + Para_List.Parameter.Cal_Org.X+", Y：" + Para_List.Parameter.Cal_Org.Y + "\r\n");
 
         }
@@ -1264,13 +1253,13 @@ namespace Laser_Build_1._0
         //RTC矫正加工
         private void Correct_Rtc_Click(object sender, EventArgs e)
         {
-            Thread Integrate_thread = new Thread(Integrated_Correct_Start);
-            Integrate_thread.Start();
-
+            //Thread Integrate_thread = new Thread(Integrated_Correct_Start);
+            ///Integrate_thread.Start();
+            Integrated_Correct_Start();
         }
         private void Integrated_Correct_Start()
         {
-            integrated.Rts_Gts_Correct(Rtc_List_Data);
+            Integrated.Rts_Gts_Correct(Rtc_List_Data);
         }
 
         //Y坐标
@@ -1290,7 +1279,7 @@ namespace Laser_Build_1._0
         //定位坐标点
         private void button21_Click(object sender, EventArgs e)
         {
-            interpolation.Gts_Ready(Cor_x,Cor_y);
+            GTS_Fun.Interpolation.Gts_Ready(Cor_x,Cor_y);
         }
         
     }

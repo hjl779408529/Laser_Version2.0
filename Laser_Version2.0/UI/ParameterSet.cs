@@ -20,8 +20,6 @@ namespace Laser_Version2._0
         }
         //输入转换变量
         Vector Tmp_Mark = new Vector();
-        //搜寻Mark
-        Calibration Cal_Mark = new Calibration();
         //触发数据
         short Intrigue = 1;
         // 像素 毫米 比
@@ -45,7 +43,7 @@ namespace Laser_Version2._0
         /// <param name="e"></param>
         private void Set_Btn_Mark1_Click(object sender, EventArgs e)
         {
-            Cal_Mark.Calibrate_Mark();
+            Calibration.Calibrate_Mark();
             //更新显示
             Set_txt_markX1.Text = Para_List.Parameter.Mark1.X.ToString();
             Set_txt_markY1.Text = Para_List.Parameter.Mark1.Y.ToString();
@@ -199,17 +197,17 @@ namespace Laser_Version2._0
         //定位mark点1
         private void button1_Click(object sender, EventArgs e)
         {
-            Cal_Mark.Mark(Para_List.Parameter.Mark1);
+            Calibration.Mark(Para_List.Parameter.Mark1);
         }
         //定位mark点2
         private void button2_Click(object sender, EventArgs e)
         {
-            Cal_Mark.Mark(Para_List.Parameter.Mark2);
+            Calibration.Mark(Para_List.Parameter.Mark2);
         }
         //定位mark点3
         private void button3_Click(object sender, EventArgs e)
         {
-            Cal_Mark.Mark(Para_List.Parameter.Mark3);
+            Calibration.Mark(Para_List.Parameter.Mark3);
         }
         //振镜与ORG 中心差值X/mm
         private void textBox19_TextChanged(object sender, EventArgs e)
@@ -234,7 +232,7 @@ namespace Laser_Version2._0
         //矫正振镜与ORG的偏差
         private void button4_Click(object sender, EventArgs e)
         {
-            Cal_Mark.Calibrate_RTC_ORG();
+            Calibration.Calibrate_RTC_ORG();
             textBox19.Text = Para_List.Parameter.Rtc_Org.X.ToString();
             textBox18.Text = Para_List.Parameter.Rtc_Org.Y.ToString();
         }

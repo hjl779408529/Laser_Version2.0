@@ -152,12 +152,10 @@ namespace Laser_Build_1._0
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
             //释放GTS
-            GTS_Fun.Factory Gts_Close = new GTS_Fun.Factory();
-            Gts_Close.Free();
+            GTS_Fun.Factory.Free();
 
             //释放RTC控制卡
-            RTC_Fun.Factory Rtc_Close = new RTC_Fun.Factory();
-            Rtc_Close.Free();
+            RTC_Fun.Factory.Free();
 
             //保存设备参数至文件
             Para_List.Serialize_Parameter Save_Parameter = new Para_List.Serialize_Parameter();

@@ -17,9 +17,9 @@ namespace GTS_Fun
     class Factory
     {
         //定义GTS函数调用返回值
-        private short Com_Return;
+        private static short Com_Return;
 
-        public void Reset()
+        public static void Reset()
         {           
             //复位运动控制器
             Com_Return = MC.GT_Reset();
@@ -35,7 +35,7 @@ namespace GTS_Fun
             Com_Return = MC.GT_AxisOn(2);
         }
        
-        public void Free()
+        public static void Free()
         {
             //关闭运动控制器
             Com_Return = MC.GT_Close();
@@ -48,11 +48,11 @@ namespace GTS_Fun
     class Axis_Home
     {
         //命令返回值
-        public short Gts_Return;       
+        public static short Gts_Return;       
 
         //定义回零运动标志，防止多次触发
-        private bool Homing_Flag;
-        public int Home(short Axis)
+        private static bool Homing_Flag;
+        public static int Home(short Axis)
         {
             if (!Homing_Flag)
             {
@@ -265,6 +265,9 @@ namespace GTS_Fun
                     Log.Commandhandler("Axis_Home----Move to Home_OffSet err!!", 1);
                     //反转回零标志
                     Homing_Flag = !Homing_Flag;
+
+                    //置位Gts_Home标志
+                    Refresh.Gts_Home_Flag = Refresh.Axis01_Limit_Up && Refresh.Axis01_Limit_Down && Refresh.Axis01_Alarm && Refresh.Axis01_MC_Err && Refresh.Axis01_IO_EMG && Refresh.Axis02_Limit_Up && Refresh.Axis02_Limit_Down && Refresh.Axis02_Alarm && Refresh.Axis02_MC_Err && Refresh.Axis02_IO_EMG && Refresh.EXI1 ;//任意（轴限位、报警、使能关闭、急停），致使原点标志丢失
                     return 2;
                 }
                 /***************************Home_Offset偏置距离 结束********************************************/
@@ -278,10 +281,10 @@ namespace GTS_Fun
 
     class Motion
     {
-        public short Gts_Return;//指令返回变量 
+        public static short Gts_Return;//指令返回变量 
 
         //绝对定位
-        public void Abs(short Axis, decimal acc, decimal dcc, short smoothTime, decimal pos, decimal vel)
+        public static void Abs(short Axis, decimal acc, decimal dcc, short smoothTime, decimal pos, decimal vel)
         {
             //定义点位运动参数变量
             MC.TTrapPrm trapPrm = new MC.TTrapPrm();
@@ -329,7 +332,7 @@ namespace GTS_Fun
             } while ((sts & 0x400) != 0);//等待Axis规划停止
         }
         //相对定位
-        public void Inc(short Axis, decimal acc, decimal dcc, short smoothTime, decimal pos, decimal vel)
+        public static void Inc(short Axis, decimal acc, decimal dcc, short smoothTime, decimal pos, decimal vel)
         {
             //定义点位运动参数变量
             MC.TTrapPrm trapPrm = new MC.TTrapPrm();
@@ -379,7 +382,7 @@ namespace GTS_Fun
 
         }
         //Jog
-        public void Jog(short Axis, short dir, decimal JogVel, decimal JogAcc, decimal JogDcc)
+        public static void Jog(short Axis, short dir, decimal JogVel, decimal JogAcc, decimal JogDcc)
         {
             //定义Jog运动参数变量
             MC.TJogPrm prfJog = new MC.TJogPrm();
@@ -415,13 +418,13 @@ namespace GTS_Fun
             Log.Commandhandler("Motion--启动轴运动", Gts_Return);
         }
 
-        public void Smooth_Stop(short Axis)
+        public static  void Smooth_Stop(short Axis)
         {
             //停止轴运动
             Gts_Return = MC.GT_Stop(1 << (Axis - 1), 0); //平滑停止轴运动
             Log.Commandhandler("Motion--停止轴运动", Gts_Return);
         }
-        public void Emg_Stop(short Axis)
+        public static  void Emg_Stop(short Axis)
         {
             //停止轴运动
             Gts_Return = MC.GT_Stop(1 << (Axis - 1), 1 << (Axis - 1)); //紧急停止轴运动
@@ -432,13 +435,12 @@ namespace GTS_Fun
 
     class Interpolation
     {
-        public short Gts_Return;//指令返回变量        
-        readonly Prompt.Log Log = new Prompt.Log();//定义日志输出函数
-        public short run;//插补运行状态
-        private int segment;//插补剩余个数
-        private int Remain_Segment;//插补剩余个数 
-        private MC.TCrdData[] crdData = new MC.TCrdData[4096];
-        IntPtr Crd_IntPtr = new IntPtr();
+        public static short Gts_Return;//指令返回变量 
+        public static short run;//插补运行状态
+        private static int segment;//插补剩余个数
+        private static int Remain_Segment;//插补剩余个数 
+        private static MC.TCrdData[] crdData = new MC.TCrdData[4096];
+        static IntPtr Crd_IntPtr = new IntPtr();
         public static double[] Crd_Pos = new double[2];//坐标系位置
         public static List<Affinity_Matrix> affinity_Matrices;//校准数据集合
         public static bool Exit_Flag = false;
@@ -450,6 +452,7 @@ namespace GTS_Fun
             {
                 //获取标定板标定数据
                 affinity_Matrices =new List<Affinity_Matrix>(Serialize_Data.Reserialize_Affinity_Matrix ("Gts_Affinity_Matrix.xml"));
+                Log.Info("Gts仿射矫正文件加载成功！！！");
             }
             else
             {
@@ -459,7 +462,7 @@ namespace GTS_Fun
             }
             
         }
-        public void Coordination(decimal X_original, decimal Y_original)
+        public static void Coordination(decimal X_original, decimal Y_original)
         {
             //结构体变量，用于定义坐标系 
             //初始化结构体变量
@@ -497,14 +500,14 @@ namespace GTS_Fun
             Log.Commandhandler("Establish_Coordinationg--GT_SetCrdPrm", Gts_Return);
         }
 
-        public void Clear_FIFO()
+        public static void Clear_FIFO()
         {            
             
             //首先清除坐标系1、FIFO0中的数据
             Gts_Return = MC.GT_CrdClear(1, 0);
             Log.Commandhandler("Line_Interpolation--清除坐标系1、FIFO0中的数据", Gts_Return);
         }
-        public void Line_FIFO(decimal x, decimal y)
+        public static void Line_FIFO(decimal x, decimal y)
         {
             //向缓存区写入一段插补数据.in
             Gts_Return = MC.GT_LnXY(
@@ -520,7 +523,7 @@ namespace GTS_Fun
         }
 
         //圆心描述法 
-        public void Circle_C_FIFO(decimal x, decimal y, decimal Center_Start_x, decimal Center_Start_y, short dir)
+        public static void Circle_C_FIFO(decimal x, decimal y, decimal Center_Start_x, decimal Center_Start_y, short dir)
         {
             //向缓存区写入一段插补数据
             Gts_Return = MC.GT_ArcXYC(
@@ -536,7 +539,7 @@ namespace GTS_Fun
             Log.Commandhandler("Line_Interpolation--向缓存区写入一段圆心插补数据", Gts_Return);
         }
         //圆弧描述法 不能用于描述整圆
-        public void Circle_R_FIFO(decimal x, decimal y, decimal radius, short dir)
+        public static void Circle_R_FIFO(decimal x, decimal y, decimal radius, short dir)
         {
             //向缓存区写入一段插补数据
             Gts_Return = MC.GT_ArcXYR(
@@ -552,7 +555,7 @@ namespace GTS_Fun
             Log.Commandhandler("Line_Interpolation--向缓存区写入一段圆心插补数据", Gts_Return);
         }
         //转换为加工数据，添加进入FIFO      
-        public void Tran_Data(List<Interpolation_Data> Concat_Datas)
+        public static void Tran_Data(List<Interpolation_Data> Concat_Datas)
         {
             //清除FIFO 0
             Clear_FIFO();
@@ -560,90 +563,9 @@ namespace GTS_Fun
             //初始化FIFO 0前瞻模块
             Gts_Return = MC.GT_InitLookAhead(1, 0, Convert.ToDouble(Para_List.Parameter.LookAhead_EvenTime), Convert.ToDouble(Para_List.Parameter.LookAhead_MaxAcc), 4096, ref crdData[0]);
             Log.Commandhandler("Line_Interpolation--初始化FIFO 0前瞻模块", Gts_Return);
-
-            //临时定位变量
-            //Int16 End_m, End_n, Center_m, Center_n;
-            //定义处理的变量
-            //decimal Tmp_End_X;
-            //decimal Tmp_End_Y;
-            //decimal Tmp_Center_X;
-            //decimal Tmp_Center_Y;
-            //decimal Tmp_Center_Start_X;
-            //decimal Tmp_Center_Start_Y;
+            
             foreach (var o in Concat_Datas) 
-            {
-
-                ////数据矫正
-                //获取落点
-                //End_m = Convert.ToInt16(o.End_x / Para_List.Parameter.Gts_Calibration_Cell);
-                //End_n = Convert.ToInt16(o.End_y / Para_List.Parameter.Gts_Calibration_Cell);
-                //Center_m = Convert.ToInt16(o.Center_x / Para_List.Parameter.Gts_Calibration_Cell);
-                //Center_n = Convert.ToInt16(o.Center_y / Para_List.Parameter.Gts_Calibration_Cell);
-                /*
-                string sdatetime = DateTime.Now.ToString("D");
-                string delimiter = ",";
-                string strHeader = "";
-                //保存的位置和文件名称
-                string File_Path = @"./\Config/" + "Gts_List.csv";
-                strHeader += "原X坐标,原Y坐标,补偿后X坐标,补偿后Y坐标,补偿前后X差值,补偿前后Y差值";
-                bool isExit = File.Exists(File_Path);
-                StreamWriter sw = new StreamWriter(File_Path, true, Encoding.GetEncoding("gb2312"));
-                if (!isExit)
-                {
-                    sw.WriteLine(strHeader);
-                }
-                */
-                //计算最终数据
-                //终点计算
-                //Tmp_End_X = o.End_x * affinity_Matrices[End_m * Para_List.Parameter.Gts_Affinity_Col + End_n].Cos_Value + o.End_y * affinity_Matrices[End_m * Para_List.Parameter.Gts_Affinity_Col + End_n].Sin_Value + affinity_Matrices[End_m * Para_List.Parameter.Gts_Affinity_Col + End_n].Delta_X;
-                //Tmp_End_Y = o.End_y * affinity_Matrices[End_m * Para_List.Parameter.Gts_Affinity_Col + End_n].Cos_Value - o.End_x * affinity_Matrices[End_m * Para_List.Parameter.Gts_Affinity_Col + End_n].Sin_Value + affinity_Matrices[End_n * Para_List.Parameter.Gts_Affinity_Col + End_n].Delta_Y;
-                /*
-                //output rows data
-                string strRowValue = "";
-                strRowValue += o.End_x + delimiter
-                                + o.End_y + delimiter
-                                + Tmp_End_X + delimiter
-                                + Tmp_End_Y + delimiter
-                                + (Tmp_End_X - o.End_x) + delimiter
-                                + (Tmp_End_Y - o.End_y) + delimiter;
-                sw.WriteLine(strRowValue);
-                */
-
-                //圆心计算
-                //Tmp_Center_X = o.Center_x * affinity_Matrices[Center_m * Para_List.Parameter.Gts_Affinity_Col + Center_n].Cos_Value + o.Center_y * affinity_Matrices[Center_m * Para_List.Parameter.Gts_Affinity_Col + Center_n].Sin_Value + affinity_Matrices[Center_m * Para_List.Parameter.Gts_Affinity_Col + Center_n].Delta_X;
-                //Tmp_Center_Y = o.Center_y * affinity_Matrices[Center_m * Para_List.Parameter.Gts_Affinity_Col + Center_n].Cos_Value - o.Center_x * affinity_Matrices[Center_m * Para_List.Parameter.Gts_Affinity_Col + Center_n].Sin_Value + affinity_Matrices[Center_n * Para_List.Parameter.Gts_Affinity_Col + Center_n].Delta_Y;
-                /*
-                //output rows data
-                strRowValue = "";
-                strRowValue += o.Center_x + delimiter
-                                + o.Center_y + delimiter
-                                + Tmp_Center_X + delimiter
-                                + Tmp_Center_Y + delimiter
-                                + (Tmp_Center_X - o.Center_x) + delimiter
-                                + (Tmp_Center_Y - o.Center_y) + delimiter;
-                sw.WriteLine(strRowValue);
-                */
-                //圆心与差值计算
-                //Tmp_Center_Start_X = Tmp_Center_X - Tmp_End_X;
-                //Tmp_Center_Start_Y = Tmp_Center_X - Tmp_End_Y;                
-
-                //sw.Close();
-
-
-                ////替换数据
-                //if (o.Type == 1)//直线
-                //{
-                //    Line_FIFO(Tmp_End_X, Tmp_End_Y);//将直线插补数据写入
-                //}
-                //else if (o.Type == 2)//圆弧
-                //{
-                //    Circle_R_FIFO(Tmp_End_X, Tmp_End_Y, o.Circle_radius, o.Circle_dir);//将圆弧插补写入
-                //}
-                //else if (o.Type == 3)//圆形
-                //{
-                //    Circle_C_FIFO(Tmp_End_X, Tmp_End_Y, Tmp_Center_Start_X, Tmp_Center_Start_Y, o.Circle_dir);//将圆形插补写入
-                //}
-
+            {               
                 //未矫正数据
 
                 if (o.Type == 1)//直线
@@ -668,7 +590,7 @@ namespace GTS_Fun
         }
 
         //转换为加工数据，添加进入FIFO  启用校准   
-        public void Tran_Data_Correct (List<Interpolation_Data> Concat_Datas) 
+        public static void Tran_Data_Correct (List<Interpolation_Data> Concat_Datas) 
         {
             //清除FIFO 0
             Clear_FIFO();
@@ -691,10 +613,10 @@ namespace GTS_Fun
 
                 //数据矫正
                 //获取落点
-                End_m = Convert.ToInt16(o.End_x / Para_List.Parameter.Gts_Calibration_Cell);
-                End_n = Convert.ToInt16(o.End_y / Para_List.Parameter.Gts_Calibration_Cell);
-                Center_m = Convert.ToInt16(o.Center_x / Para_List.Parameter.Gts_Calibration_Cell);
-                Center_n = Convert.ToInt16(o.Center_y / Para_List.Parameter.Gts_Calibration_Cell);
+                End_m = Gts_Cal_Data_Resolve.Seek_X_Pos(o.End_x);
+                End_n = Gts_Cal_Data_Resolve.Seek_Y_Pos(o.End_y);
+                Center_m = Gts_Cal_Data_Resolve.Seek_X_Pos(o.Center_x);
+                Center_n = Gts_Cal_Data_Resolve.Seek_Y_Pos(o.Center_y);
                 /*
                 string sdatetime = DateTime.Now.ToString("D");
                 string delimiter = ",";
@@ -769,7 +691,7 @@ namespace GTS_Fun
         }
 
         //获取当前点的坐标系坐标
-        public Vector Get_Coordinate()
+        public static Vector Get_Coordinate()
         {
             Vector Result;
             double[] Curent_Pos=new double[2];
@@ -777,7 +699,7 @@ namespace GTS_Fun
             Result = new Vector(-(decimal)Curent_Pos[0]/Para_List.Parameter.Gts_Pos_reference,-(decimal)Curent_Pos[1]/ Para_List.Parameter.Gts_Pos_reference);
             return Result;
         }
-        public void Interpolation_Start()
+        public static void Interpolation_Start()
         {
 
             //缓存区延时指令
@@ -816,66 +738,16 @@ namespace GTS_Fun
 
             } while (run == 1);
         }
-
         //停止轴运动
-        public void Interpolation_Stop()
+        public static void Interpolation_Stop()
         {
             //停止轴规划运动，停止坐标系运动
             Gts_Return = MC.GT_Stop(15, 0);//783-1-4轴全停止，坐标系1、2均停止,15-1-4轴全停止；0-平滑停止运动，783-急停运动
             Log.Commandhandler("Establish_Coordinationg--GT_Stop", Gts_Return);
         }
         //XY平台运动到配合振镜切割准备点
-        public void Gts_Ready(decimal x,decimal y)
-        {
-            /*
-            //数据矫正
-            //临时定位变量
-            Int16 Tmp_m, Tmp_n;
-            //获取落点
-            Tmp_m = Convert.ToInt16(x / Para_List.Parameter.Gts_Calibration_Cell);
-            Tmp_n = Convert.ToInt16(y / Para_List.Parameter.Gts_Calibration_Cell);
-            //定义处理的变量
-            decimal Tmp_X;
-            decimal Tmp_Y;
-            //终点计算
-            Tmp_X = x * affinity_Matrices[Tmp_m * Para_List.Parameter.Gts_Affinity_Col + Tmp_n].Cos_Value + y * affinity_Matrices[Tmp_m * Para_List.Parameter.Gts_Affinity_Col + Tmp_n].Sin_Value + affinity_Matrices[Tmp_m * Para_List.Parameter.Gts_Affinity_Col + Tmp_n].Delta_X;
-            Tmp_Y = y * affinity_Matrices[Tmp_m * Para_List.Parameter.Gts_Affinity_Col + Tmp_n].Cos_Value - x * affinity_Matrices[Tmp_m * Para_List.Parameter.Gts_Affinity_Col + Tmp_n].Sin_Value + affinity_Matrices[Tmp_n * Para_List.Parameter.Gts_Affinity_Col + Tmp_n].Delta_Y;
-            //清除FIFO 0
-            Clear_FIFO();
-            //初始化FIFO 0前瞻模块
-            Gts_Return = MC.GT_InitLookAhead(1, 0, Convert.ToDouble(Para_List.Parameter.LookAhead_EvenTime), Convert.ToDouble(Para_List.Parameter.LookAhead_MaxAcc), 4096, ref crdData[0]);
-            Log.Commandhandler("Line_Interpolation--初始化FIFO 0前瞻模块", Gts_Return);
-            //直线插补定位
-            Line_FIFO(Tmp_X, Tmp_Y);//将直线插补数据写入
-            //将前瞻数据压入控制器
-            Gts_Return = MC.GT_CrdData(1, Crd_IntPtr, 0);
-            Log.Commandhandler("Line_Interpolation--将前瞻数据压入控制器", Gts_Return);
-            */
-            
-            /*
-            string sdatetime = DateTime.Now.ToString("D");
-            string delimiter = ",";
-            string strHeader = "";
-            //保存的位置和文件名称
-            string File_Path = @"./\Config/" + "Gts_Ready.csv";
-            strHeader += "原X坐标,原Y坐标,补偿后X坐标,补偿后Y坐标,补偿前后X差值,补偿前后Y差值";
-            bool isExit = File.Exists(File_Path);
-            StreamWriter sw = new StreamWriter(File_Path, true, Encoding.GetEncoding("gb2312"));
-            if (!isExit)
-            {
-                sw.WriteLine(strHeader);
-            }
-            //output rows data
-            string strRowValue = "";
-            strRowValue += x + delimiter
-                            + y + delimiter
-                            + Tmp_X + delimiter
-                            + Tmp_Y + delimiter
-                            + (Tmp_X - x) + delimiter
-                            + (Tmp_Y - y) + delimiter;
-            sw.WriteLine(strRowValue);
-            sw.Close();
-            */
+        public static void Gts_Ready(decimal x,decimal y)
+        {          
 
             //启动定位
             Interpolation_Start();
@@ -897,15 +769,15 @@ namespace GTS_Fun
             Interpolation_Start();
         }
         //XY平台运动到配合振镜切割准备点
-        public void Gts_Ready_Correct(decimal x, decimal y) 
+        public static void Gts_Ready_Correct(decimal x, decimal y) 
         {
             
             //数据矫正
             //临时定位变量
             Int16 Tmp_m, Tmp_n;
             //获取落点
-            Tmp_m = Convert.ToInt16(x / Para_List.Parameter.Gts_Calibration_Cell);
-            Tmp_n = Convert.ToInt16(y / Para_List.Parameter.Gts_Calibration_Cell);
+            Tmp_m = Gts_Cal_Data_Resolve.Seek_X_Pos(x);
+            Tmp_n = Gts_Cal_Data_Resolve.Seek_Y_Pos(y);
             //定义处理的变量
             decimal Tmp_X;
             decimal Tmp_Y;
@@ -951,7 +823,7 @@ namespace GTS_Fun
 
         }
         //XY平台运动到指定点位
-        public void Gts_Ready(Vector Point)
+        public static void Gts_Ready(Vector Point)
         {
             //清除FIFO 0
             Clear_FIFO();
@@ -966,16 +838,15 @@ namespace GTS_Fun
             //启动定位
             Interpolation_Start();            
         }
-
         //XY平台运动到指定点位
-        public void Gts_Ready_Correct(Vector Point) 
+        public static void Gts_Ready_Correct(Vector Point) 
         {
             //数据矫正
             //临时定位变量
             Int16 Tmp_m, Tmp_n;
             //获取落点
-            Tmp_m = Convert.ToInt16(Point.X / Para_List.Parameter.Gts_Calibration_Cell);
-            Tmp_n = Convert.ToInt16(Point.Y / Para_List.Parameter.Gts_Calibration_Cell);
+            Tmp_m = Gts_Cal_Data_Resolve.Seek_X_Pos(Point.X);
+            Tmp_n = Gts_Cal_Data_Resolve.Seek_Y_Pos(Point.Y);
             //定义处理的变量
             decimal Tmp_X;
             decimal Tmp_Y;
@@ -998,16 +869,15 @@ namespace GTS_Fun
 
         }
         //Gts插补 整合Rtc振镜 数据，执行
-        public void Integrate(List<List<Interpolation_Data>> Gts_Datas, UInt16 No) 
+        public static void Integrate(List<List<Interpolation_Data>> Gts_Datas, UInt16 No) 
         {            
             //追加数据
             Tran_Data(Gts_Datas[No]);
             //启动定位
             Interpolation_Start();
         }
-
         //Gts插补 特定数据，执行
-        public void Integrate(List<Interpolation_Data> Gts_Datas)
+        public static void Integrate(List<Interpolation_Data> Gts_Datas)
         {
             //追加数据
             Tran_Data(Gts_Datas);

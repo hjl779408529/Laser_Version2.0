@@ -877,8 +877,7 @@ namespace Laser_Build_1._0
             //临时数据
             Interpolation_Data Temp_Data = new Interpolation_Data();
             //获取坐标点
-            GTS_Fun.Interpolation interpolation = new GTS_Fun.Interpolation();
-            Vector Start_Coordinate = new Vector(interpolation.Get_Coordinate());
+            Vector Start_Coordinate = new Vector(GTS_Fun.Interpolation.Get_Coordinate());
             //数据处理合并为走刀直线添加起点坐标
             for (int cal = 0; cal < Result.Count; cal++)
             {

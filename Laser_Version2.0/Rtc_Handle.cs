@@ -23,8 +23,6 @@ namespace Laser_Version2._0
         decimal Distence_Y = 20;
         decimal Abs_X = 20;
         decimal Abs_Y = 20;
-        //定义RTC运动变量
-        RTC_Fun.Motion Rtc_m = new RTC_Fun.Motion();
         //建立定时器
         System.Timers.Timer Refresh_Timer = new System.Timers.Timer(200);
         //定义Home
@@ -94,27 +92,27 @@ namespace Laser_Version2._0
         //Home
         private void button1_Click(object sender, EventArgs e)
         {
-            Rtc_m.Home();
+            RTC_Fun.Motion.Home();
         }
         //X+
         private void button2_Click(object sender, EventArgs e)
         {
-            Rtc_m.Inc_X(Distence_X, Control_Type, 1);
+            RTC_Fun.Motion.Inc_X(Distence_X, Control_Type, 1);
         }
         //X-
         private void button3_Click(object sender, EventArgs e)
         {
-            Rtc_m.Inc_X(-Distence_X, Control_Type, 1);
+            RTC_Fun.Motion.Inc_X(-Distence_X, Control_Type, 1);
         }
         //Y+
         private void button5_Click(object sender, EventArgs e)
         {
-            Rtc_m.Inc_Y(Distence_Y, Control_Type, 1);
+            RTC_Fun.Motion.Inc_Y(Distence_Y, Control_Type, 1);
         }
         //Y-
         private void button4_Click(object sender, EventArgs e)
         {
-            Rtc_m.Inc_Y(-Distence_Y, Control_Type, 1);
+            RTC_Fun.Motion.Inc_Y(-Distence_Y, Control_Type, 1);
         }
         //Para_List.Parameter.Rtc_Home.X
         private void textBox4_TextChanged(object sender, EventArgs e)
@@ -161,7 +159,7 @@ namespace Laser_Version2._0
         //绝对定位
         private void button6_Click(object sender, EventArgs e)
         {
-            Rtc_m.Abs_XY(Abs_X,Abs_Y, Control_Type, 1);
+            RTC_Fun.Motion.Abs_XY(Abs_X,Abs_Y, Control_Type, 1);
         }
         //移动方式切换
         private void button7_Click(object sender, EventArgs e)
@@ -182,12 +180,12 @@ namespace Laser_Version2._0
         //激光开
         private void button8_Click(object sender, EventArgs e)
         {
-            Rtc_m.Open_Laser();
+            RTC_Fun.Motion.Open_Laser();
         }
         //激光关
         private void button9_Click(object sender, EventArgs e)
         {
-            Rtc_m.Close_Laser();
+            RTC_Fun.Motion.Close_Laser();
         }
         //Rtc位置X轴基准
         private void textBox7_TextChanged(object sender, EventArgs e)

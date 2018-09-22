@@ -97,6 +97,8 @@ namespace Prompt
         public static bool Timer_1s_Flag;
         //定义GTS函数调用返回值
         public static short Gts_Return;
+        //定义Gts X/Y轴回零标志
+        public static bool Gts_Home_Flag;
 
         public void Refresh_IO_Thread(object sender, ElapsedEventArgs e)
         {
@@ -194,6 +196,12 @@ namespace Prompt
             Axis02_Busy = (Axis02_Sta & (1 << 10)) != 0;// Axis02轴输出中
             Axis02_IO_Stop = (Axis02_Sta & (1 << 7)) != 0;// Axis02轴IO停止
             Axis02_IO_EMG = (Axis02_Sta & (1 << 8)) != 0;// Axis02轴IO急停
+
+            //刷新轴原点状态
+            if (Gts_Home_Flag)
+            {
+                Gts_Home_Flag =!(Axis01_Limit_Up || Axis01_Limit_Down || Axis01_Alarm || Axis01_MC_Err || Axis01_IO_EMG || Axis02_Limit_Up || Axis02_Limit_Down || Axis02_Alarm || Axis02_MC_Err || Axis02_IO_EMG || EXI1);//任意（轴限位、报警、使能关闭、急停），致使原点标志丢失
+            }
 
             //输出控制 0-输出，1-关闭输出
             //Cyc_control, Blow_control, Lamp_control;//定义气缸、吹气、照明控制字
