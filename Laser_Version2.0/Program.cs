@@ -21,12 +21,12 @@ namespace Laser_Build_1._0
         
         static void Main()
         {
-#if !DEBUG
+
             //运动控制卡初始化
             Initialization.Initial Laser_initial = new Initialization.Initial();
+            Laser_initial.Common_Initial();//公共初始化
             Laser_initial.Gts_Initial();//工控卡初始化
             Laser_initial.Rtc_Initial();//振镜初始化
-            Laser_initial.Common_Initial();//公共初始化
             Laser_initial.RS232_Initial();//RS232初始化
             Laser_initial.Tcp_Initial();//TCP初始化
             //运动控制卡IO监视
@@ -45,7 +45,7 @@ namespace Laser_Build_1._0
             Refresh_Timer_1s.AutoReset = true;
             Refresh_Timer_1s.Enabled = true;
             Refresh_Timer_1s.Start(); 
-#endif
+
             //窗体启动
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

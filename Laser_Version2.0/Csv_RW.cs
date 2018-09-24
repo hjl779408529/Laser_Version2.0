@@ -20,7 +20,8 @@ namespace Laser_Version2._0
         public static void SaveCSV(DataTable dt, string fileName) 
         {
             string sdatetime = DateTime.Now.ToString("D");
-            string fullPath = @"./\Config/" + fileName + " " + sdatetime + ".csv";
+            string[] tmp = fileName.Split('.');
+            string fullPath = @"./\Config/" + tmp[0] + " " + sdatetime + ".csv";
             FileInfo fi = new FileInfo(fullPath);
             if (!fi.Directory.Exists)
             {
@@ -218,6 +219,50 @@ namespace Laser_Version2._0
             //结果返回
             return Result;
         }
+
+        public static List<Double_Fit_Data> DataTable_Double_Fit_Data(DataTable New_Data) 
+        {
+            List<Double_Fit_Data> Result = new List<Double_Fit_Data>();
+            if (New_Data.Columns.Count == 10) //确定数据格式是否合适
+            {
+                for (int i = 0; i < New_Data.Rows.Count; i++)
+                {
+
+                    if ((decimal.TryParse(New_Data.Rows[i][0].ToString(), out decimal K_X1)) && (decimal.TryParse(New_Data.Rows[i][1].ToString(), out decimal K_X2)) && (decimal.TryParse(New_Data.Rows[i][2].ToString(), out decimal K_X3)) && (decimal.TryParse(New_Data.Rows[i][3].ToString(), out decimal K_X4)) && (decimal.TryParse(New_Data.Rows[i][3].ToString(), out decimal Delta_X)) && (decimal.TryParse(New_Data.Rows[i][0].ToString(), out decimal K_Y1)) && (decimal.TryParse(New_Data.Rows[i][1].ToString(), out decimal K_Y2)) && (decimal.TryParse(New_Data.Rows[i][2].ToString(), out decimal K_Y3)) && (decimal.TryParse(New_Data.Rows[i][3].ToString(), out decimal K_Y4)) && (decimal.TryParse(New_Data.Rows[i][3].ToString(), out decimal Delta_Y))) 
+                    {
+                        Result.Add(new Double_Fit_Data(K_X1, K_X2, K_X3, K_X4, Delta_X, K_Y1, K_Y2, K_Y3, K_Y4, Delta_Y));
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("数据格式异常！！！");
+            }
+            return Result;
+
+        }
+        public static DataTable Double_Fit_Data_DataTable(List<Double_Fit_Data> New_Data)
+        {
+            DataTable Result = new DataTable();
+            Result.Columns.Add("X轴 1次系数", typeof(decimal));//添加列
+            Result.Columns.Add("X轴 2次系数", typeof(decimal));
+            Result.Columns.Add("X轴 3次系数", typeof(decimal));
+            Result.Columns.Add("X轴 4次系数", typeof(decimal));
+            Result.Columns.Add("X轴 常数", typeof(decimal));
+            Result.Columns.Add("Y轴 1次系数", typeof(decimal));
+            Result.Columns.Add("Y轴 2次系数", typeof(decimal));
+            Result.Columns.Add("Y轴 3次系数", typeof(decimal));
+            Result.Columns.Add("Y轴 4次系数", typeof(decimal));
+            Result.Columns.Add("Y轴 常数", typeof(decimal));
+            //数据赋值
+            for (int i = 0; i < New_Data.Count; i++)
+            {
+                Result.Rows.Add(new object[] { New_Data[i].K_X1, New_Data[i].K_X2, New_Data[i].K_X3, New_Data[i].K_X4, New_Data[i].Delta_X, New_Data[i].K_Y1, New_Data[i].K_Y2, New_Data[i].K_Y3, New_Data[i].K_Y4, New_Data[i].Delta_Y });
+            }
+            //结果返回
+            return Result;
+        }
+
     }
 
     //编码问题目前为止，基本上没人解决，就连windows的IE的自动识别有时还识别错编码呢。--yongfa365   

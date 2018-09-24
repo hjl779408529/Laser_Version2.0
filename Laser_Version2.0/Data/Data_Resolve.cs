@@ -167,6 +167,52 @@ namespace Laser_Build_1._0
             //返回结果
             return Result;
         }
+        //处理Dxf得到多边形数据
+        public List<List<Entity_Data>> Resolve_LWPolyline(DxfDocument dxf) 
+        {
+            List<List<Entity_Data>> Result = new List<List<Entity_Data>>();
+            List<Entity_Data> Temp_List = new List<Entity_Data>(); 
+            //建立临时Entity数据
+            Entity_Data Temp_Entity_Data = new Entity_Data();
+            //临时变量
+            int i = 0, j = 0;
+            //LightWeightPolyline 多边形读取
+            if (dxf.LwPolylines.Count > 0)
+            {
+                for (i = 0; i < dxf.LwPolylines.Count; i++)
+                {
+                    if (dxf.LwPolylines[i].Layer.Name == "Laser")
+                    {
+                        for (j = 0; j < dxf.LwPolylines[i].Vertexes.Count; j++)
+                        {
+                            Temp_Entity_Data.Type = 1;//直线插补
+                            //起点计算
+                            Temp_Entity_Data.Start_x = Convert.ToDecimal(dxf.LwPolylines[i].Vertexes[j].Position.X);
+                            Temp_Entity_Data.Start_y = Convert.ToDecimal(dxf.LwPolylines[i].Vertexes[j].Position.Y);
+                            if (j <= dxf.LwPolylines[i].Vertexes.Count - 2)
+                            {
+                                Temp_Entity_Data.End_x = Convert.ToDecimal(dxf.LwPolylines[i].Vertexes[j + 1].Position.X);
+                                Temp_Entity_Data.End_y = Convert.ToDecimal(dxf.LwPolylines[i].Vertexes[j + 1].Position.Y);
+                            }
+                            else if (j == (dxf.LwPolylines[i].Vertexes.Count - 1))
+                            {
+                                Temp_Entity_Data.End_x = Convert.ToDecimal(dxf.LwPolylines[i].Vertexes[0].Position.X);
+                                Temp_Entity_Data.End_y = Convert.ToDecimal(dxf.LwPolylines[i].Vertexes[0].Position.Y);
+                            }
+                            //提交进入LwPolylines_Entity_Data
+                            Temp_List.Add(new Entity_Data(Temp_Entity_Data));
+                            Temp_Entity_Data.Empty();
+                        }
+                        //追加一个LW
+                        Result.Add(new List<Entity_Data>(Temp_List));
+                        //清空数据
+                        Temp_List.Clear();
+                    }
+                }
+            }
+            //返回结果
+            return Result;
+        }
         //处理Dxf得到Circle数据
         public List<Entity_Data> Resolve_Circle(DxfDocument dxf)
         {
@@ -302,7 +348,58 @@ namespace Laser_Build_1._0
 
             }
             return Result;
-        } 
+        }
+        //Entity数据提取完成后，使用mark点计算的仿射变换参数处理数据，获取Dxf在平台坐标系的位置、同时补偿振镜中心与坐标系原点的差值
+        public List<List<Entity_Data>> Calibration_List_Entity(List<List<Entity_Data>> List_Datas, Affinity_Matrix Mark_affinity_Matrices)
+        {
+            //建立变量 
+            List<List<Entity_Data>> Result = new List<List<Entity_Data>>();
+            List<Entity_Data> Temp_List = new List<Entity_Data>(); 
+            Entity_Data Temp_Data = new Entity_Data();
+
+            foreach (var entity_Datas in List_Datas)
+            {
+                foreach (var O in entity_Datas)
+                {
+                    //先清空
+                    Temp_Data.Empty();
+                    //后赋值
+                    Temp_Data = O;
+                    //sin取正  (当前坐标系采用) 已验证
+                    //起点计算
+                    Temp_Data.Start_x = O.Start_x * Mark_affinity_Matrices.Cos_Value + O.Start_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
+                    Temp_Data.Start_y = O.Start_y * Mark_affinity_Matrices.Cos_Value - O.Start_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
+                    //终点计算
+                    Temp_Data.End_x = O.End_x * Mark_affinity_Matrices.Cos_Value + O.End_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
+                    Temp_Data.End_y = O.End_y * Mark_affinity_Matrices.Cos_Value - O.End_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
+                    //圆心计算
+                    Temp_Data.Center_x = O.Center_x * Mark_affinity_Matrices.Cos_Value + O.Center_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
+                    Temp_Data.Center_y = O.Center_y * Mark_affinity_Matrices.Cos_Value - O.Center_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
+
+                    ////sin取负 (当前坐标系不采用)
+                    ////起点计算
+                    //Temp_Data.Start_x = O.Start_x * Mark_affinity_Matrices.Cos_Value - O.Start_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
+                    //Temp_Data.Start_y = O.Start_y * Mark_affinity_Matrices.Cos_Value + O.Start_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
+                    ////终点计算
+                    //Temp_Data.End_x = O.End_x * Mark_affinity_Matrices.Cos_Value - O.End_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
+                    //Temp_Data.End_y = O.End_y * Mark_affinity_Matrices.Cos_Value + O.End_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
+                    ////圆心计算
+                    //Temp_Data.Center_x = O.Center_x * Mark_affinity_Matrices.Cos_Value - O.Center_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
+                    //Temp_Data.Center_y = O.Center_y * Mark_affinity_Matrices.Cos_Value + O.Center_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
+
+                    //追加数据至Temp_List
+                    Temp_List.Add(new Entity_Data(Temp_Data));
+                    //清空Temp_Data
+                    Temp_Data.Empty();
+                }
+                //追加至结果数据
+                Result.Add(new List<Entity_Data>(Temp_List));
+                //清空数据
+                Temp_List.Clear();
+            }
+            
+            return Result;
+        }
         //标定板标定的整体仿射变换参数，计算的是加工轨迹的矫正值，则在生成加工轨迹数据后，统一对该数据进行标定板仿射变换参数修正
         //整理生成的List<List<Interpolation_Data>>数据，直接处理entity_Datas数据，生成的是工控卡平台的数据
         public List<Entity_Data> Calibration_Trail(List<Entity_Data> In_Data)
@@ -701,6 +798,94 @@ namespace Laser_Build_1._0
             //返回结果
             return Result;
         }
+        //数据处理 生成LWPolyline整合数据  振镜和平台联合加工
+        public List<List<Interpolation_Data>> Integrate_LWPolyline(List<List<Entity_Data>> LWPolyline_Datas)
+        {
+            //结果变量
+            List<List<Interpolation_Data>> Result = new List<List<Interpolation_Data>>();
+            //临时变量
+            List<Interpolation_Data> Temp_List_Data = new List<Interpolation_Data>();
+            Interpolation_Data Temp_Data = new Interpolation_Data();
+            int i = 0;
+            int j = 0;
+            //初始清除
+            Temp_List_Data.Clear();
+            Temp_Data.Empty();
+
+            //处理LWPolyline生成加工数据 初始数据  属于切入加工起点，故强制使用
+            //直线插补走刀
+            //强制生成独立的 List<Interpolation_Data>，并将其写入独立运行数据块 List<List<Interpolation_Data>>
+            if (LWPolyline_Datas.Count > 0)
+            {
+                //选择任意切入点
+                Temp_Data.Type = 1;//直线插补
+                Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
+                Temp_Data.Lift_flag = 1;//抬刀标志
+                Temp_Data.Repeat = 0;//重复次数
+                Temp_Data.End_x = LWPolyline_Datas[0][0].Start_x;
+                Temp_Data.End_y = LWPolyline_Datas[0][0].Start_y;
+                //整合数据生成代码
+                Temp_List_Data.Add(new Interpolation_Data(Temp_Data));//追加数据
+                Result.Add(new List<Interpolation_Data>(Temp_List_Data));//追加数据
+
+                //清空数据
+                Temp_Data.Empty();
+                Temp_List_Data.Clear();
+
+                //整理数据
+                do
+                {
+                    
+                    for (i = 0;i< LWPolyline_Datas.Count;i++)
+                    {
+                        for (j = 0; j < LWPolyline_Datas[i].Count; j++)
+                        {
+                            Temp_Data.Type = 1;//直线插补
+                            Temp_Data.Lift_flag = 0;//抬刀标志
+                            Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
+                            Temp_Data.Repeat = 0;//重复次数
+                            Temp_Data.Start_x = LWPolyline_Datas[i][j].Start_x;
+                            Temp_Data.Start_y = LWPolyline_Datas[i][j].Start_y;
+                            Temp_Data.End_x = LWPolyline_Datas[i][j].End_x;
+                            Temp_Data.End_y = LWPolyline_Datas[i][j].End_y;
+                            //整合数据生成代码
+                            Temp_List_Data.Add(new Interpolation_Data(Temp_Data));//追加数据
+                            Temp_Data.Empty(); //清空数据
+                        }
+                        Result.Add(new List<Interpolation_Data>(Temp_List_Data));//追加数据
+                        //清空数据
+                        Temp_Data.Empty();
+                        Temp_List_Data.Clear();
+                        //删除数据
+                        LWPolyline_Datas.RemoveAt(i);
+
+                        if (LWPolyline_Datas.Count >= 1)
+                        { 
+                            //跳刀直接使用直线插补走刀
+                            //插补进入新的目标起点
+                            Temp_Data.Type = 1;//直线插补
+                            Temp_Data.Lift_flag = 1;//抬刀标志
+                            Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
+                            Temp_Data.Repeat = 0;//重复次数
+                            Temp_Data.End_x = LWPolyline_Datas[0][0].Start_x;
+                            Temp_Data.End_y = LWPolyline_Datas[0][0].Start_y;
+                            //整合数据生成代码
+                            Temp_List_Data.Add(new Interpolation_Data(Temp_Data));//追加数据
+                            Result.Add(new List<Interpolation_Data>(Temp_List_Data));//追加数据
+
+                            //清空数据
+                            Temp_Data.Empty();
+                            Temp_List_Data.Clear();
+                        }
+                        //跳出for循环
+                        break;
+                    }                    
+                    
+                } while (LWPolyline_Datas.Count > 0);//实体LWPolyline数据未清空完
+            }
+            //返回结果
+            return Result;
+        }
         //数据处理 生成Circle整合数据  振镜和平台联合加工
         public List<List<Interpolation_Data>> Integrate_Circle(List<Entity_Data> Circle_Datas)
         {
@@ -727,11 +912,9 @@ namespace Laser_Build_1._0
                 Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
                 Temp_Data.Lift_flag = 1;//抬刀标志
                 Temp_Data.Repeat = 0;//重复次数
-                Temp_Data.End_x = Circle_Datas[0].Start_x;
-                Temp_Data.End_y = Circle_Datas[0].Start_y; ;
+                Temp_Data.End_x = Circle_Datas[0].End_x;
+                Temp_Data.End_y = Circle_Datas[0].End_y; 
 
-                //提交进入Arc_Data
-                Single_Data.Add(new Interpolation_Data(Temp_Data));
                 //整合数据生成代码
                 Temp_List_Data.Add(new Interpolation_Data(Temp_Data));//追加数据
                 Result.Add(new List<Interpolation_Data>(Temp_List_Data));//追加数据
@@ -743,127 +926,213 @@ namespace Laser_Build_1._0
                 //整理数据
                 do
                 {
-                    Num = Circle_Datas.Count;//记录当前Circle_Datas.Count,用于判断数据是否处理完或封闭寻找结束
-                    for (i = 0; i < Circle_Datas.Count; i++)
+                    for ( i = 0;i<Circle_Datas.Count; i++ )
                     {
-                        if (Differ_Err(Single_Data[Single_Data.Count - 1].End_x, Single_Data[Single_Data.Count - 1].End_y, Circle_Datas[i].End_x, Circle_Datas[i].End_y))//当前插补终点是 数据处理终点 同CAD文件规定方向相反
-                        {
-                            Temp_Data.Type = 3;//圆形插补
-                            Temp_Data.Lift_flag = 0;//抬刀标志
-                            Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
-                            Temp_Data.Repeat = 0;//重复次数
-                            //圆形半径
-                            Temp_Data.Circle_radius = Circle_Datas[i].Circle_radius;
-                            //圆形起点坐标
-                            Temp_Data.Start_x = Circle_Datas[i].End_x;
-                            Temp_Data.Start_y = Circle_Datas[i].End_y;
-                            //插补终点坐标
-                            Temp_Data.End_x = Circle_Datas[i].End_x;
-                            Temp_Data.End_y = Circle_Datas[i].End_y;
-                            //圆心坐标
-                            Temp_Data.Center_x = Circle_Datas[i].Center_x;
-                            Temp_Data.Center_y = Circle_Datas[i].Center_y;
-
-                            //圆弧插补 圆心坐标 减去 插补起点坐标
-                            Temp_Data.Center_Start_x = Temp_Data.Center_x - Temp_Data.End_x;
-                            Temp_Data.Center_Start_y = Temp_Data.Center_y - Temp_Data.End_y;
-
-                            //圆形方向
-                            Temp_Data.Circle_dir = Circle_Datas[i].Circle_dir;
-
-                            //提交进入Arc_Data
-                            Single_Data.Add(new Interpolation_Data(Temp_Data));
-
-                            //整合数据生成代码
-                            Temp_List_Data.Add(new Interpolation_Data(Temp_Data));//追加数据
-
-                            //清空数据
-                            Temp_Data.Empty();
-
-                            //删除当前的Entity数据
-                            Circle_Datas.RemoveAt(i);
-                            break;
-                        }
-                        else if (Differ_Err(Single_Data[Single_Data.Count - 1].End_x, Single_Data[Single_Data.Count - 1].End_y, Circle_Datas[i].Start_x, Circle_Datas[i].Start_y)) //当前插补终点是 数据处理起点 同CAD文件规定方向相同
-                        {
-
-                            Temp_Data.Type = 3;//圆形插补
-                            Temp_Data.Lift_flag = 0;//抬刀标志
-                            Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
-                            Temp_Data.Repeat = 0;//重复次数
-                            //圆形半径
-                            Temp_Data.Circle_radius = Circle_Datas[i].Circle_radius;
-                            //圆形起点坐标
-                            Temp_Data.Start_x = Circle_Datas[i].Start_x;
-                            Temp_Data.Start_y = Circle_Datas[i].Start_y;
-                            //插补终点坐标
-                            Temp_Data.End_x = Circle_Datas[i].Start_x;
-                            Temp_Data.End_y = Circle_Datas[i].Start_y;
-                            //圆心坐标
-                            Temp_Data.Center_x = Circle_Datas[i].Center_x;
-                            Temp_Data.Center_y = Circle_Datas[i].Center_y;
-
-                            //圆弧插补 圆心坐标 减去 插补起点坐标
-                            Temp_Data.Center_Start_x = Temp_Data.Center_x - Temp_Data.End_x;
-                            Temp_Data.Center_Start_y = Temp_Data.Center_y - Temp_Data.End_y;
-
-                            //圆形方向
-                            Temp_Data.Circle_dir = Circle_Datas[i].Circle_dir;
-
-                            //提交进入Arc_Data
-                            Single_Data.Add(new Interpolation_Data(Temp_Data));
-                            //整合数据生成代码
-                            Temp_List_Data.Add(new Interpolation_Data(Temp_Data));//追加数据
-
-                            //清空数据
-                            Temp_Data.Empty();
-
-                            //删除当前的Entity数据
-                            Circle_Datas.RemoveAt(i);
-                            break;
-                        }
-                    }
-
-                    //寻找结束点失败，意味着重新开始新的 线段或圆弧
-                    if ((Circle_Datas.Count != 0) && (Num != 0) && (Num == Circle_Datas.Count))
-                    {
-
-                        //整合数据生成代码 当前结束的封闭图形加工数据
-                        Result.Add(new List<Interpolation_Data>(Temp_List_Data));//追加数据
-                        //清空数据
-                        Temp_Data.Empty();
-                        Temp_List_Data.Clear();
-
-                        //跳刀直接使用直线插补走刀
-                        //插补进入新的目标起点
-                        Temp_Data.Type = 1;//直线插补
-                        Temp_Data.Lift_flag = 1;//抬刀标志
+                        Temp_Data.Type = 3;//圆形插补
+                        Temp_Data.Lift_flag = 0;//抬刀标志
                         Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
                         Temp_Data.Repeat = 0;//重复次数
-                        Temp_Data.End_x = Circle_Datas[0].Start_x;
-                        Temp_Data.End_y = Circle_Datas[0].Start_y;
-
-                        //提交进入Arc_Data
-                        Single_Data.Add(new Interpolation_Data(Temp_Data));
+                        //圆形半径
+                        Temp_Data.Circle_radius = Circle_Datas[i].Circle_radius;
+                        //圆形起点坐标
+                        Temp_Data.Start_x = Circle_Datas[i].End_x;
+                        Temp_Data.Start_y = Circle_Datas[i].End_y;
+                        //插补终点坐标
+                        Temp_Data.End_x = Circle_Datas[i].End_x;
+                        Temp_Data.End_y = Circle_Datas[i].End_y;
+                        //圆心坐标
+                        Temp_Data.Center_x = Circle_Datas[i].Center_x;
+                        Temp_Data.Center_y = Circle_Datas[i].Center_y;
+                        //圆弧插补 圆心坐标 减去 插补起点坐标
+                        Temp_Data.Center_Start_x = Temp_Data.Center_x - Temp_Data.End_x;
+                        Temp_Data.Center_Start_y = Temp_Data.Center_y - Temp_Data.End_y;
+                        //圆形方向
+                        Temp_Data.Circle_dir = Circle_Datas[i].Circle_dir;
 
                         //整合数据生成代码
                         Temp_List_Data.Add(new Interpolation_Data(Temp_Data));//追加数据
                         Result.Add(new List<Interpolation_Data>(Temp_List_Data));//追加数据
-
                         //清空数据
                         Temp_Data.Empty();
                         Temp_List_Data.Clear();
-                    }
-                    else if ((Circle_Datas.Count == 0) && (Num == 1))
-                    {
-                        //整合数据生成代码 当前结束的封闭图形加工数据
-                        Result.Add(new List<Interpolation_Data>(Temp_List_Data));//追加数据
-                       //清空数据
-                        Temp_List_Data.Clear();
+
+                        //删除当前的Entity数据
+                        Circle_Datas.RemoveAt(i);
+
+                        if (Circle_Datas.Count>=1)
+                        {
+                            //跳刀直接使用直线插补走刀
+                            //插补进入新的目标起点
+                            Temp_Data.Type = 1;//直线插补
+                            Temp_Data.Lift_flag = 1;//抬刀标志
+                            Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
+                            Temp_Data.Repeat = 0;//重复次数
+                            Temp_Data.End_x = Circle_Datas[0].End_x;
+                            Temp_Data.End_y = Circle_Datas[0].End_y;
+
+                            //整合数据生成代码
+                            Temp_List_Data.Add(new Interpolation_Data(Temp_Data));//追加数据
+                            Result.Add(new List<Interpolation_Data>(Temp_List_Data));//追加数据
+
+                            //清空数据
+                            Temp_Data.Empty();
+                            Temp_List_Data.Clear();
+                        }
+                        
+                        //跳出For循环
+                        break;
                     }
 
                 } while (Circle_Datas.Count > 0);//实体Circle数据未清空完
             }
+                                                                           
+            ////处理Circle生成加工数据 初始数据  属于切入加工起点，故强制使用
+            ////直线插补走刀
+            ////强制生成独立的 List<Interpolation_Data>，并将其写入独立运行数据块 List<List<Interpolation_Data>>
+            //if (Circle_Datas.Count > 0)
+            //{
+            //    //选择任意切入点
+            //    Temp_Data.Type = 1;//直线插补
+            //    Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
+            //    Temp_Data.Lift_flag = 1;//抬刀标志
+            //    Temp_Data.Repeat = 0;//重复次数
+            //    Temp_Data.End_x = Circle_Datas[0].Start_x;
+            //    Temp_Data.End_y = Circle_Datas[0].Start_y; ;
+
+            //    //提交进入Arc_Data
+            //    Single_Data.Add(new Interpolation_Data(Temp_Data));
+            //    //整合数据生成代码
+            //    Temp_List_Data.Add(new Interpolation_Data(Temp_Data));//追加数据
+            //    Result.Add(new List<Interpolation_Data>(Temp_List_Data));//追加数据
+
+            //    //清空数据
+            //    Temp_Data.Empty();
+            //    Temp_List_Data.Clear();
+
+            //    //整理数据
+            //    do
+            //    {
+            //        Num = Circle_Datas.Count;//记录当前Circle_Datas.Count,用于判断数据是否处理完或封闭寻找结束
+            //        for (i = 0; i < Circle_Datas.Count; i++)
+            //        {
+            //            if (Differ_Err(Single_Data[Single_Data.Count - 1].End_x, Single_Data[Single_Data.Count - 1].End_y, Circle_Datas[i].End_x, Circle_Datas[i].End_y))//当前插补终点是 数据处理终点 同CAD文件规定方向相反
+            //            {
+            //                Temp_Data.Type = 3;//圆形插补
+            //                Temp_Data.Lift_flag = 0;//抬刀标志
+            //                Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
+            //                Temp_Data.Repeat = 0;//重复次数
+            //                //圆形半径
+            //                Temp_Data.Circle_radius = Circle_Datas[i].Circle_radius;
+            //                //圆形起点坐标
+            //                Temp_Data.Start_x = Circle_Datas[i].End_x;
+            //                Temp_Data.Start_y = Circle_Datas[i].End_y;
+            //                //插补终点坐标
+            //                Temp_Data.End_x = Circle_Datas[i].End_x;
+            //                Temp_Data.End_y = Circle_Datas[i].End_y;
+            //                //圆心坐标
+            //                Temp_Data.Center_x = Circle_Datas[i].Center_x;
+            //                Temp_Data.Center_y = Circle_Datas[i].Center_y;
+
+            //                //圆弧插补 圆心坐标 减去 插补起点坐标
+            //                Temp_Data.Center_Start_x = Temp_Data.Center_x - Temp_Data.End_x;
+            //                Temp_Data.Center_Start_y = Temp_Data.Center_y - Temp_Data.End_y;
+
+            //                //圆形方向
+            //                Temp_Data.Circle_dir = Circle_Datas[i].Circle_dir;
+
+            //                //提交进入Arc_Data
+            //                Single_Data.Add(new Interpolation_Data(Temp_Data));
+
+            //                //整合数据生成代码
+            //                Temp_List_Data.Add(new Interpolation_Data(Temp_Data));//追加数据
+
+            //                //清空数据
+            //                Temp_Data.Empty();
+
+            //                //删除当前的Entity数据
+            //                Circle_Datas.RemoveAt(i);
+            //                break;
+            //            }
+            //            else if (Differ_Err(Single_Data[Single_Data.Count - 1].End_x, Single_Data[Single_Data.Count - 1].End_y, Circle_Datas[i].Start_x, Circle_Datas[i].Start_y)) //当前插补终点是 数据处理起点 同CAD文件规定方向相同
+            //            {
+
+            //                Temp_Data.Type = 3;//圆形插补
+            //                Temp_Data.Lift_flag = 0;//抬刀标志
+            //                Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
+            //                Temp_Data.Repeat = 0;//重复次数
+            //                //圆形半径
+            //                Temp_Data.Circle_radius = Circle_Datas[i].Circle_radius;
+            //                //圆形起点坐标
+            //                Temp_Data.Start_x = Circle_Datas[i].Start_x;
+            //                Temp_Data.Start_y = Circle_Datas[i].Start_y;
+            //                //插补终点坐标
+            //                Temp_Data.End_x = Circle_Datas[i].Start_x;
+            //                Temp_Data.End_y = Circle_Datas[i].Start_y;
+            //                //圆心坐标
+            //                Temp_Data.Center_x = Circle_Datas[i].Center_x;
+            //                Temp_Data.Center_y = Circle_Datas[i].Center_y;
+
+            //                //圆弧插补 圆心坐标 减去 插补起点坐标
+            //                Temp_Data.Center_Start_x = Temp_Data.Center_x - Temp_Data.End_x;
+            //                Temp_Data.Center_Start_y = Temp_Data.Center_y - Temp_Data.End_y;
+
+            //                //圆形方向
+            //                Temp_Data.Circle_dir = Circle_Datas[i].Circle_dir;
+
+            //                //提交进入Arc_Data
+            //                Single_Data.Add(new Interpolation_Data(Temp_Data));
+            //                //整合数据生成代码
+            //                Temp_List_Data.Add(new Interpolation_Data(Temp_Data));//追加数据
+
+            //                //清空数据
+            //                Temp_Data.Empty();
+
+            //                //删除当前的Entity数据
+            //                Circle_Datas.RemoveAt(i);
+            //                break;
+            //            }
+            //        }
+
+            //        //寻找结束点失败，意味着重新开始新的 线段或圆弧
+            //        if ((Circle_Datas.Count != 0) && (Num != 0) && (Num == Circle_Datas.Count))
+            //        {
+
+            //            //整合数据生成代码 当前结束的封闭图形加工数据
+            //            Result.Add(new List<Interpolation_Data>(Temp_List_Data));//追加数据
+            //            //清空数据
+            //            Temp_Data.Empty();
+            //            Temp_List_Data.Clear();
+
+            //            //跳刀直接使用直线插补走刀
+            //            //插补进入新的目标起点
+            //            Temp_Data.Type = 1;//直线插补
+            //            Temp_Data.Lift_flag = 1;//抬刀标志
+            //            Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
+            //            Temp_Data.Repeat = 0;//重复次数
+            //            Temp_Data.End_x = Circle_Datas[0].Start_x;
+            //            Temp_Data.End_y = Circle_Datas[0].Start_y;
+
+            //            //提交进入Arc_Data
+            //            Single_Data.Add(new Interpolation_Data(Temp_Data));
+
+            //            //整合数据生成代码
+            //            Temp_List_Data.Add(new Interpolation_Data(Temp_Data));//追加数据
+            //            Result.Add(new List<Interpolation_Data>(Temp_List_Data));//追加数据
+
+            //            //清空数据
+            //            Temp_Data.Empty();
+            //            Temp_List_Data.Clear();
+            //        }
+            //        else if ((Circle_Datas.Count == 0) && (Num == 1))
+            //        {
+            //            //整合数据生成代码 当前结束的封闭图形加工数据
+            //            Result.Add(new List<Interpolation_Data>(Temp_List_Data));//追加数据
+            //           //清空数据
+            //            Temp_List_Data.Clear();
+            //        }
+
+            //    } while (Circle_Datas.Count > 0);//实体Circle数据未清空完
+            //}
             //返回结果
             return Result;
         }

@@ -288,7 +288,8 @@ namespace Laser_Build_1._0
             //建立临时数据存储组 和数据矫正
             List<Entity_Data> Arc_Line_Entity_Data = new List<Entity_Data>(Data_Cal.Calibration_Entity(Data_Cal.Resolve_Arc_Line(dxf), Para_List.Parameter.Trans_Affinity));//提取圆弧直线数据
             List<Entity_Data> Circle_Entity_Data = new List<Entity_Data>(Data_Cal.Calibration_Entity(Data_Cal.Resolve_Circle(dxf), Para_List.Parameter.Trans_Affinity));//提取圆数据
-            List<Entity_Data> LwPolylines_Entity_Data = new List<Entity_Data>(Data_Cal.Calibration_Entity(Data_Cal.Resolve_LightWeightPolyline(dxf), Para_List.Parameter.Trans_Affinity)); //提取多边形数据            
+            //List<Entity_Data> LwPolylines_Entity_Data = new List<Entity_Data>(Data_Cal.Calibration_Entity(Data_Cal.Resolve_LightWeightPolyline(dxf), Para_List.Parameter.Trans_Affinity)); //提取多边形数据            
+            List < List <Entity_Data> >  LwPolylines_Entity_Data = new List<List<Entity_Data>> (Data_Cal.Calibration_List_Entity(Data_Cal.Resolve_LWPolyline(dxf), Para_List.Parameter.Trans_Affinity)); //提取多边形数据            
             Mark_Circle_Entity_Data = new List<Entity_Data>(Data_Cal.Resolve_Mark_Point(dxf));//提取Mark点数据
 
             ////建立临时
@@ -298,10 +299,10 @@ namespace Laser_Build_1._0
             //    richTextBox1.AppendText("未矫正 序号：" + j + "  Type：" + Arc_Line_Entity_Data[j].Type + "  起点X：" + Arc_Line_Entity_Data[j].Start_x + "  起点Y：：" + Arc_Line_Entity_Data[j].Start_y + "  终点X：" + Arc_Line_Entity_Data[j].End_x + "  终点Y：" + Arc_Line_Entity_Data[j].End_y + "\r\n");
             //}
             //圆弧直线数据矫正
-            for (j = 0; j < Arc_Line_Entity_Data.Count; j++)
-            {
-                richTextBox1.AppendText("已矫正 序号：" + j + "  Type：" + Arc_Line_Entity_Data[j].Type + "  起点X：" + Arc_Line_Entity_Data[j].Start_x + "  起点Y：：" + Arc_Line_Entity_Data[j].Start_y + "  终点X：" + Arc_Line_Entity_Data[j].End_x + "  终点Y：" + Arc_Line_Entity_Data[j].End_y + "\r\n");
-            }
+            //for (j = 0; j < Arc_Line_Entity_Data.Count; j++)
+            //{
+            //    richTextBox1.AppendText("已矫正 序号：" + j + "  Type：" + Arc_Line_Entity_Data[j].Type + "  起点X：" + Arc_Line_Entity_Data[j].Start_x + "  起点Y：：" + Arc_Line_Entity_Data[j].Start_y + "  终点X：" + Arc_Line_Entity_Data[j].End_x + "  终点Y：" + Arc_Line_Entity_Data[j].End_y + "\r\n");
+            //}
 
             //直线圆弧数据转换为  轨迹加工数据
             Arc_Line_List_Data = new List<List<Interpolation_Data>>(Data_Cal.Integrate_Arc_Line(Arc_Line_Entity_Data));
@@ -309,28 +310,30 @@ namespace Laser_Build_1._0
             LwPolyline_List_Data = new List<List<Interpolation_Data>>(Data_Cal.Integrate_LWPolyline(LwPolylines_Entity_Data));
             //整圆数据转换为  轨迹加工数据
             Circle_List_Data = new List<List<Interpolation_Data>>(Data_Cal.Integrate_Circle(Circle_Entity_Data));
-            //圆形、直线和圆弧、多边形Rtc+Gts 融合
+            //圆形、直线和圆弧、多边形Rtc+Gts 
             Concat_List_Data.Clear();//清空数据
             Concat_List_Data.AddRange(Arc_Line_List_Data);
             Concat_List_Data.AddRange(LwPolyline_List_Data);
             Concat_List_Data.AddRange(Circle_List_Data);
 
-            for (i = 0; i < Concat_List_Data.Count; i++)
-            {
-                richTextBox1.AppendText("序号：" + i + "\r\n");
-                for (j = 0; j < Concat_List_Data[i].Count; j++)
-                {
-                    richTextBox1.AppendText("    子数据；"+ j +"  Type：" + Concat_List_Data[i][j].Type + "  加工类型Work：" + Concat_List_Data[i][j].Work + "  Gts起点x：" + Concat_List_Data[i][j].Gts_x + "  Gts起点y：" + Concat_List_Data[i][j].Gts_y + "  Rtc起点x：" + Concat_List_Data[i][j].Rtc_x + "  Rtc起点y：" + Concat_List_Data[i][j].Rtc_y + "  加工起点 Start_x：" + Concat_List_Data[i][j].Start_x + "  加工起点 Start_y：" + Concat_List_Data[i][j].Start_y + "  加工终点 End_x：" + Concat_List_Data[i][j].End_x + "  加工终点 End_y：" + Concat_List_Data[i][j].End_y + "  圆心X：" + Concat_List_Data[i][j].Center_x + "  圆心Y：" + Concat_List_Data[i][j].Center_y + "  角度：" + Concat_List_Data[i][j].Angle + "  圆弧方向：" + Concat_List_Data[i][j].Circle_dir + "\r\n");
-                }
-            }
+            //for (i = 0; i < Concat_List_Data.Count; i++)
+            //{
+            //    richTextBox1.AppendText("序号：" + i + "\r\n");
+            //    for (j = 0; j < Concat_List_Data[i].Count; j++)
+            //    {
+            //        richTextBox1.AppendText("    子数据；"+ j +"  Type：" + Concat_List_Data[i][j].Type + "  加工类型Work：" + Concat_List_Data[i][j].Work + "  Gts起点x：" + Concat_List_Data[i][j].Gts_x + "  Gts起点y：" + Concat_List_Data[i][j].Gts_y + "  Rtc起点x：" + Concat_List_Data[i][j].Rtc_x + "  Rtc起点y：" + Concat_List_Data[i][j].Rtc_y + "  加工起点 Start_x：" + Concat_List_Data[i][j].Start_x + "  加工起点 Start_y：" + Concat_List_Data[i][j].Start_y + "  加工终点 End_x：" + Concat_List_Data[i][j].End_x + "  加工终点 End_y：" + Concat_List_Data[i][j].End_y + "  圆心X：" + Concat_List_Data[i][j].Center_x + "  圆心Y：" + Concat_List_Data[i][j].Center_y + "  角度：" + Concat_List_Data[i][j].Angle + "  圆弧方向：" + Concat_List_Data[i][j].Circle_dir + "\r\n");
+            //    }
+            //}
+
             //调试信息
+            richTextBox1.AppendText("数据提取完成！！！！" + "\r\n");
+            richTextBox1.AppendText("----------------------------------" + "\r\n");
             richTextBox1.AppendText("直线和圆弧 数据计数：" + Arc_Line_List_Data.Count + "\r\n");
             richTextBox1.AppendText("多边形插补 数据计数：" + LwPolyline_List_Data.Count + "\r\n");
             richTextBox1.AppendText("圆形插补 数据计数：" + Circle_List_Data.Count + "\r\n");
             richTextBox1.AppendText("融合数据 数据计数：" + Concat_List_Data.Count + "\r\n");
             //输出调试信息
             int Count_CN = 0;
-            richTextBox1.AppendText("华丽的分割线------------------------" + "\r\n");
             for (i = 0; i < Concat_List_Data.Count; i++)
             {
                 Count_CN = Count_CN + Concat_List_Data[i].Count;
@@ -784,23 +787,23 @@ namespace Laser_Build_1._0
             PointF[] srcTri = new PointF[3];
             PointF[] dstTri = new PointF[3];
             //点位数据赋值
-            ////标准数据
-            //srcTri[0] = new PointF(0, 0);
-            //srcTri[1] = new PointF(5, 0);
-            //srcTri[2] = new PointF(0, 5);
-            ////仿射数据
-            //dstTri[0] = new PointF(0+10, 0+11);
-            //dstTri[1] = new PointF(Convert.ToSingle(5.0 * Math.Cos(Math.PI / 9)+10), Convert.ToSingle(-5.0 * Math.Sin(Math.PI / 9)+11));
-            //dstTri[2] = new PointF(Convert.ToSingle(5.0 * Math.Sin(Math.PI / 9)+10), Convert.ToSingle(5.0 * Math.Cos(Math.PI / 9)+11));
-
             //标准数据
-            srcTri[0] = new PointF(Convert.ToSingle(Para_List.Parameter.Mark_Dxf1.X), Convert.ToSingle(Para_List.Parameter.Mark_Dxf1.Y));
-            srcTri[1] = new PointF(Convert.ToSingle(Para_List.Parameter.Mark_Dxf2.X), Convert.ToSingle(Para_List.Parameter.Mark_Dxf2.Y));
-            srcTri[2] = new PointF(Convert.ToSingle(Para_List.Parameter.Mark_Dxf3.X), Convert.ToSingle(Para_List.Parameter.Mark_Dxf3.Y));
+            srcTri[0] = new PointF(0, 0);
+            srcTri[1] = new PointF(5, 0);
+            srcTri[2] = new PointF(0, 5);
             //仿射数据
-            dstTri[0] = new PointF(Convert.ToSingle(Para_List.Parameter.Mark1.X), Convert.ToSingle(Para_List.Parameter.Mark1.Y));
-            dstTri[1] = new PointF(Convert.ToSingle(Para_List.Parameter.Mark2.X), Convert.ToSingle(Para_List.Parameter.Mark2.Y));
-            dstTri[2] = new PointF(Convert.ToSingle(Para_List.Parameter.Mark3.X), Convert.ToSingle(Para_List.Parameter.Mark3.Y));
+            dstTri[0] = new PointF(0 + 10, 0 + 11);
+            dstTri[1] = new PointF(Convert.ToSingle(5.0 * Math.Cos(Math.PI / 9) + 10), Convert.ToSingle(-5.0 * Math.Sin(Math.PI / 9) + 11));
+            dstTri[2] = new PointF(Convert.ToSingle(5.0 * Math.Sin(Math.PI / 9) + 10), Convert.ToSingle(5.0 * Math.Cos(Math.PI / 9) + 11));
+
+            ////标准数据
+            //srcTri[0] = new PointF(Convert.ToSingle(Para_List.Parameter.Mark_Dxf1.X), Convert.ToSingle(Para_List.Parameter.Mark_Dxf1.Y));
+            //srcTri[1] = new PointF(Convert.ToSingle(Para_List.Parameter.Mark_Dxf2.X), Convert.ToSingle(Para_List.Parameter.Mark_Dxf2.Y));
+            //srcTri[2] = new PointF(Convert.ToSingle(Para_List.Parameter.Mark_Dxf3.X), Convert.ToSingle(Para_List.Parameter.Mark_Dxf3.Y));
+            ////仿射数据
+            //dstTri[0] = new PointF(Convert.ToSingle(Para_List.Parameter.Mark1.X), Convert.ToSingle(Para_List.Parameter.Mark1.Y));
+            //dstTri[1] = new PointF(Convert.ToSingle(Para_List.Parameter.Mark2.X), Convert.ToSingle(Para_List.Parameter.Mark2.Y));
+            //dstTri[2] = new PointF(Convert.ToSingle(Para_List.Parameter.Mark3.X), Convert.ToSingle(Para_List.Parameter.Mark3.Y));
 
             //计算仿射变换矩阵
             mat = CvInvoke.GetAffineTransform(srcTri, dstTri);
@@ -826,18 +829,18 @@ namespace Laser_Build_1._0
             {
                 richTextBox1.AppendText("按顺序数组元素:" + temp_array[i] + "\r\n");
             }
-            //获取仿射变换参数
-            decimal Cos_Arc = Convert.ToDecimal(temp_array[0]);//余弦值
-            decimal Sin_Arc =-Convert.ToDecimal(temp_array[1]);//正弦值
-            decimal Delta_x = Convert.ToDecimal(temp_array[2]);//x方向偏移
-            decimal Delta_y = Convert.ToDecimal(temp_array[5]);//y方向偏移
+            ////获取仿射变换参数
+            //decimal Cos_Arc = Convert.ToDecimal(temp_array[0]);//余弦值
+            //decimal Sin_Arc = Convert.ToDecimal(temp_array[1]);//正弦值
+            //decimal Delta_x = Convert.ToDecimal(temp_array[2]);//x方向偏移
+            //decimal Delta_y = Convert.ToDecimal(temp_array[5]);//y方向偏移
 
-            richTextBox1.AppendText("Mark1 X：" + Para_List.Parameter.Mark1.X + "  Y：" + Para_List.Parameter.Mark1.Y + "\r\n");
-            richTextBox1.AppendText("Mark2 X：" + Para_List.Parameter.Mark2.X + "  Y：" + Para_List.Parameter.Mark2.Y + "\r\n");
-            richTextBox1.AppendText("Mark3 X：" + Para_List.Parameter.Mark3.X + "  Y：" + Para_List.Parameter.Mark3.Y + "\r\n");
-            richTextBox1.AppendText("Mark_Dxf1 X：" + Para_List.Parameter.Mark_Dxf1.X + "  Y：" + Para_List.Parameter.Mark_Dxf1.Y + "\r\n");
-            richTextBox1.AppendText("Mark_Dxf2 X：" + Para_List.Parameter.Mark_Dxf2.X + "  Y：" + Para_List.Parameter.Mark_Dxf2.Y + "\r\n");
-            richTextBox1.AppendText("Mark_Dxf3 X：" + Para_List.Parameter.Mark_Dxf3.X + "  Y：" + Para_List.Parameter.Mark_Dxf3.Y + "\r\n");
+            //richTextBox1.AppendText("Mark1 X：" + Para_List.Parameter.Mark1.X + "  Y：" + Para_List.Parameter.Mark1.Y + "\r\n");
+            //richTextBox1.AppendText("Mark2 X：" + Para_List.Parameter.Mark2.X + "  Y：" + Para_List.Parameter.Mark2.Y + "\r\n");
+            //richTextBox1.AppendText("Mark3 X：" + Para_List.Parameter.Mark3.X + "  Y：" + Para_List.Parameter.Mark3.Y + "\r\n");
+            //richTextBox1.AppendText("Mark_Dxf1 X：" + Para_List.Parameter.Mark_Dxf1.X + "  Y：" + Para_List.Parameter.Mark_Dxf1.Y + "\r\n");
+            //richTextBox1.AppendText("Mark_Dxf2 X：" + Para_List.Parameter.Mark_Dxf2.X + "  Y：" + Para_List.Parameter.Mark_Dxf2.Y + "\r\n");
+            //richTextBox1.AppendText("Mark_Dxf3 X：" + Para_List.Parameter.Mark_Dxf3.X + "  Y：" + Para_List.Parameter.Mark_Dxf3.Y + "\r\n");
 
             //坐标转换值
 
@@ -1023,16 +1026,17 @@ namespace Laser_Build_1._0
             //        richTextBox1.AppendText("Type：" + Compensation_Concat_List_Data[i][j].Type + "  加工类型Work：" + Compensation_Concat_List_Data[i][j].Work + "  加工起点 Start_x：" + Compensation_Concat_List_Data[i][j].Start_x + "  加工起点 Start_y：" + Compensation_Concat_List_Data[i][j].Start_y + "  加工终点 End_x：" + Compensation_Concat_List_Data[i][j].End_x + "  加工终点 End_y：" + Compensation_Concat_List_Data[i][j].End_y + "  圆心X：" + Compensation_Concat_List_Data[i][j].Center_x + "  圆心Y：" + Compensation_Concat_List_Data[i][j].Center_y + "\r\n");
             //    }
             //}
+            richTextBox1.AppendText("RTC和GTS数据拆分完成！！！！" + "\r\n");
             richTextBox1.AppendText("RTC和GTS数据拆分后数据数量：" + Rtc_List_Data.Count + "\r\n");
-            for (int i = 0; i < Rtc_List_Data.Count; i++)
-            {
-                richTextBox1.AppendText("No：" + i + "  加工类型Work：" + Rtc_List_Data[i][0].Work + "  Gts起点x：" + Rtc_List_Data[i][0].Gts_x + "  Gts起点y：" + Rtc_List_Data[i][0].Gts_y + "\r\n");
+            //for (int i = 0; i < Rtc_List_Data.Count; i++)
+            //{
+            //    richTextBox1.AppendText("No：" + i + "  加工类型Work：" + Rtc_List_Data[i][0].Work + "  Gts起点x：" + Rtc_List_Data[i][0].Gts_x + "  Gts起点y：" + Rtc_List_Data[i][0].Gts_y + "\r\n");
 
-                for (int j = 0; j < Rtc_List_Data[i].Count; j++)
-                {
-                    richTextBox1.AppendText("      Type：" + Rtc_List_Data[i][j].Type + "  加工类型Work：" + Rtc_List_Data[i][j].Work + "  Gts起点x：" + Rtc_List_Data[i][j].Gts_x + "  Gts起点y：" + Rtc_List_Data[i][j].Gts_y + "  Rtc起点x：" + Rtc_List_Data[i][j].Rtc_x + "  Rtc起点y：" + Rtc_List_Data[i][j].Rtc_y + "  加工起点 Start_x：" + Rtc_List_Data[i][j].Start_x + "  加工起点 Start_y：" + Rtc_List_Data[i][j].Start_y + "  加工终点 End_x：" + Rtc_List_Data[i][j].End_x + "  加工终点 End_y：" + Rtc_List_Data[i][j].End_y + "  圆心X：" + Rtc_List_Data[i][j].Center_x + "  圆心Y：" + Rtc_List_Data[i][j].Center_y + "  角度：" + Rtc_List_Data[i][j].Angle + "  圆弧方向：" + Rtc_List_Data[i][j].Circle_dir + "\r\n");
-                }
-            }
+            //    for (int j = 0; j < Rtc_List_Data[i].Count; j++)
+            //    {
+            //        richTextBox1.AppendText("      Type：" + Rtc_List_Data[i][j].Type + "  加工类型Work：" + Rtc_List_Data[i][j].Work + "  Gts起点x：" + Rtc_List_Data[i][j].Gts_x + "  Gts起点y：" + Rtc_List_Data[i][j].Gts_y + "  Rtc起点x：" + Rtc_List_Data[i][j].Rtc_x + "  Rtc起点y：" + Rtc_List_Data[i][j].Rtc_y + "  加工起点 Start_x：" + Rtc_List_Data[i][j].Start_x + "  加工起点 Start_y：" + Rtc_List_Data[i][j].Start_y + "  加工终点 End_x：" + Rtc_List_Data[i][j].End_x + "  加工终点 End_y：" + Rtc_List_Data[i][j].End_y + "  圆心X：" + Rtc_List_Data[i][j].Center_x + "  圆心Y：" + Rtc_List_Data[i][j].Center_y + "  角度：" + Rtc_List_Data[i][j].Angle + "  圆弧方向：" + Rtc_List_Data[i][j].Circle_dir + "\r\n");
+            //    }
+            //}
 
         }
         //定位坐标原点
@@ -1215,8 +1219,41 @@ namespace Laser_Build_1._0
             richTextBox1.AppendText("矫正后数据 X：" + Para_List.Parameter.Cal_Org.X+", Y：" + Para_List.Parameter.Cal_Org.Y + "\r\n");
 
         }
-        //csv文件测试
+        //生成GTS校准数据
         private void Csv_Test_Click(object sender, EventArgs e)
+        {
+            string File_Name = "";
+            if (Para_List.Parameter.Gts_Affinity_Type == 1)
+            {
+                File_Name = "Gts_Affinity_Matrix_All.xml";
+            }
+            else
+            {
+                File_Name = "Gts_Affinity_Matrix_Three.xml";
+            }
+            //生成全新GTS校准文件
+            Gts_Cal_Data_Resolve.Resolve(Serialize_Data.Reserialize_Correct_Data("Gts_Correct_Data.xml"));
+
+            //将Affinity数据转换为CSV并保存
+            CSV_RW.SaveCSV(CSV_RW.Affinity_Matrix_DataTable(Serialize_Data.Reserialize_Affinity_Matrix(File_Name)), File_Name);
+
+            //将Gts Correctdata数据转换为CSV并保存
+            //CSV_RW.SaveCSV(CSV_RW.Correct_Data_DataTable(Serialize_Data.Reserialize_Correct_Data("Gts_Correct_Data.xml")), "Gts_Correct_Data");
+
+        }
+        //RTC矫正加工
+        private void Correct_Rtc_Click(object sender, EventArgs e)
+        {
+            //Thread Integrate_thread = new Thread(Integrated_Correct_Start);
+            ///Integrate_thread.Start();
+            Integrated_Correct_Start();
+        }
+        private void Integrated_Correct_Start()
+        {
+            Integrated.Rts_Gts_Correct(Rtc_List_Data);
+        }
+        //生成RTC校准数据
+        private void Rtc_Affinity_Click(object sender, EventArgs e)
         {
             //RTC数据转换为 可用格式
             //DataTable New_Data =  CSV_RW.OpenCSV(@"./\Config/Rtc_Correct.csv");
@@ -1236,30 +1273,8 @@ namespace Laser_Build_1._0
             //    }
             //}
             //Serialize_Data.Serialize_Correct_Data(Result, "Rtc_Correct_Data.xml");
-
             //生成RTC仿射变换参数
-            //Rtc_Cal_Data_Resolve.Resolve(Serialize_Data.Reserialize_Correct_Data("Rtc_Correct_Data.xml"));
-
-            //生成全新GTS校准文件
-            //Gts_Cal_Data_Resolve.Resolve(Serialize_Data.Reserialize_Correct_Data("Correct_Data_9.22.xml"));
-
-            //将Affinity数据转换为CSV并保存
-            //CSV_RW.SaveCSV(CSV_RW.Affinity_Matrix_DataTable(Serialize_Data.Reserialize_Affinity_Matrix("Gts_Affinity_Matrix.xml")), "Gts_Affinity_Matrix");
-
-            //将Gts Correctdata数据转换为CSV并保存
-            CSV_RW.SaveCSV(CSV_RW.Correct_Data_DataTable(Serialize_Data.Reserialize_Correct_Data("Gts_Correct_Data.xml")), "Gts_Correct_Data");
-
-        }
-        //RTC矫正加工
-        private void Correct_Rtc_Click(object sender, EventArgs e)
-        {
-            //Thread Integrate_thread = new Thread(Integrated_Correct_Start);
-            ///Integrate_thread.Start();
-            Integrated_Correct_Start();
-        }
-        private void Integrated_Correct_Start()
-        {
-            Integrated.Rts_Gts_Correct(Rtc_List_Data);
+            Rtc_Cal_Data_Resolve.Resolve(Serialize_Data.Reserialize_Correct_Data("Rtc_Correct_Data.xml"));
         }
 
         //Y坐标

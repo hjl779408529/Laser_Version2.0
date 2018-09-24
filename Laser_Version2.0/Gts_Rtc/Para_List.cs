@@ -54,14 +54,14 @@ namespace Para_List
         private static decimal gts_calibration_cell = 2.5m;//标定板尺寸 mm
         private static Int16 gts_calibration_row = Convert.ToInt16((gts_calibration_x_len / gts_calibration_cell) + 1), gts_calibration_col = Convert.ToInt16((gts_calibration_y_len / gts_calibration_cell) + 1);//标定板的点位gts_calibration横纵数
         private static Int16 gts_affinity_row = Convert.ToInt16(gts_calibration_x_len / gts_calibration_cell), gts_affinity_col = Convert.ToInt16(gts_calibration_y_len / gts_calibration_cell);//仿射变换的横纵数 
-        
+        private static Int16 gts_affinity_type = 1;//GTS坐标矫正变换类型 0-三对点 小区块数据 仿射变换、1-全部点对 仿射变换
         //RTC坐标矫正变换参数
         private static decimal rtc_calibration_x_len = 350.0m;//标定板X尺寸 mm
         private static decimal rtc_calibration_y_len = 350.0m;//标定板Y尺寸 mm
         private static decimal rtc_calibration_cell = 2.5m;//标定板尺寸 mm
         private static Int16 rtc_calibration_row = Convert.ToInt16((rtc_calibration_x_len / rtc_calibration_cell) + 1), rtc_calibration_col = Convert.ToInt16((rtc_calibration_y_len / rtc_calibration_cell) + 1);//标定板的点位rtc_calibration横纵数
         private static Int16 rtc_affinity_row = Convert.ToInt16(rtc_calibration_x_len / rtc_calibration_cell), rtc_affinity_col = Convert.ToInt16(rtc_calibration_y_len / rtc_calibration_cell);//仿射变换的横纵数 
-
+        private static Int16 rtc_affinity_type = 1;//RTC坐标矫正变换类型 0-三对点 小区块数据 仿射变换、1-全部点对 仿射变换
         //加工坐标系
         private static Vector work = new Vector(0,0);//加工坐标系
         //刀具绝对坐标 激光光束相对于整个平台绝对坐标
@@ -182,6 +182,7 @@ namespace Para_List
         public static Int16 Gts_Calibration_Row { get => gts_calibration_row; set => gts_calibration_row = value; }
         public static Int16 Gts_Affinity_Col { get => gts_affinity_col; set => gts_affinity_col = value; }
         public static Int16 Gts_Affinity_Row { get => gts_affinity_row; set => gts_affinity_row = value; }
+        public static Int16 Gts_Affinity_Type { get => gts_affinity_type; set => gts_affinity_type = value; }        
         public static decimal Rtc_Calibration_X_Len { get => rtc_calibration_x_len; set => rtc_calibration_x_len = value; }
         public static decimal Rtc_Calibration_Y_Len { get => rtc_calibration_y_len; set => rtc_calibration_y_len = value; }
         public static decimal Rtc_Calibration_Cell { get => rtc_calibration_cell; set => rtc_calibration_cell = value; }
@@ -189,6 +190,7 @@ namespace Para_List
         public static Int16 Rtc_Calibration_Row { get => rtc_calibration_row; set => rtc_calibration_row = value; }
         public static Int16 Rtc_Affinity_Col { get => rtc_affinity_col; set => rtc_affinity_col = value; }
         public static Int16 Rtc_Affinity_Row { get => rtc_affinity_row; set => rtc_affinity_row = value; }
+        public static Int16 Rtc_Affinity_Type { get => rtc_affinity_type; set => rtc_affinity_type = value; }        
         public static Vector Work { get => work; set => work = value; }
         public static Vector Laser { get => laser; set => laser = value; }
         public static decimal Cam_Reference { get => cam_reference; set => cam_reference = value; }
@@ -292,7 +294,7 @@ namespace Para_List
         private decimal gts_calibration_cell;//标定板间隔尺寸 mm 
         private Int16 gts_calibration_row, gts_calibration_col;//标定板的点位gts_calibration横纵数 row-行-x  col-列-y
         private Int16 gts_affinity_row, gts_affinity_col;//仿射变换的横纵数 row-行-x  col-列-y
-
+        private Int16 gts_affinity_type = 1;//GTS坐标矫正变换类型 0-三对点 小区块数据 仿射变换、1-全部点对 仿射变换
 
         //RTC坐标矫正变换参数
         private decimal rtc_calibration_x_len;//标定板X尺寸 mm
@@ -300,6 +302,7 @@ namespace Para_List
         private decimal rtc_calibration_cell;//标定板间隔尺寸 mm 
         private Int16 rtc_calibration_row, rtc_calibration_col;//标定板的点位rtc_calibration横纵数 row-行-x  col-列-y
         private Int16 rtc_affinity_row, rtc_affinity_col;//仿射变换的横纵数 row-行-x  col-列-y
+        private Int16 rtc_affinity_type = 1;//RTC坐标矫正变换类型 0-三对点 小区块数据 仿射变换、1-全部点对 仿射变换
 
         //加工坐标系
         private Vector work;//加工坐标系
@@ -410,6 +413,7 @@ namespace Para_List
         public Int16 Gts_Calibration_Row { get => gts_calibration_row; set => gts_calibration_row = value; }
         public Int16 Gts_Affinity_Col { get => gts_affinity_col; set => gts_affinity_col = value; }
         public Int16 Gts_Affinity_Row { get => gts_affinity_row; set => gts_affinity_row = value; }
+        public Int16 Gts_Affinity_Type { get => gts_affinity_type; set => gts_affinity_type = value; }
         public decimal Rtc_Calibration_X_Len { get => rtc_calibration_x_len; set => rtc_calibration_x_len = value; }
         public decimal Rtc_Calibration_Y_Len { get => rtc_calibration_y_len; set => rtc_calibration_y_len = value; }
         public decimal Rtc_Calibration_Cell { get => rtc_calibration_cell; set => rtc_calibration_cell = value; }
@@ -417,6 +421,7 @@ namespace Para_List
         public Int16 Rtc_Calibration_Row { get => rtc_calibration_row; set => rtc_calibration_row = value; }
         public Int16 Rtc_Affinity_Col { get => rtc_affinity_col; set => rtc_affinity_col = value; }
         public Int16 Rtc_Affinity_Row { get => rtc_affinity_row; set => rtc_affinity_row = value; }
+        public Int16 Rtc_Affinity_Type { get => rtc_affinity_type; set => rtc_affinity_type = value; }
         public Vector Work { get => work; set => work = value; }
         public Vector Laser { get => laser; set => laser = value; }
         public decimal Cam_Reference { get => cam_reference; set => cam_reference = value; }
@@ -518,6 +523,7 @@ namespace Para_List
                 Gts_Calibration_Row = Para_List.Parameter.Gts_Calibration_Row,
                 Gts_Affinity_Col = Para_List.Parameter.Gts_Affinity_Col,
                 Gts_Affinity_Row = Para_List.Parameter.Gts_Affinity_Row,
+                Gts_Affinity_Type = Para_List.Parameter.Gts_Affinity_Type,
                 Rtc_Calibration_X_Len = Para_List.Parameter.Rtc_Calibration_X_Len,
                 Rtc_Calibration_Y_Len = Para_List.Parameter.Rtc_Calibration_Y_Len,
                 Rtc_Calibration_Cell = Para_List.Parameter.Rtc_Calibration_Cell,
@@ -525,6 +531,7 @@ namespace Para_List
                 Rtc_Calibration_Row = Para_List.Parameter.Rtc_Calibration_Row,
                 Rtc_Affinity_Col = Para_List.Parameter.Rtc_Affinity_Col,
                 Rtc_Affinity_Row = Para_List.Parameter.Rtc_Affinity_Row,
+                Rtc_Affinity_Type = Para_List.Parameter.Rtc_Affinity_Type,
                 Work = Para_List.Parameter.Work,
                 Laser = Para_List.Parameter.Laser,
                 Cam_Reference = Para_List.Parameter.Cam_Reference,
@@ -648,6 +655,7 @@ namespace Para_List
                     Para_List.Parameter.Gts_Calibration_Row = parameter.Gts_Calibration_Row;
                     Para_List.Parameter.Gts_Affinity_Col = parameter.Gts_Affinity_Col;
                     Para_List.Parameter.Gts_Affinity_Row = parameter.Gts_Affinity_Row;
+                    Para_List.Parameter.Gts_Affinity_Type = parameter.Gts_Affinity_Type;
                     Para_List.Parameter.Rtc_Calibration_X_Len = parameter.Rtc_Calibration_X_Len;
                     Para_List.Parameter.Rtc_Calibration_Y_Len = parameter.Rtc_Calibration_Y_Len;
                     Para_List.Parameter.Rtc_Calibration_Cell = parameter.Rtc_Calibration_Cell;
@@ -655,6 +663,7 @@ namespace Para_List
                     Para_List.Parameter.Rtc_Calibration_Row = parameter.Rtc_Calibration_Row;
                     Para_List.Parameter.Rtc_Affinity_Col = parameter.Rtc_Affinity_Col;
                     Para_List.Parameter.Rtc_Affinity_Row = parameter.Rtc_Affinity_Row;
+                    Para_List.Parameter.Rtc_Affinity_Type = parameter.Rtc_Affinity_Type;
                     Para_List.Parameter.Work = parameter.Work;
                     Para_List.Parameter.Laser = parameter.Laser;
                     Para_List.Parameter.Cam_Reference = parameter.Cam_Reference;

@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.Xml.Serialization;
 using GTS;
 using Laser_Build_1._0;
+using Laser_Version2._0;
 using Prompt;
 
 namespace GTS_Fun
@@ -443,22 +444,48 @@ namespace GTS_Fun
         static IntPtr Crd_IntPtr = new IntPtr();
         public static double[] Crd_Pos = new double[2];//坐标系位置
         public static List<Affinity_Matrix> affinity_Matrices;//校准数据集合
+        public static List<Double_Fit_Data> Fit_Matrices;//线性拟合校准数据集合 
         public static bool Exit_Flag = false;
         //构造函数
         public Interpolation()
         {
-            string File_Path = @"./\Config/" + "Gts_Affinity_Matrix.xml";
+            string File_Name = "";
+            if (Para_List.Parameter.Gts_Affinity_Type == 1)//点阵匹配
+            {
+                File_Name = "Gts_Affinity_Matrix_All.xml";
+            }
+            else if (Para_List.Parameter.Gts_Affinity_Type == 2)//直线拟合
+            {
+                File_Name = "Gts_Line_Fit_Data.csv";
+            }
+            else
+            {
+                File_Name = "Gts_Affinity_Matrix_Three.xml";
+            }            
+            string File_Path = @"./\Config/" + File_Name;
             if (File.Exists(File_Path))
             {
-                //获取标定板标定数据
-                affinity_Matrices =new List<Affinity_Matrix>(Serialize_Data.Reserialize_Affinity_Matrix ("Gts_Affinity_Matrix.xml"));
-                Log.Info("Gts仿射矫正文件加载成功！！！");
+                //获取矫正数据
+                if (Para_List.Parameter.Gts_Affinity_Type == 1)//点阵匹配
+                {                    
+                    affinity_Matrices = new List<Affinity_Matrix>(Serialize_Data.Reserialize_Affinity_Matrix(File_Name));
+                }
+                else if (Para_List.Parameter.Gts_Affinity_Type == 2)//直线拟合
+                {
+                    Fit_Matrices = new List<Double_Fit_Data>(CSV_RW.DataTable_Double_Fit_Data(CSV_RW.OpenCSV(File_Path)));
+                }
+                else
+                {
+                    affinity_Matrices = new List<Affinity_Matrix>(Serialize_Data.Reserialize_Affinity_Matrix(File_Name));
+                }                
+                Log.Info("Gts矫正文件加载成功！！！");
             }
             else
             {
                 affinity_Matrices = new List<Affinity_Matrix>();
-                MessageBox.Show("Gts仿射矫正文件不存在，禁止加工，请检查！");
-                Log.Info("Gts仿射矫正文件不存在，禁止加工，请检查！");
+                Fit_Matrices = new List<Double_Fit_Data>();
+                MessageBox.Show("Gts矫正文件不存在，禁止加工，请检查！");
+                Log.Info("Gts矫正文件不存在，禁止加工，请检查！");
             }
             
         }
@@ -592,82 +619,76 @@ namespace GTS_Fun
         //转换为加工数据，添加进入FIFO  启用校准   
         public static void Tran_Data_Correct (List<Interpolation_Data> Concat_Datas) 
         {
+#if !DEBUG
             //清除FIFO 0
             Clear_FIFO();
 
             //初始化FIFO 0前瞻模块
             Gts_Return = MC.GT_InitLookAhead(1, 0, Convert.ToDouble(Para_List.Parameter.LookAhead_EvenTime), Convert.ToDouble(Para_List.Parameter.LookAhead_MaxAcc), 4096, ref crdData[0]);
             Log.Commandhandler("Line_Interpolation--初始化FIFO 0前瞻模块", Gts_Return);
-
+#endif
             //临时定位变量
             Int16 End_m, End_n, Center_m, Center_n;
             //定义处理的变量
-            decimal Tmp_End_X;
-            decimal Tmp_End_Y;
-            decimal Tmp_Center_X;
-            decimal Tmp_Center_Y;
-            decimal Tmp_Center_Start_X;
-            decimal Tmp_Center_Start_Y;
+            Vector Tmp_Point = new Vector();
+            decimal Tmp_End_X = 0.0m;
+            decimal Tmp_End_Y = 0.0m;
+            decimal Tmp_Center_X = 0.0m;
+            decimal Tmp_Center_Y = 0.0m;
+            decimal Tmp_Center_Start_X = 0.0m;
+            decimal Tmp_Center_Start_Y = 0.0m;
             foreach (var o in Concat_Datas)
             {
-
-                //数据矫正
-                //获取落点
-                End_m = Gts_Cal_Data_Resolve.Seek_X_Pos(o.End_x);
-                End_n = Gts_Cal_Data_Resolve.Seek_Y_Pos(o.End_y);
-                Center_m = Gts_Cal_Data_Resolve.Seek_X_Pos(o.Center_x);
-                Center_n = Gts_Cal_Data_Resolve.Seek_Y_Pos(o.Center_y);
-                /*
-                string sdatetime = DateTime.Now.ToString("D");
-                string delimiter = ",";
-                string strHeader = "";
-                保存的位置和文件名称
-                string File_Path = @"./\Config/" + "Gts_List.csv";
-                strHeader += "原X坐标,原Y坐标,补偿后X坐标,补偿后Y坐标,补偿前后X差值,补偿前后Y差值";
-                bool isExit = File.Exists(File_Path);
-                StreamWriter sw = new StreamWriter(File_Path, true, Encoding.GetEncoding("gb2312"));
-                if (!isExit)
+                if (Para_List.Parameter.Gts_Affinity_Type == 2)
                 {
-                    sw.WriteLine(strHeader);
+                    Tmp_Point = new Vector(Gts_Cal_Data_Resolve.Get_Line_Fit_Coordinate(o.End_x,o.End_y, Fit_Matrices));
+                    Tmp_End_X = Tmp_Point.X;
+                    Tmp_End_Y = Tmp_Point.Y;
+                    Tmp_Point = new Vector(Gts_Cal_Data_Resolve.Get_Line_Fit_Coordinate(o.Center_x, o.Center_y, Fit_Matrices));
+                    Tmp_Center_X = Tmp_Point.X;
+                    Tmp_Center_Y = Tmp_Point.Y;
                 }
-                */
-                //计算最终数据
-                //终点计算
-                Tmp_End_X = o.End_x * affinity_Matrices[End_m * Para_List.Parameter.Gts_Affinity_Col + End_n].Cos_Value + o.End_y * affinity_Matrices[End_m * Para_List.Parameter.Gts_Affinity_Col + End_n].Sin_Value + affinity_Matrices[End_m * Para_List.Parameter.Gts_Affinity_Col + End_n].Delta_X;
-                Tmp_End_Y = o.End_y * affinity_Matrices[End_m * Para_List.Parameter.Gts_Affinity_Col + End_n].Cos_Value - o.End_x * affinity_Matrices[End_m * Para_List.Parameter.Gts_Affinity_Col + End_n].Sin_Value + affinity_Matrices[End_n * Para_List.Parameter.Gts_Affinity_Col + End_n].Delta_Y;
-                /*
-                output rows data
-                string strRowValue = "";
-                strRowValue += o.End_x + delimiter
-                                + o.End_y + delimiter
-                                + Tmp_End_X + delimiter
-                                + Tmp_End_Y + delimiter
-                                + (Tmp_End_X - o.End_x) + delimiter
-                                + (Tmp_End_Y - o.End_y) + delimiter;
-                sw.WriteLine(strRowValue);
-                */
+                else
+                {
+                    //数据矫正
+                    //获取落点
+                    End_m = Gts_Cal_Data_Resolve.Seek_X_Pos(o.End_x);
+                    End_n = Gts_Cal_Data_Resolve.Seek_Y_Pos(o.End_y);
+                    Center_m = Gts_Cal_Data_Resolve.Seek_X_Pos(o.Center_x);
+                    Center_n = Gts_Cal_Data_Resolve.Seek_Y_Pos(o.Center_y);
+                    //计算最终数据
+                    //终点计算
+                    if (affinity_Matrices.Count > 1)
+                    {
+                        Tmp_End_X = o.End_x * affinity_Matrices[End_n * Para_List.Parameter.Gts_Affinity_Col + End_m].Cos_Value + o.End_y * affinity_Matrices[End_n * Para_List.Parameter.Gts_Affinity_Col + End_m].Sin_Value + affinity_Matrices[End_n * Para_List.Parameter.Gts_Affinity_Col + End_m].Delta_X;
+                        Tmp_End_Y = o.End_y * affinity_Matrices[End_n * Para_List.Parameter.Gts_Affinity_Col + End_m].Cos_Value - o.End_x * affinity_Matrices[End_n * Para_List.Parameter.Gts_Affinity_Col + End_m].Sin_Value + affinity_Matrices[End_n * Para_List.Parameter.Gts_Affinity_Col + End_m].Delta_Y;
 
-                //圆心计算
-                Tmp_Center_X = o.Center_x * affinity_Matrices[Center_m * Para_List.Parameter.Gts_Affinity_Col + Center_n].Cos_Value + o.Center_y * affinity_Matrices[Center_m * Para_List.Parameter.Gts_Affinity_Col + Center_n].Sin_Value + affinity_Matrices[Center_m * Para_List.Parameter.Gts_Affinity_Col + Center_n].Delta_X;
-                Tmp_Center_Y = o.Center_y * affinity_Matrices[Center_m * Para_List.Parameter.Gts_Affinity_Col + Center_n].Cos_Value - o.Center_x * affinity_Matrices[Center_m * Para_List.Parameter.Gts_Affinity_Col + Center_n].Sin_Value + affinity_Matrices[Center_n * Para_List.Parameter.Gts_Affinity_Col + Center_n].Delta_Y;
-                /*
-                output rows data
-                strRowValue = "";
-                strRowValue += o.Center_x + delimiter
-                                + o.Center_y + delimiter
-                                + Tmp_Center_X + delimiter
-                                + Tmp_Center_Y + delimiter
-                                + (Tmp_Center_X - o.Center_x) + delimiter
-                                + (Tmp_Center_Y - o.Center_y) + delimiter;
-                sw.WriteLine(strRowValue);
-                */
+                    }
+                    else if ((affinity_Matrices.Count > 0) && (affinity_Matrices.Count == 1))
+                    {
+                        Tmp_End_X = o.End_x * affinity_Matrices[0].Cos_Value + o.End_y * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_X;
+                        Tmp_End_Y = o.End_y * affinity_Matrices[0].Cos_Value - o.End_x * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_Y;
+                    }
+                    //圆心计算
+                    if (affinity_Matrices.Count > 1)
+                    {
+                        Tmp_Center_X = o.Center_x * affinity_Matrices[Center_n * Para_List.Parameter.Gts_Affinity_Col + Center_m].Cos_Value + o.Center_y * affinity_Matrices[Center_n * Para_List.Parameter.Gts_Affinity_Col + Center_m].Sin_Value + affinity_Matrices[Center_n * Para_List.Parameter.Gts_Affinity_Col + Center_m].Delta_X;
+                        Tmp_Center_Y = o.Center_y * affinity_Matrices[Center_n * Para_List.Parameter.Gts_Affinity_Col + Center_m].Cos_Value - o.Center_x * affinity_Matrices[Center_n * Para_List.Parameter.Gts_Affinity_Col + Center_m].Sin_Value + affinity_Matrices[Center_n * Para_List.Parameter.Gts_Affinity_Col + Center_m].Delta_Y;
+
+                    }
+                    else if ((affinity_Matrices.Count > 0) && (affinity_Matrices.Count == 1))
+                    {
+                        Tmp_Center_X = o.Center_x * affinity_Matrices[0].Cos_Value + o.Center_y * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_X;
+                        Tmp_Center_Y = o.Center_y * affinity_Matrices[0].Cos_Value - o.Center_x * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_Y;
+                    }
+                }               
+
+
                 //圆心与差值计算
                 Tmp_Center_Start_X = Tmp_Center_X - Tmp_End_X;
                 Tmp_Center_Start_Y = Tmp_Center_X - Tmp_End_Y;
 
-                //sw.Close();
-
-
+#if !DEBUG
                 //替换数据
                 if (o.Type == 1)//直线
                 {
@@ -681,13 +702,14 @@ namespace GTS_Fun
                 {
                     Circle_C_FIFO(Tmp_End_X, Tmp_End_Y, Tmp_Center_Start_X, Tmp_Center_Start_Y, o.Circle_dir);//将圆形插补写入
                 }
-                
-            }
+#endif
 
+            }
+#if !DEBUG
             //将前瞻数据压入控制器
             Gts_Return = MC.GT_CrdData(1, Crd_IntPtr, 0);
             Log.Commandhandler("Line_Interpolation--将前瞻数据压入控制器", Gts_Return);
-
+#endif
         }
 
         //获取当前点的坐标系坐标
@@ -775,16 +797,37 @@ namespace GTS_Fun
             //数据矫正
             //临时定位变量
             Int16 Tmp_m, Tmp_n;
+            Vector Tmp_Point = new Vector();
             //获取落点
             Tmp_m = Gts_Cal_Data_Resolve.Seek_X_Pos(x);
             Tmp_n = Gts_Cal_Data_Resolve.Seek_Y_Pos(y);
             //定义处理的变量
-            decimal Tmp_X;
-            decimal Tmp_Y;
-            //终点计算
-            Tmp_X = x * affinity_Matrices[Tmp_m * Para_List.Parameter.Gts_Affinity_Col + Tmp_n].Cos_Value + y * affinity_Matrices[Tmp_m * Para_List.Parameter.Gts_Affinity_Col + Tmp_n].Sin_Value + affinity_Matrices[Tmp_m * Para_List.Parameter.Gts_Affinity_Col + Tmp_n].Delta_X;
-            Tmp_Y = y * affinity_Matrices[Tmp_m * Para_List.Parameter.Gts_Affinity_Col + Tmp_n].Cos_Value - x * affinity_Matrices[Tmp_m * Para_List.Parameter.Gts_Affinity_Col + Tmp_n].Sin_Value + affinity_Matrices[Tmp_n * Para_List.Parameter.Gts_Affinity_Col + Tmp_n].Delta_Y;
+            decimal Tmp_X = 0.0m;
+            decimal Tmp_Y = 0.0m;
+            if (Para_List.Parameter.Gts_Affinity_Type == 2)
+            {
+                Tmp_Point = new Vector(Gts_Cal_Data_Resolve.Get_Line_Fit_Coordinate(x, y, Fit_Matrices));
+                Tmp_X = Tmp_Point.X;
+                Tmp_Y = Tmp_Point.Y;
+            }
+            else
+            {
+                //终点计算
+                if (affinity_Matrices.Count > 1)
+                {
+                    Tmp_X = x * affinity_Matrices[Tmp_n * Para_List.Parameter.Gts_Affinity_Col + Tmp_m].Cos_Value + y * affinity_Matrices[Tmp_n * Para_List.Parameter.Gts_Affinity_Col + Tmp_m].Sin_Value + affinity_Matrices[Tmp_n * Para_List.Parameter.Gts_Affinity_Col + Tmp_m].Delta_X;
+                    Tmp_Y = y * affinity_Matrices[Tmp_n * Para_List.Parameter.Gts_Affinity_Col + Tmp_m].Cos_Value - x * affinity_Matrices[Tmp_n * Para_List.Parameter.Gts_Affinity_Col + Tmp_m].Sin_Value + affinity_Matrices[Tmp_n * Para_List.Parameter.Gts_Affinity_Col + Tmp_m].Delta_Y;
+
+                }
+                else if ((affinity_Matrices.Count > 0) && (affinity_Matrices.Count == 1))
+                {
+                    Tmp_X = x * affinity_Matrices[0].Cos_Value + y * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_X;
+                    Tmp_Y = y * affinity_Matrices[0].Cos_Value - x * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_Y;
+                }
+            }
             
+
+#if !DEBUG
             //清除FIFO 0
             Clear_FIFO();
             //初始化FIFO 0前瞻模块
@@ -795,14 +838,14 @@ namespace GTS_Fun
             //将前瞻数据压入控制器
             Gts_Return = MC.GT_CrdData(1, Crd_IntPtr, 0);
             Log.Commandhandler("Line_Interpolation--将前瞻数据压入控制器", Gts_Return);          
+#endif
 
-            /*
             string sdatetime = DateTime.Now.ToString("D");
             string delimiter = ",";
             string strHeader = "";
             //保存的位置和文件名称
-            string File_Path = @"./\Config/" + "Gts_Ready.csv";
-            strHeader += "原X坐标,原Y坐标,补偿后X坐标,补偿后Y坐标,补偿前后X差值,补偿前后Y差值";
+            string File_Path = @"./\Config/" + "Gts_Ready "+ sdatetime + ".csv";
+            strHeader += "原X坐标,原Y坐标,补偿后X坐标,补偿后Y坐标,补偿前后X差值,补偿前后Y差值,取值坐标X位置,取值坐标Y位置";
             bool isExit = File.Exists(File_Path);
             StreamWriter sw = new StreamWriter(File_Path, true, Encoding.GetEncoding("gb2312"));
             if (!isExit)
@@ -816,10 +859,12 @@ namespace GTS_Fun
                             + Tmp_X + delimiter
                             + Tmp_Y + delimiter
                             + (Tmp_X - x) + delimiter
-                            + (Tmp_Y - y) + delimiter;
+                            + (Tmp_Y - y) + delimiter
+                            + Tmp_m + delimiter
+                            + Tmp_n + delimiter;
             sw.WriteLine(strRowValue);
             sw.Close();
-            */
+            
 
         }
         //XY平台运动到指定点位
@@ -848,11 +893,20 @@ namespace GTS_Fun
             Tmp_m = Gts_Cal_Data_Resolve.Seek_X_Pos(Point.X);
             Tmp_n = Gts_Cal_Data_Resolve.Seek_Y_Pos(Point.Y);
             //定义处理的变量
-            decimal Tmp_X;
-            decimal Tmp_Y;
+            decimal Tmp_X = 0.0m;
+            decimal Tmp_Y = 0.0m;
             //终点计算
-            Tmp_X = Point.X * affinity_Matrices[Tmp_m * Para_List.Parameter.Gts_Affinity_Col + Tmp_n].Cos_Value + Point.Y * affinity_Matrices[Tmp_m * Para_List.Parameter.Gts_Affinity_Col + Tmp_n].Sin_Value + affinity_Matrices[Tmp_m * Para_List.Parameter.Gts_Affinity_Col + Tmp_n].Delta_X;
-            Tmp_Y = Point.Y * affinity_Matrices[Tmp_m * Para_List.Parameter.Gts_Affinity_Col + Tmp_n].Cos_Value - Point.X * affinity_Matrices[Tmp_m * Para_List.Parameter.Gts_Affinity_Col + Tmp_n].Sin_Value + affinity_Matrices[Tmp_n * Para_List.Parameter.Gts_Affinity_Col + Tmp_n].Delta_Y;
+            if (affinity_Matrices.Count > 1)
+            {
+                Tmp_X = Point.X * affinity_Matrices[Tmp_n * Para_List.Parameter.Gts_Affinity_Col + Tmp_m].Cos_Value + Point.Y * affinity_Matrices[Tmp_n * Para_List.Parameter.Gts_Affinity_Col + Tmp_m].Sin_Value + affinity_Matrices[Tmp_n * Para_List.Parameter.Gts_Affinity_Col + Tmp_m].Delta_X;
+                Tmp_Y = Point.Y * affinity_Matrices[Tmp_n * Para_List.Parameter.Gts_Affinity_Col + Tmp_m].Cos_Value - Point.X * affinity_Matrices[Tmp_n * Para_List.Parameter.Gts_Affinity_Col + Tmp_m].Sin_Value + affinity_Matrices[Tmp_n * Para_List.Parameter.Gts_Affinity_Col + Tmp_m].Delta_Y;
+
+            }
+            else if ((affinity_Matrices.Count > 0) && (affinity_Matrices.Count == 1))
+            {
+                Tmp_X = Point.X * affinity_Matrices[0].Cos_Value + Point.Y * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_X;
+                Tmp_Y = Point.Y * affinity_Matrices[0].Cos_Value - Point.X * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_Y;
+            }
             //清除FIFO 0
             Clear_FIFO();
             //初始化FIFO 0前瞻模块
@@ -883,6 +937,15 @@ namespace GTS_Fun
             Tran_Data(Gts_Datas);
             //启动定位
             Interpolation_Start();
+        }
+        public static void Integrate_Correct(List<Interpolation_Data> Gts_Datas) 
+        {
+            //追加数据
+            Tran_Data_Correct(Gts_Datas);
+#if !DEBUG
+            //启动定位
+            Interpolation_Start();
+#endif
         }
     }
 

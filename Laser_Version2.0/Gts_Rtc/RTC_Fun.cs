@@ -148,12 +148,20 @@ namespace RTC_Fun
         //构造函数
         public Motion()
         {
-            string File_Path = @"./\Config/" + "Rtc_Affinity_Matrix.xml";
-
+            string File_Name = "";
+            if (Para_List.Parameter.Rtc_Affinity_Type == 1)
+            {
+                File_Name = "Rtc_Affinity_Matrix_All.xml";
+            }
+            else
+            {
+                File_Name = "Rtc_Affinity_Matrix_Three.xml";
+            }
+            string File_Path = @"./\Config/" + File_Name;
             if (File.Exists(File_Path))
             {
                 //获取标定板标定数据
-                affinity_Matrices = new List<Affinity_Matrix>(Serialize_Data.Reserialize_Affinity_Matrix("Rtc_Affinity_Matrix.xml"));
+                affinity_Matrices = new List<Affinity_Matrix>(Serialize_Data.Reserialize_Affinity_Matrix(File_Name));
             }
             else
             {
@@ -462,8 +470,17 @@ namespace RTC_Fun
             R0_n = Rtc_Cal_Data_Resolve.Seek_Y_Pos(Rtc_Datas[0].Rtc_y);
 
             //终点计算
-            Tmp_R0_X = Rtc_Datas[0].Rtc_x * affinity_Matrices[R0_m * Para_List.Parameter.Rtc_Affinity_Col + R0_n].Cos_Value + Rtc_Datas[0].Rtc_y * affinity_Matrices[R0_m * Para_List.Parameter.Rtc_Affinity_Col + R0_n].Sin_Value + affinity_Matrices[R0_m * Para_List.Parameter.Rtc_Affinity_Col + R0_n].Delta_X;
-            Tmp_R0_Y = Rtc_Datas[0].Rtc_y * affinity_Matrices[R0_m * Para_List.Parameter.Rtc_Affinity_Col + R0_n].Cos_Value - Rtc_Datas[0].Rtc_x * affinity_Matrices[R0_m * Para_List.Parameter.Rtc_Affinity_Col + R0_n].Sin_Value + affinity_Matrices[R0_m * Para_List.Parameter.Rtc_Affinity_Col + R0_n].Delta_Y;
+            if (affinity_Matrices.Count>1)
+            {
+                Tmp_R0_X = Rtc_Datas[0].Rtc_x * affinity_Matrices[R0_n * Para_List.Parameter.Rtc_Affinity_Col + R0_m].Cos_Value + Rtc_Datas[0].Rtc_y * affinity_Matrices[R0_n * Para_List.Parameter.Rtc_Affinity_Col + R0_m].Sin_Value + affinity_Matrices[R0_n * Para_List.Parameter.Rtc_Affinity_Col + R0_m].Delta_X;
+                Tmp_R0_Y = Rtc_Datas[0].Rtc_y * affinity_Matrices[R0_n * Para_List.Parameter.Rtc_Affinity_Col + R0_m].Cos_Value - Rtc_Datas[0].Rtc_x * affinity_Matrices[R0_n * Para_List.Parameter.Rtc_Affinity_Col + R0_m].Sin_Value + affinity_Matrices[R0_n * Para_List.Parameter.Rtc_Affinity_Col + R0_m].Delta_Y;
+            }
+            else if ((affinity_Matrices.Count > 0) && (affinity_Matrices.Count == 1))
+            {
+                Tmp_R0_X = Rtc_Datas[0].Rtc_x * affinity_Matrices[0].Cos_Value + Rtc_Datas[0].Rtc_y * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_X;
+                Tmp_R0_Y = Rtc_Datas[0].Rtc_y * affinity_Matrices[0].Cos_Value - Rtc_Datas[0].Rtc_x * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_Y;
+            }
+            
 #if !DEBUG
             //初始Jump到启动点位
             RTC5Wrap.jump_abs(Convert.ToInt32(-Tmp_R0_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_R0_X * Para_List.Parameter.Rtc_XPos_Reference));
@@ -479,11 +496,21 @@ namespace RTC_Fun
                 Center_n = Rtc_Cal_Data_Resolve.Seek_Y_Pos(o.Center_y);
 
                 //终点计算
-                Tmp_End_X = o.End_x * affinity_Matrices[End_m * Para_List.Parameter.Rtc_Affinity_Col + End_n].Cos_Value + o.End_y * affinity_Matrices[End_m * Para_List.Parameter.Rtc_Affinity_Col + End_n].Sin_Value + affinity_Matrices[End_m * Para_List.Parameter.Rtc_Affinity_Col + End_n].Delta_X;
-                Tmp_End_Y = o.End_y * affinity_Matrices[End_m * Para_List.Parameter.Rtc_Affinity_Col + End_n].Cos_Value - o.End_x * affinity_Matrices[End_m * Para_List.Parameter.Rtc_Affinity_Col + End_n].Sin_Value + affinity_Matrices[End_m * Para_List.Parameter.Rtc_Affinity_Col + End_n].Delta_Y;
-                Tmp_Center_X = o.Center_x * affinity_Matrices[Center_m * Para_List.Parameter.Rtc_Affinity_Col + Center_n].Cos_Value + o.Center_y * affinity_Matrices[Center_m * Para_List.Parameter.Rtc_Affinity_Col + Center_n].Sin_Value + affinity_Matrices[Center_m * Para_List.Parameter.Rtc_Affinity_Col + Center_n].Delta_X;
-                Tmp_Center_Y = o.Center_y * affinity_Matrices[Center_m * Para_List.Parameter.Rtc_Affinity_Col + Center_n].Cos_Value - o.Center_x * affinity_Matrices[Center_m * Para_List.Parameter.Rtc_Affinity_Col + Center_n].Sin_Value + affinity_Matrices[Center_m * Para_List.Parameter.Rtc_Affinity_Col + Center_n].Delta_Y;
-
+                if (affinity_Matrices.Count > 1)
+                {
+                    Tmp_End_X = o.End_x * affinity_Matrices[End_n * Para_List.Parameter.Rtc_Affinity_Col + End_m].Cos_Value + o.End_y * affinity_Matrices[End_n * Para_List.Parameter.Rtc_Affinity_Col + End_m].Sin_Value + affinity_Matrices[End_n * Para_List.Parameter.Rtc_Affinity_Col + End_m].Delta_X;
+                    Tmp_End_Y = o.End_y * affinity_Matrices[End_n * Para_List.Parameter.Rtc_Affinity_Col + End_m].Cos_Value - o.End_x * affinity_Matrices[End_n * Para_List.Parameter.Rtc_Affinity_Col + End_m].Sin_Value + affinity_Matrices[End_n * Para_List.Parameter.Rtc_Affinity_Col + End_m].Delta_Y;
+                    Tmp_Center_X = o.Center_x * affinity_Matrices[Center_n * Para_List.Parameter.Rtc_Affinity_Col + Center_m].Cos_Value + o.Center_y * affinity_Matrices[Center_n * Para_List.Parameter.Rtc_Affinity_Col + Center_m].Sin_Value + affinity_Matrices[Center_n * Para_List.Parameter.Rtc_Affinity_Col + Center_m].Delta_X;
+                    Tmp_Center_Y = o.Center_y * affinity_Matrices[Center_n * Para_List.Parameter.Rtc_Affinity_Col + Center_m].Cos_Value - o.Center_x * affinity_Matrices[Center_n * Para_List.Parameter.Rtc_Affinity_Col + Center_m].Sin_Value + affinity_Matrices[Center_n * Para_List.Parameter.Rtc_Affinity_Col + Center_m].Delta_Y;
+                }
+                else if ((affinity_Matrices.Count > 0) && (affinity_Matrices.Count == 1))
+                {
+                    Tmp_End_X = o.End_x * affinity_Matrices[0].Cos_Value + o.End_y * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_X;
+                    Tmp_End_Y = o.End_y * affinity_Matrices[0].Cos_Value - o.End_x * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_Y;
+                    Tmp_Center_X = o.Center_x * affinity_Matrices[0].Cos_Value + o.Center_y * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_X;
+                    Tmp_Center_Y = o.Center_y * affinity_Matrices[0].Cos_Value - o.Center_x * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_Y;
+                }
+                
 #if !DEBUG
                 if (o.Type == 11)//arc_abs 绝对圆弧
                 {

@@ -16,6 +16,8 @@ using System.Drawing;
 using System.Threading;
 using System.Xml.Serialization;
 using System.Windows.Forms;
+using MathNet.Numerics;
+using Laser_Version2._0;
 
 namespace Laser_Build_1._0
 {
@@ -128,8 +130,167 @@ namespace Laser_Build_1._0
             this.delta_y = 0;
         }
     }
-   
-   public class Calibration 
+    public struct Fit_Data
+    {
+        //私有属性 
+        private decimal k1, k2,k3,k4;//k1-1次系数，k2-2次系数，k3-3次系数，k4-4次系数
+        private decimal delta;//坐标偏移值
+        //共有属性
+        public decimal K1
+        {
+            get { return k1; }
+            set { k1 = value; }
+        }
+        public decimal K2
+        {
+            get { return k2; }
+            set { k2 = value; }
+        }
+        public decimal K3
+        {
+            get { return k3; }
+            set { k3 = value; }
+        }
+        public decimal K4
+        {
+            get { return k4; }
+            set { k4 = value; }
+        }
+        public decimal Delta
+        {
+            get { return delta; }
+            set { delta = value; }
+        }
+        //公开构造函数        
+        //有参数
+        public Fit_Data(decimal k1, decimal k2, decimal k3, decimal k4, decimal delta)
+        {
+            this.k1 = k1;
+            this.k2 = k2;
+            this.k3 = k3;
+            this.k4 = k4;
+            this.delta = delta;
+        }
+        public Fit_Data(Fit_Data Ini)
+        {
+            this.k1 = Ini.K1;
+            this.k2 = Ini.K2;
+            this.k3 = Ini.K3;
+            this.k4 = Ini.K4;
+            this.delta = Ini.Delta;
+        }
+        //清空
+        public void Empty()
+        {
+            this.k1 = 0;
+            this.k2 = 0;
+            this.k3 = 0;
+            this.k4 = 0;
+            this.delta = 0;
+        }
+    }
+    public struct Double_Fit_Data
+    {
+        //私有属性 
+        private decimal k_x1, k_x2, k_x3, k_x4;//k_x1-1次系数，k_x2-2次系数，k_x3-3次系数，k_x4-4次系数
+        private decimal delta_x;//坐标偏移值
+        private decimal k_y1, k_y2, k_y3, k_y4;//k_y1-1次系数，k_y2-2次系数，k_y3-3次系数，k_y4-4次系数
+        private decimal delta_y;//坐标偏移值
+        //共有属性
+        public decimal K_X1
+        {
+            get { return k_x1; }
+            set { k_x1 = value; }
+        }
+        public decimal K_X2
+        {
+            get { return k_x2; }
+            set { k_x2 = value; }
+        }
+        public decimal K_X3
+        {
+            get { return k_x3; }
+            set { k_x3 = value; }
+        }
+        public decimal K_X4
+        {
+            get { return k_x4; }
+            set { k_x4 = value; }
+        }
+        public decimal Delta_X
+        {
+            get { return delta_x; }
+            set { delta_x = value; }
+        }
+        public decimal K_Y1
+        {
+            get { return k_y1; }
+            set { k_y1 = value; }
+        }
+        public decimal K_Y2
+        {
+            get { return k_y2; }
+            set { k_y2 = value; }
+        }
+        public decimal K_Y3
+        {
+            get { return k_y3; }
+            set { k_y3 = value; }
+        }
+        public decimal K_Y4
+        {
+            get { return k_y4; }
+            set { k_y4 = value; }
+        }
+        public decimal Delta_Y
+        {
+            get { return delta_y; }
+            set { delta_y = value; }
+        }
+        //公开构造函数        
+        //有参数
+        public Double_Fit_Data(decimal k_x1, decimal k_x2, decimal k_x3, decimal k_x4, decimal delta_x, decimal k_y1, decimal k_y2, decimal k_y3, decimal k_y4, decimal delta_y)
+        {
+            this.k_x1 = k_x1;
+            this.k_x2 = k_x2;
+            this.k_x3 = k_x3;
+            this.k_x4 = k_x4;
+            this.delta_x = delta_x;
+            this.k_y1 = k_y1;
+            this.k_y2 = k_y2;
+            this.k_y3 = k_y3;
+            this.k_y4 = k_y4;
+            this.delta_y = delta_y;
+        }
+        public Double_Fit_Data(Double_Fit_Data Ini)
+        {
+            this.k_x1 = Ini.K_X1;
+            this.k_x2 = Ini.K_X2;
+            this.k_x3 = Ini.K_X3;
+            this.k_x4 = Ini.K_X4;
+            this.delta_x = Ini.Delta_X;
+            this.k_y1 = Ini.K_Y1;
+            this.k_y2 = Ini.K_Y2;
+            this.k_y3 = Ini.K_Y3;
+            this.k_y4 = Ini.K_Y4;
+            this.delta_y = Ini.Delta_Y;
+        }
+        //清空
+        public void Empty()
+        {
+            this.k_x1 = 0;
+            this.k_x2 = 0;
+            this.k_x3 = 0;
+            this.k_x4 = 0;
+            this.delta_x = 0;
+            this.k_y1 = 0;
+            this.k_y2 = 0;
+            this.k_y3 = 0;
+            this.k_y4 = 0;
+            this.delta_y = 0;
+        }
+    }
+    public class Calibration 
     {
         //定义退出变量
         public static bool Exit_Flag = false;
@@ -196,7 +357,7 @@ namespace Laser_Build_1._0
                     //Main.T_Client
                     Cam_New = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(1));//触发拍照    
                     
-                    if ((i==0) && (j == 0))
+                    if (j == 0)//X轴坐标归零
                     {
                         //计算差值
                         Cam_Delta_X = Cam_New.X - 243 * Para_List.Parameter.Cam_Reference;
@@ -612,55 +773,163 @@ namespace Laser_Build_1._0
             //建立变量
             List<Affinity_Matrix> Result = new List<Affinity_Matrix>();
             Affinity_Matrix Temp_Affinity_Matrix = new Affinity_Matrix();
+            List<Double_Fit_Data> Line_Fit_Data = new List<Double_Fit_Data>();
+            Double_Fit_Data Temp_Fit_Data = new Double_Fit_Data();
             Int16 i, j;
             //定义仿射变换数组 
             Mat mat = new Mat(new Size(3, 2), Emgu.CV.CvEnum.DepthType.Cv32F, 1); //2行 3列 的矩阵
-            //定义点位数组
-            PointF[] srcTri = new PointF[3];//标准数据
-            PointF[] dstTri = new PointF[3];//差异化数据
+            //定义仿射变换矩阵转换数组
             double[] temp_array;
-
+            //数据处理
             if (Para_List.Parameter.Gts_Calibration_Col * Para_List.Parameter.Gts_Calibration_Row == correct_Datas.Count)//矫正和差异数据完整
             {
-                //数据处理
-                for (i = 0; i < Para_List.Parameter.Gts_Calibration_Row - 1; i++)
+                if (Para_List.Parameter.Gts_Affinity_Type == 1)//全部点对
                 {
-                    for (j = 0; j < Para_List.Parameter.Gts_Calibration_Col - 1; j++)
+                    //定义点位数组 
+                    PointF[] srcTri = new PointF[Para_List.Parameter.Gts_Calibration_Col * Para_List.Parameter.Gts_Calibration_Row];//标准数据
+                    PointF[] dstTri = new PointF[Para_List.Parameter.Gts_Calibration_Col * Para_List.Parameter.Gts_Calibration_Row];//差异化数据
+                    //所有点对
+                    for (i = 0; i < correct_Datas.Count; i++)
                     {
-                        //标准数据
-                        srcTri[0] = new PointF(Convert.ToSingle(correct_Datas[i + j * Para_List.Parameter.Gts_Calibration_Col].Xo), Convert.ToSingle(correct_Datas[i + j * Para_List.Parameter.Gts_Calibration_Col].Yo));
-                        srcTri[1] = new PointF(Convert.ToSingle(correct_Datas[i + j * Para_List.Parameter.Gts_Calibration_Col + 1].Xo), Convert.ToSingle(correct_Datas[i + j * Para_List.Parameter.Gts_Calibration_Col + 1].Yo));
-                        srcTri[2] = new PointF(Convert.ToSingle(correct_Datas[i + j * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row].Xo), Convert.ToSingle(correct_Datas[i + j * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row].Yo));
-                        //仿射数据
-                        dstTri[0] = new PointF(Convert.ToSingle(correct_Datas[i + j * Para_List.Parameter.Gts_Calibration_Col].Xm), Convert.ToSingle(correct_Datas[i + j * Para_List.Parameter.Gts_Calibration_Col].Ym));
-                        dstTri[1] = new PointF(Convert.ToSingle(correct_Datas[i + j * Para_List.Parameter.Gts_Calibration_Col + 1].Xm), Convert.ToSingle(correct_Datas[i + j * Para_List.Parameter.Gts_Calibration_Col + 1].Ym));
-                        dstTri[2] = new PointF(Convert.ToSingle(correct_Datas[i + j * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row].Xm), Convert.ToSingle(correct_Datas[i + j * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row].Ym));
-                        //计算仿射变换矩阵
-                        mat = CvInvoke.GetAffineTransform(srcTri, dstTri);
-                        //提取矩阵数据
-                        temp_array = mat.GetDoubleArray();
-                        //获取仿射变换参数
-                        Temp_Affinity_Matrix.Cos_Value = Convert.ToDecimal(temp_array[0]);//余弦值
-                        Temp_Affinity_Matrix.Sin_Value = Convert.ToDecimal(temp_array[1]);//正弦值
-                        Temp_Affinity_Matrix.Delta_X = Convert.ToDecimal(temp_array[2]);//x方向偏移
-                        Temp_Affinity_Matrix.Delta_Y = Convert.ToDecimal(temp_array[5]);//y方向偏移
-                        //追加进入仿射变换List
-                        Result.Add(new Affinity_Matrix(Temp_Affinity_Matrix));
-                        //清除变量
-                        Temp_Affinity_Matrix.Empty();
+                        srcTri[i] = new PointF((float)correct_Datas[i].Xo, (float)correct_Datas[i].Yo);
+                        dstTri[i] = new PointF((float)correct_Datas[i].Xm, (float)correct_Datas[i].Ym);
                     }
+                    mat = CvInvoke.EstimateRigidTransform(srcTri, dstTri, false);
+                    //提取矩阵数据
+                    temp_array = mat.GetDoubleArray();
+                    //获取仿射变换参数
+                    Temp_Affinity_Matrix = Array_To_Affinity(temp_array);
+                    //追加进入仿射变换List
+                    Result.Add(new Affinity_Matrix(Temp_Affinity_Matrix));
+                    //清除变量
+                    Temp_Affinity_Matrix.Empty();
+                    //保存为文件
+                    Serialize_Data.Serialize_Affinity_Matrix(Result, "Gts_Affinity_Matrix_All.xml");
                 }
-                //保存为文件
-                Serialize_Data.Serialize_Affinity_Matrix(Result, "Gts_Affinity_Matrix.xml");
+                else if (Para_List.Parameter.Gts_Affinity_Type == 2)//线性拟合
+                {
+                    //初始化数据
+                    double[] src_x = new double[Para_List.Parameter.Gts_Calibration_Col];
+                    double[] dst_x = new double[Para_List.Parameter.Gts_Calibration_Col];
+                    Tuple<double, double> R_X = new Tuple<double, double>(0, 0);
+                    double[] src_y = new double[Para_List.Parameter.Gts_Calibration_Row];
+                    double[] dst_y = new double[Para_List.Parameter.Gts_Calibration_Row];
+                    Tuple<double, double> R_Y = new Tuple<double, double>(0, 0); 
+                    //拟合数据
+                    for (i = 0; i < Para_List.Parameter.Gts_Calibration_Col; i++)
+                    {
+                        for (j = 0; j < Para_List.Parameter.Gts_Calibration_Row; j++)
+                        {
+                            //提取X轴拟合数据
+                            src_x[j] = (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Xo);
+                            dst_x[j] = (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Xm);
+                            R_X = Fit.Line(src_x, dst_x);
+                            //提取Y轴拟合数据
+                            src_y[j] = (float)(correct_Datas[i + j * Para_List.Parameter.Gts_Calibration_Col].Yo);
+                            dst_y[j] = (float)(correct_Datas[i + j * Para_List.Parameter.Gts_Calibration_Col].Ym);
+                            R_Y = Fit.Line(src_y, dst_y);
+                        }
+                        //提取拟合直线数据
+                        Temp_Fit_Data = new Double_Fit_Data
+                        {
+                            K_X1 = (decimal)R_X.Item2,
+                            Delta_X = (decimal)R_X.Item1,
+                            K_Y1 = (decimal)R_Y.Item2,
+                            Delta_Y = (decimal)R_Y.Item1
+                        };
+                        //保存进入Line_Fit_Data
+                        Line_Fit_Data.Add(new Double_Fit_Data(Temp_Fit_Data));
+                        //清空数据
+                        Temp_Fit_Data.Empty();
+                    }
+                    //保存轴拟合数据
+                    CSV_RW.SaveCSV(CSV_RW.Double_Fit_Data_DataTable(Line_Fit_Data), "Gts_Line_Fit_Data");
+                }
+                else
+                {
+                    //定义点位数组 
+                    PointF[] srcTri = new PointF[4];//标准数据
+                    PointF[] dstTri = new PointF[4];//差异化数据
+                    //数据处理
+                    for (i = 0; i < Para_List.Parameter.Gts_Calibration_Col - 1; i++)
+                    {
+                        for (j = 0; j < Para_List.Parameter.Gts_Calibration_Row - 1; j++)
+                        {
+
+                            //标准数据  平台坐标
+                            srcTri[0] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Xm), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Ym));
+                            srcTri[1] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row].Xm), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row].Ym));
+                            srcTri[2] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row + 1].Xm), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row + 1].Ym));
+                            srcTri[3] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + 1].Xm), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + 1].Ym));
+
+                            //仿射数据  测量坐标
+                            dstTri[0] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Xo), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Yo));
+                            dstTri[1] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row].Xo), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row].Yo));
+                            dstTri[2] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row + 1].Xo), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row + 1].Yo));
+                            dstTri[3] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + 1].Xo), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + 1].Yo));
+
+                            //计算仿射变换矩阵
+                            //mat = CvInvoke.GetAffineTransform(srcTri, dstTri);
+                            mat = CvInvoke.EstimateRigidTransform(srcTri, dstTri, false);
+                            //提取矩阵数据
+                            temp_array = mat.GetDoubleArray();
+                            //获取仿射变换参数
+                            Temp_Affinity_Matrix = Array_To_Affinity(temp_array);
+                            //追加进入仿射变换List
+                            Result.Add(new Affinity_Matrix(Temp_Affinity_Matrix));
+                            //清除变量
+                            Temp_Affinity_Matrix.Empty();
+                        }
+                    }
+                    //保存为文件
+                    Serialize_Data.Serialize_Affinity_Matrix(Result, "Gts_Affinity_Matrix_Three.xml");
+                }   
             }
             return Result;
 
         }
-        //定位坐标 X
+        public static Affinity_Matrix Array_To_Affinity(double[] temp_array)
+        {
+            Affinity_Matrix Result = new Affinity_Matrix();
+            //获取仿射变换参数
+            Result.Cos_Value = Convert.ToDecimal(temp_array[0]);//余弦值
+            //范围限制
+            if (Result.Cos_Value > 1.0m)
+            {
+                Result.Cos_Value = 1.0m;
+            }
+            else if (Result.Cos_Value < -1.0m)
+            {
+                Result.Cos_Value = -1.0m;
+            }
+            //else if (Math.Abs(Result.Cos_Value) < 0.002m)
+            //{
+            //    Result.Cos_Value = 0.0m;
+            //}
+            Result.Sin_Value = Convert.ToDecimal(temp_array[1]);//正弦值
+            //范围限制
+            if (Result.Sin_Value > 1.0m)
+            {
+                Result.Sin_Value = 1.0m;
+            }
+            else if (Result.Sin_Value < -1.0m)
+            {
+                Result.Sin_Value = -1.0m;
+            }
+            //else if (Math.Abs(Result.Sin_Value) < 0.002m)
+            //{
+            //    Result.Sin_Value = 0.0m;
+            //}
+            Result.Delta_X = Convert.ToDecimal(temp_array[2]);//x方向偏移
+            Result.Delta_Y = Convert.ToDecimal(temp_array[5]);//y方向偏移
+            //返回结果
+            return Result;
+        }
+        //定位坐标 X 
         public static Int16 Seek_X_Pos(decimal Pos)
         {
             Int16 Result = 0;
-            Result = (Int16)(Pos % Para_List.Parameter.Gts_Calibration_Cell);
+            Result = (Int16)Math.Floor((Pos / Para_List.Parameter.Gts_Calibration_Cell) + 0.01m);
             if (Result >= Para_List.Parameter.Gts_Affinity_Row)
             {
                 Result = (Int16)(Para_List.Parameter.Gts_Affinity_Row - 1);
@@ -675,7 +944,7 @@ namespace Laser_Build_1._0
         public static Int16 Seek_Y_Pos(decimal Pos)
         {
             Int16 Result = 0;
-            Result = (Int16)(Pos % Para_List.Parameter.Gts_Calibration_Cell);
+            Result = (Int16)Math.Floor((Pos / Para_List.Parameter.Gts_Calibration_Cell) + 0.01m);
             if (Result >= Para_List.Parameter.Gts_Affinity_Col)
             {
                 Result = (Int16)(Para_List.Parameter.Gts_Affinity_Col - 1);
@@ -699,23 +968,19 @@ namespace Laser_Build_1._0
             double[] temp_array;
             //数据提取
             //标准数据
-            srcTri[0] = new PointF(Convert.ToSingle(Para_List.Parameter.Mark_Dxf1.X), Convert.ToSingle(Para_List.Parameter.Mark_Dxf1.Y));
-            srcTri[1] = new PointF(Convert.ToSingle(Para_List.Parameter.Mark_Dxf2.X), Convert.ToSingle(Para_List.Parameter.Mark_Dxf2.Y));
-            srcTri[2] = new PointF(Convert.ToSingle(Para_List.Parameter.Mark_Dxf3.X), Convert.ToSingle(Para_List.Parameter.Mark_Dxf3.Y));
+            srcTri[0] = new PointF((float)(Para_List.Parameter.Mark_Dxf1.X), (float)(Para_List.Parameter.Mark_Dxf1.Y));
+            srcTri[1] = new PointF((float)(Para_List.Parameter.Mark_Dxf2.X), (float)(Para_List.Parameter.Mark_Dxf2.Y));
+            srcTri[2] = new PointF((float)(Para_List.Parameter.Mark_Dxf3.X), (float)(Para_List.Parameter.Mark_Dxf3.Y));
             //仿射数据
-            dstTri[0] = new PointF(Convert.ToSingle(Para_List.Parameter.Mark1.X), Convert.ToSingle(Para_List.Parameter.Mark1.Y));
-            dstTri[1] = new PointF(Convert.ToSingle(Para_List.Parameter.Mark2.X), Convert.ToSingle(Para_List.Parameter.Mark2.Y));
-            dstTri[2] = new PointF(Convert.ToSingle(Para_List.Parameter.Mark3.X), Convert.ToSingle(Para_List.Parameter.Mark3.Y));
+            dstTri[0] = new PointF((float)(Para_List.Parameter.Mark1.X), (float)(Para_List.Parameter.Mark1.Y));
+            dstTri[1] = new PointF((float)(Para_List.Parameter.Mark2.X), (float)(Para_List.Parameter.Mark2.Y));
+            dstTri[2] = new PointF((float)(Para_List.Parameter.Mark3.X), (float)(Para_List.Parameter.Mark3.Y));
             //计算仿射变换矩阵
             mat = CvInvoke.GetAffineTransform(srcTri, dstTri);
             //提取矩阵数据
             temp_array = mat.GetDoubleArray();
             //获取仿射变换参数
-            Result.Cos_Value = Convert.ToDecimal(temp_array[0]);//余弦值
-            Result.Sin_Value = Convert.ToDecimal(temp_array[1]);//正弦值
-            Result.Delta_X = Convert.ToDecimal(temp_array[2]);//x方向偏移
-            Result.Delta_Y = Convert.ToDecimal(temp_array[5]);//y方向偏移
-
+            Result = Array_To_Affinity(temp_array);
             //保存为文件
             string sdatetime = DateTime.Now.ToString("D");
             string filePath = "";
@@ -742,6 +1007,28 @@ namespace Laser_Build_1._0
             //追加进入仿射变换List
             return Result;
         }
+        //获取线性补偿坐标
+        public static Vector Get_Line_Fit_Coordinate(Decimal x,decimal y,List<Double_Fit_Data> line_fit_data)  
+        {
+            //临时定位变量
+            Int16 m, n;
+            decimal X_per, Y_per;
+            decimal K_x, B_x;
+            decimal K_y, B_y; 
+            //获取落点
+            m = Seek_X_Pos(x);
+            n = Seek_Y_Pos(y);
+            //计算比率
+            X_per = Math.Abs(x - m * Para_List.Parameter.Gts_Calibration_Cell) / Para_List.Parameter.Gts_Calibration_Cell;
+            Y_per = Math.Abs(y - m * Para_List.Parameter.Gts_Calibration_Cell) / Para_List.Parameter.Gts_Calibration_Cell;
+            //计算实际 线性拟合数据
+            K_x = (line_fit_data[m + 1].K_X1 - line_fit_data[m].K_X1) * X_per + line_fit_data[m].K_X1;
+            B_x = (line_fit_data[m + 1].Delta_X - line_fit_data[m].Delta_X) * X_per + line_fit_data[m].Delta_X;
+            K_y = (line_fit_data[m + 1].K_Y1 - line_fit_data[m].K_Y1) * Y_per + line_fit_data[m].K_Y1;
+            B_y = (line_fit_data[m + 1].Delta_Y - line_fit_data[m].Delta_Y) * Y_per + line_fit_data[m].Delta_Y;
+            //返回实际坐标
+            return new Vector(K_x * x + B_x,K_y * y + B_y);
+        }
     }
     //RTC校准数据处理
     class Rtc_Cal_Data_Resolve
@@ -756,43 +1043,70 @@ namespace Laser_Build_1._0
             Int16 i, j;
             //定义仿射变换数组 
             Mat mat = new Mat(new Size(3, 2), Emgu.CV.CvEnum.DepthType.Cv32F, 1); //2行 3列 的矩阵
-            //定义点位数组
-            PointF[] srcTri = new PointF[3];//标准数据
-            PointF[] dstTri = new PointF[3];//差异化数据
+            //定义仿射变换矩阵转换数组
             double[] temp_array;
-
+            //数据处理
             if (Para_List.Parameter.Rtc_Calibration_Col * Para_List.Parameter.Rtc_Calibration_Row == correct_Datas.Count)//矫正和差异数据完整
             {
-                //数据处理
-                for (i = 0; i < Para_List.Parameter.Rtc_Calibration_Row - 1; i++)
+                if (Para_List.Parameter.Rtc_Affinity_Type == 1)//全部点对
                 {
-                    for (j = 0; j < Para_List.Parameter.Rtc_Calibration_Col - 1; j++)
+                    //定义点位数组 
+                    PointF[] srcTri = new PointF[Para_List.Parameter.Rtc_Calibration_Col * Para_List.Parameter.Rtc_Calibration_Row];//标准数据
+                    PointF[] dstTri = new PointF[Para_List.Parameter.Rtc_Calibration_Col * Para_List.Parameter.Rtc_Calibration_Row];//差异化数据
+                    //所有点对
+                    for (i = 0; i < correct_Datas.Count; i++)
                     {
-                        //标准数据
-                        srcTri[0] = new PointF(Convert.ToSingle(correct_Datas[i + j * Para_List.Parameter.Rtc_Calibration_Col].Xo), Convert.ToSingle(correct_Datas[i + j * Para_List.Parameter.Rtc_Calibration_Col].Yo));
-                        srcTri[1] = new PointF(Convert.ToSingle(correct_Datas[i + j * Para_List.Parameter.Rtc_Calibration_Col + 1].Xo), Convert.ToSingle(correct_Datas[i + j * Para_List.Parameter.Rtc_Calibration_Col + 1].Yo));
-                        srcTri[2] = new PointF(Convert.ToSingle(correct_Datas[i + j * Para_List.Parameter.Rtc_Calibration_Col + Para_List.Parameter.Rtc_Calibration_Row].Xo), Convert.ToSingle(correct_Datas[i + j * Para_List.Parameter.Rtc_Calibration_Col + Para_List.Parameter.Rtc_Calibration_Row].Yo));
-                        //仿射数据
-                        dstTri[0] = new PointF(Convert.ToSingle(correct_Datas[i + j * Para_List.Parameter.Rtc_Calibration_Col].Xm), Convert.ToSingle(correct_Datas[i + j * Para_List.Parameter.Rtc_Calibration_Col].Ym));
-                        dstTri[1] = new PointF(Convert.ToSingle(correct_Datas[i + j * Para_List.Parameter.Rtc_Calibration_Col + 1].Xm), Convert.ToSingle(correct_Datas[i + j * Para_List.Parameter.Rtc_Calibration_Col + 1].Ym));
-                        dstTri[2] = new PointF(Convert.ToSingle(correct_Datas[i + j * Para_List.Parameter.Rtc_Calibration_Col + Para_List.Parameter.Rtc_Calibration_Row].Xm), Convert.ToSingle(correct_Datas[i + j * Para_List.Parameter.Rtc_Calibration_Col + Para_List.Parameter.Rtc_Calibration_Row].Ym));
-                        //计算仿射变换矩阵
-                        mat = CvInvoke.GetAffineTransform(srcTri, dstTri);
-                        //提取矩阵数据
-                        temp_array = mat.GetDoubleArray();
-                        //获取仿射变换参数
-                        Temp_Affinity_Matrix.Cos_Value = Convert.ToDecimal(temp_array[0]);//余弦值
-                        Temp_Affinity_Matrix.Sin_Value = Convert.ToDecimal(temp_array[1]);//正弦值
-                        Temp_Affinity_Matrix.Delta_X = Convert.ToDecimal(temp_array[2]);//x方向偏移
-                        Temp_Affinity_Matrix.Delta_Y = Convert.ToDecimal(temp_array[5]);//y方向偏移
-                        //追加进入仿射变换List
-                        Result.Add(new Affinity_Matrix(Temp_Affinity_Matrix));
-                        //清除变量
-                        Temp_Affinity_Matrix.Empty();
+                        srcTri[i] = new PointF((float)correct_Datas[i].Xo, (float)correct_Datas[i].Yo);
+                        dstTri[i] = new PointF((float)correct_Datas[i].Xm, (float)correct_Datas[i].Ym);
                     }
+                    mat = CvInvoke.EstimateRigidTransform(srcTri, dstTri, false);
+                    //提取矩阵数据
+                    temp_array = mat.GetDoubleArray();
+                    //获取仿射变换参数
+                    Temp_Affinity_Matrix = Gts_Cal_Data_Resolve.Array_To_Affinity(temp_array);
+                    //追加进入仿射变换List
+                    Result.Add(new Affinity_Matrix(Temp_Affinity_Matrix));
+                    //清除变量
+                    Temp_Affinity_Matrix.Empty();
+                    //保存为文件
+                    Serialize_Data.Serialize_Affinity_Matrix(Result, "Rtc_Affinity_Matrix_All.xml");
                 }
-                //保存为文件
-                Serialize_Data.Serialize_Affinity_Matrix(Result, "Rtc_Affinity_Matrix.xml");
+                else
+                {
+                    //定义点位数组 
+                    PointF[] srcTri = new PointF[4];//标准数据
+                    PointF[] dstTri = new PointF[4];//差异化数据
+                    //数据处理
+                    for (i = 0; i < Para_List.Parameter.Rtc_Calibration_Col - 1; i++)
+                    {
+                        for (j = 0; j < Para_List.Parameter.Rtc_Calibration_Row - 1; j++)
+                        {
+                            //标准数据  定位坐标
+                            srcTri[0] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Rtc_Calibration_Col].Xm), (float)(correct_Datas[j + i * Para_List.Parameter.Rtc_Calibration_Col].Ym));
+                            srcTri[1] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Rtc_Calibration_Col + Para_List.Parameter.Rtc_Calibration_Row].Xm), (float)(correct_Datas[j + i * Para_List.Parameter.Rtc_Calibration_Col + Para_List.Parameter.Rtc_Calibration_Row].Ym));
+                            srcTri[2] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Rtc_Calibration_Col + Para_List.Parameter.Rtc_Calibration_Row + 1].Xm), (float)(correct_Datas[j + i * Para_List.Parameter.Rtc_Calibration_Col + Para_List.Parameter.Rtc_Calibration_Row + 1].Ym));//计算仿射变换矩阵
+
+                            //仿射数据  测量坐标
+                            dstTri[0] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Rtc_Calibration_Col].Xo), (float)(correct_Datas[j + i * Para_List.Parameter.Rtc_Calibration_Col].Yo));
+                            dstTri[1] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Rtc_Calibration_Col + Para_List.Parameter.Rtc_Calibration_Row].Xo), (float)(correct_Datas[j + i * Para_List.Parameter.Rtc_Calibration_Col + Para_List.Parameter.Rtc_Calibration_Row].Yo));
+                            dstTri[2] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Rtc_Calibration_Col + Para_List.Parameter.Rtc_Calibration_Row + 1].Xo), (float)(correct_Datas[j + i * Para_List.Parameter.Rtc_Calibration_Col + Para_List.Parameter.Rtc_Calibration_Row + 1].Yo));
+
+                            //计算仿射变换矩阵
+                            //mat = CvInvoke.GetAffineTransform(srcTri, dstTri);
+                            mat = CvInvoke.EstimateRigidTransform(srcTri, dstTri, false);
+                            //提取矩阵数据
+                            temp_array = mat.GetDoubleArray();
+                            //获取仿射变换参数
+                            Temp_Affinity_Matrix = Gts_Cal_Data_Resolve.Array_To_Affinity(temp_array);
+                            //追加进入仿射变换List
+                            Result.Add(new Affinity_Matrix(Temp_Affinity_Matrix));
+                            //清除变量
+                            Temp_Affinity_Matrix.Empty();
+                        }
+                    }
+                    //保存为文件
+                    Serialize_Data.Serialize_Affinity_Matrix(Result, "Rtc_Affinity_Matrix_Three.xml");
+                }
             }
             return Result;
         }
@@ -800,7 +1114,7 @@ namespace Laser_Build_1._0
         public static Int16 Seek_X_Pos(decimal Pos)
         {
             Int16 Result = 0;
-            Result = (Int16)((Pos + 25 ) % Para_List.Parameter.Rtc_Calibration_Cell);
+            Result = (Int16)Math.Floor(((Pos + 25 ) / Para_List.Parameter.Rtc_Calibration_Cell) + 0.01m);
             if (Result >= Para_List.Parameter.Rtc_Affinity_Row)
             {
                 Result = (Int16)(Para_List.Parameter.Rtc_Affinity_Row - 1);
@@ -815,7 +1129,7 @@ namespace Laser_Build_1._0
         public static Int16 Seek_Y_Pos(decimal Pos)
         {
             Int16 Result = 0;
-            Result = (Int16)((Pos + 25) % Para_List.Parameter.Rtc_Calibration_Cell);
+            Result = (Int16)Math.Floor(((Pos + 25) / Para_List.Parameter.Rtc_Calibration_Cell) + 0.01m);
             if (Result >= Para_List.Parameter.Rtc_Affinity_Col)
             {
                 Result = (Int16)(Para_List.Parameter.Rtc_Affinity_Col - 1);
@@ -825,6 +1139,27 @@ namespace Laser_Build_1._0
                 Result = 0;
             }
             return Result;
+        }
+        public static Vector Get_Line_Fit_Coordinate(Decimal x, decimal y, List<Double_Fit_Data> line_fit_data)
+        {
+            //临时定位变量
+            Int16 m, n;
+            decimal X_per, Y_per;
+            decimal K_x, B_x;
+            decimal K_y, B_y;
+            //获取落点
+            m = Seek_X_Pos(x);
+            n = Seek_Y_Pos(y);
+            //计算比率
+            X_per = Math.Abs(x - m * Para_List.Parameter.Rtc_Calibration_Cell) / Para_List.Parameter.Rtc_Calibration_Cell;
+            Y_per = Math.Abs(y - m * Para_List.Parameter.Rtc_Calibration_Cell) / Para_List.Parameter.Rtc_Calibration_Cell;
+            //计算实际 线性拟合数据
+            K_x = (line_fit_data[m + 1].K_X1 - line_fit_data[m].K_X1) * X_per + line_fit_data[m].K_X1;
+            B_x = (line_fit_data[m + 1].Delta_X - line_fit_data[m].Delta_X) * X_per + line_fit_data[m].Delta_X;
+            K_y = (line_fit_data[m + 1].K_Y1 - line_fit_data[m].K_Y1) * Y_per + line_fit_data[m].K_Y1;
+            B_y = (line_fit_data[m + 1].Delta_Y - line_fit_data[m].Delta_Y) * Y_per + line_fit_data[m].Delta_Y;
+            //返回实际坐标
+            return new Vector(K_x * x + B_x, K_y * y + B_y);
         }
     }
 
