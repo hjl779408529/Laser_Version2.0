@@ -146,7 +146,10 @@ namespace Para_List
         private static decimal cutter_radius = 0.5m; //刀具半径
         private static Int16 cutter_type = 0; //刀具补偿类型 0-不补偿、1-钻孔、2-落料
         //振镜加工范围约束
-        private static Vector rtc_limit = new Vector(50,50); 
+        private static Vector rtc_limit = new Vector(50,50);
+        //加工次数
+        private static UInt16 gts_repeat;
+        private static UInt16 rtc_repeat;
 
         public static decimal Gts_Vel_reference { get => gts_vel_reference; set => gts_vel_reference = value; }
         public static decimal Gts_Acc_reference { get => gts_acc_reference; set => gts_acc_reference = value; }
@@ -245,6 +248,8 @@ namespace Para_List
         public static decimal Cutter_Radius { get => cutter_radius; set => cutter_radius = value; }
         public static Int16 Cutter_Type { get => cutter_type; set => cutter_type = value; }        
         public static Vector Rtc_Limit { get => rtc_limit; set => rtc_limit = value; }
+        public static UInt16 Gts_Repeat { get => gts_repeat; set => gts_repeat = value; }
+        public static UInt16 Rtc_Repeat { get => rtc_repeat; set => rtc_repeat = value; }
         //公开构造函数
         public Parameter() { }
     }
@@ -378,6 +383,9 @@ namespace Para_List
         private decimal cutter_radius = 0.5m; //刀具半径
         private Int16 cutter_type = 0; //刀具补偿类型 0-不补偿、1-钻孔、2-落料
         private Vector rtc_limit;
+        //加工次数
+        private UInt16 gts_repeat;
+        private UInt16 rtc_repeat;
 
         public decimal Gts_Vel_reference { get => gts_vel_reference; set => gts_vel_reference = value; }
         public decimal Gts_Acc_reference { get => gts_acc_reference; set => gts_acc_reference = value; }
@@ -475,6 +483,8 @@ namespace Para_List
         public decimal Cutter_Radius { get => cutter_radius; set => cutter_radius = value; }
         public Int16 Cutter_Type { get => cutter_type; set => cutter_type = value; }
         public Vector Rtc_Limit { get => rtc_limit; set => rtc_limit = value; }
+        public UInt16 Gts_Repeat { get => gts_repeat; set => gts_repeat = value; }
+        public UInt16 Rtc_Repeat { get => rtc_repeat; set => rtc_repeat = value; }
         //构造函数
         public Parameter_RW() { }
     } 
@@ -483,7 +493,7 @@ namespace Para_List
     {
 
         //参数保存
-        public void Serialize(string txtFile)
+        public static void Serialize(string txtFile)
         {
             //中转当前参数
             Parameter_RW parameter = new Parameter_RW
@@ -584,7 +594,9 @@ namespace Para_List
                 Trans_Affinity = Para_List.Parameter.Trans_Affinity,
                 Cutter_Radius = Para_List.Parameter.Cutter_Radius,
                 Cutter_Type = Para_List.Parameter.Cutter_Type,
-                Rtc_Limit = Para_List.Parameter.Rtc_Limit
+                Rtc_Limit = Para_List.Parameter.Rtc_Limit,
+                Gts_Repeat = Para_List.Parameter.Gts_Repeat,
+                Rtc_Repeat = Para_List.Parameter.Rtc_Repeat
             };
 
             //二进制 序列化
@@ -607,7 +619,7 @@ namespace Para_List
         }
 
         //反序列化
-        public void Reserialize(string fileName)
+        public static void Reserialize(string fileName)
         {
             //读取文件
             string File_Path = @"./\Config/" + fileName;
@@ -717,6 +729,8 @@ namespace Para_List
                     Para_List.Parameter.Cutter_Radius = parameter.Cutter_Radius;
                     Para_List.Parameter.Cutter_Type = parameter.Cutter_Type;
                     Para_List.Parameter.Rtc_Limit = parameter.Rtc_Limit;
+                    Para_List.Parameter.Gts_Repeat = parameter.Gts_Repeat;
+                    Para_List.Parameter.Rtc_Repeat = parameter.Rtc_Repeat;
                 }
             }
         }

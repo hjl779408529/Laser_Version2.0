@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Laser_Build_1._0;
+using Laser_Version2._0;
 using Prompt;
 using RTC5Import;
 
@@ -134,6 +135,46 @@ namespace RTC_Fun
             } while (Busy != 0U);
 
         }
+        //修正速度
+        public static void Change_Para()
+        {
+            //  wait list List_No to be not busy
+            //  load_list( List_No, 0) returns 1 if successful, otherwise 0
+            //执行到POS 0
+            do
+            {
+
+            }
+            while (RTC5Wrap.load_list(1u, 0u) == 0);
+            // Timing, delay and speed preset.
+            // Transmit the following list commands to the list buffer.
+            RTC5Wrap.set_start_list(1u);
+            // Wait for Para_List.Parameter.Warmup_Time seconds
+            RTC5Wrap.long_delay(Convert.ToUInt32(Para_List.Parameter.Warmup_Time / Para_List.Parameter.Scanner_Delay_Reference));
+            RTC5Wrap.set_laser_pulses(
+                Convert.ToUInt32(Para_List.Parameter.Laser_Half_Period * Para_List.Parameter.Rtc_Period_Reference),    // half of the laser signal period.
+                Convert.ToUInt32(Para_List.Parameter.Laser_Pulse_Width * Para_List.Parameter.Rtc_Period_Reference));  // pulse widths of signal LASER1.
+            RTC5Wrap.set_scanner_delays(
+                Convert.ToUInt32(Para_List.Parameter.Jump_Delay / Para_List.Parameter.Scanner_Delay_Reference),    // jump delay, in 10 microseconds.
+                Convert.ToUInt32(Para_List.Parameter.Mark_Delay / Para_List.Parameter.Scanner_Delay_Reference),    // mark delay, in 10 microseconds.
+                Convert.ToUInt32(Para_List.Parameter.Polygon_Delay / Para_List.Parameter.Scanner_Delay_Reference));    // polygon delay, in 10 microseconds.
+            RTC5Wrap.set_laser_delays(
+                Convert.ToInt32(Para_List.Parameter.Laser_On_Delay * Para_List.Parameter.Laser_Delay_Reference),    // laser on delay, in microseconds.
+                Convert.ToUInt32(Para_List.Parameter.Laser_Off_Delay * Para_List.Parameter.Laser_Delay_Reference));   // laser off delay, in microseconds.
+            // jump speed in bits per milliseconds.
+            RTC5Wrap.set_jump_speed(Para_List.Parameter.Jump_Speed);
+            // marking speed in bits per milliseconds.
+            RTC5Wrap.set_mark_speed(Para_List.Parameter.Mark_Speed);
+            RTC5Wrap.set_end_of_list();
+            RTC5Wrap.execute_list(1u);
+
+            //Pump source warming up ,wait!!!
+            uint Busy;
+            do
+            {
+                RTC5Wrap.get_status(out Busy, out uint Position);
+            } while (Busy != 0U);
+        }
         public static void Free()  
         {
             //释放Rtc5_dll
@@ -143,8 +184,8 @@ namespace RTC_Fun
 
     class Motion 
     {
-        public static List<Affinity_Matrix> affinity_Matrices;//校准数据集合
-        public static bool Exit_Flag = false;
+        public static List<Affinity_Matrix> affinity_Matrices=new List<Affinity_Matrix>();//校准数据集合
+        public static List<Double_Fit_Data> Fit_Matrices = new List<Double_Fit_Data>();//线性拟合校准数据集合 
         //构造函数
         public Motion()
         {
@@ -153,23 +194,44 @@ namespace RTC_Fun
             {
                 File_Name = "Rtc_Affinity_Matrix_All.xml";
             }
+            else if (Para_List.Parameter.Rtc_Affinity_Type == 2)
+            {
+                File_Name = "Rtc_Line_Fit_Data.csv";
+            }
             else
             {
                 File_Name = "Rtc_Affinity_Matrix_Three.xml";
             }
             string File_Path = @"./\Config/" + File_Name;
+
             if (File.Exists(File_Path))
             {
-                //获取标定板标定数据
-                affinity_Matrices = new List<Affinity_Matrix>(Serialize_Data.Reserialize_Affinity_Matrix(File_Name));
+                //获取矫正数据
+                if (Para_List.Parameter.Rtc_Affinity_Type == 1)//点阵匹配
+                {
+                    affinity_Matrices = new List<Affinity_Matrix>(Serialize_Data.Reserialize_Affinity_Matrix(File_Name));
+                    Log.Info("Rtc矫正文件加载成功！！！,数据数量：" + affinity_Matrices.Count);
+                }
+                else if (Para_List.Parameter.Rtc_Affinity_Type == 2)//直线拟合
+                {
+                    Fit_Matrices = new List<Double_Fit_Data>(CSV_RW.DataTable_Double_Fit_Data(CSV_RW.OpenCSV(File_Path)));
+                    Log.Info("Rtc矫正文件加载成功！！！,数据数量：" + Fit_Matrices.Count);
+                }
+                else
+                {
+                    affinity_Matrices = new List<Affinity_Matrix>(Serialize_Data.Reserialize_Affinity_Matrix(File_Name));
+                    Log.Info("Rtc矫正文件加载成功！！！,数据数量：" + affinity_Matrices.Count);
+                }
+                
             }
             else
             {
                 affinity_Matrices = new List<Affinity_Matrix>();
-                MessageBox.Show("Rtc仿射矫正文件不存在，禁止加工，请检查！");
-                Log.Info("Rtc仿射矫正文件不存在，禁止加工，请检查！");
+                Fit_Matrices = new List<Double_Fit_Data>();
+                MessageBox.Show("Rtc矫正文件不存在，禁止加工，请检查！");
+                Log.Info("Rtc矫正文件不存在，禁止加工，请检查！");
             }
-            MessageBox.Show("Rtc校准数据 数量："+ affinity_Matrices.Count);
+            
 
         }
         //关闭激光
@@ -190,11 +252,59 @@ namespace RTC_Fun
         //回到Home点
         public static void Home()
         {
+            UInt32 List_No = 1u;
+            //  wait list List_No to be not busy
+            //  load_list( List_No, 0) returns 1 if successful, otherwise 0
+            //  执行到POS 0
+            do
+            {
+
+            }
+            while (RTC5Wrap.load_list(List_No, 0u) == 0);
+            // Transmit the following list commands to the list buffer.
+            RTC5Wrap.set_start_list(List_No);
+            //修正当前位置00
+            RTC5Wrap.jump_abs(-Convert.ToInt32(Para_List.Parameter.Rtc_Home.Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Para_List.Parameter.Rtc_Home.X * Para_List.Parameter.Rtc_XPos_Reference));
+            //设置List结束位置
+            RTC5Wrap.set_end_of_list();
+            //启动执行
+            RTC5Wrap.execute_list(List_No);
+            //Busy 运行等待结束
+            uint Busy;
+            do
+            {
+                RTC5Wrap.get_status(out Busy, out uint Position);
+            } while (Busy != 0U);
+
+            //移动光点
             RTC5Wrap.goto_xy(-Convert.ToInt32(Para_List.Parameter.Rtc_Home.Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Para_List.Parameter.Rtc_Home.X * Para_List.Parameter.Rtc_XPos_Reference));
         }
         //关闭激光，移动激光聚焦点至加工起始位置
         public static void Rtc_Ready(decimal x, decimal y)
         {
+            UInt32 List_No = 1u;
+            //  wait list List_No to be not busy
+            //  load_list( List_No, 0) returns 1 if successful, otherwise 0
+            //  执行到POS 0
+            do
+            {
+
+            }
+            while (RTC5Wrap.load_list(List_No, 0u) == 0);
+            // Transmit the following list commands to the list buffer.
+            RTC5Wrap.set_start_list(List_No);
+            //修正当前位置00
+            RTC5Wrap.jump_abs(-Convert.ToInt32(y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(x * Para_List.Parameter.Rtc_XPos_Reference));
+            //设置List结束位置
+            RTC5Wrap.set_end_of_list();
+            //启动执行
+            RTC5Wrap.execute_list(List_No);
+            //Busy 运行等待结束
+            uint Busy;
+            do
+            {
+                RTC5Wrap.get_status(out Busy, out uint Position);
+            } while (Busy != 0U);
             //goto 指定点
             RTC5Wrap.goto_xy(-Convert.ToInt32(y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(x * Para_List.Parameter.Rtc_XPos_Reference));
         }
@@ -412,7 +522,7 @@ namespace RTC_Fun
                 }
             }
             //结束Jump到启动点位
-            RTC5Wrap.jump_abs(0,0);
+            //RTC5Wrap.jump_abs(0,0);
 
             //设置List结束位置
             RTC5Wrap.set_end_of_list();
@@ -425,13 +535,6 @@ namespace RTC_Fun
             do
             {
                 RTC5Wrap.get_status(out Busy, out uint Position);
-                //退出
-                if (Exit_Flag)
-                {
-                    Draw_Stop();
-                    Exit_Flag = false;
-                    return;
-                }
             } while (Busy != 0U);
         }
         public static void Draw_Stop()
@@ -444,14 +547,15 @@ namespace RTC_Fun
         {
 
             //临时定位变量
-            Int16 R0_m, R0_n, End_m, End_n, Center_m, Center_n; 
+            Int16 R0_m, R0_n, End_m, End_n, Center_m, Center_n;
             //定义处理的变量
-            decimal Tmp_R0_X;
-            decimal Tmp_R0_Y;
-            decimal Tmp_End_X;
-            decimal Tmp_End_Y;
-            decimal Tmp_Center_X;
-            decimal Tmp_Center_Y;
+            Vector Tmp_Point = new Vector();
+            decimal Tmp_R0_X = 0.0m;
+            decimal Tmp_R0_Y = 0.0m;
+            decimal Tmp_End_X = 0.0m;
+            decimal Tmp_End_Y = 0.0m;
+            decimal Tmp_Center_X = 0.0m;
+            decimal Tmp_Center_Y = 0.0m;
 #if !DEBUG
             //  wait list List_No to be not busy
             //  load_list( List_No, 0) returns 1 if successful, otherwise 0
@@ -464,22 +568,31 @@ namespace RTC_Fun
             // Transmit the following list commands to the list buffer.
             RTC5Wrap.set_start_list(List_No);
 #endif
-
-            //获取数据落点
-            R0_m = Rtc_Cal_Data_Resolve.Seek_X_Pos(Rtc_Datas[0].Rtc_x);
-            R0_n = Rtc_Cal_Data_Resolve.Seek_Y_Pos(Rtc_Datas[0].Rtc_y);
-
-            //终点计算
-            if (affinity_Matrices.Count>1)
+            if (Para_List.Parameter.Rtc_Affinity_Type == 2)
             {
-                Tmp_R0_X = Rtc_Datas[0].Rtc_x * affinity_Matrices[R0_n * Para_List.Parameter.Rtc_Affinity_Col + R0_m].Cos_Value + Rtc_Datas[0].Rtc_y * affinity_Matrices[R0_n * Para_List.Parameter.Rtc_Affinity_Col + R0_m].Sin_Value + affinity_Matrices[R0_n * Para_List.Parameter.Rtc_Affinity_Col + R0_m].Delta_X;
-                Tmp_R0_Y = Rtc_Datas[0].Rtc_y * affinity_Matrices[R0_n * Para_List.Parameter.Rtc_Affinity_Col + R0_m].Cos_Value - Rtc_Datas[0].Rtc_x * affinity_Matrices[R0_n * Para_List.Parameter.Rtc_Affinity_Col + R0_m].Sin_Value + affinity_Matrices[R0_n * Para_List.Parameter.Rtc_Affinity_Col + R0_m].Delta_Y;
+                Tmp_Point = new Vector(Rtc_Cal_Data_Resolve.Get_Line_Fit_Coordinate(Rtc_Datas[0].Rtc_x, Rtc_Datas[0].Rtc_y, Fit_Matrices));
+                Tmp_R0_X = Tmp_Point.X;
+                Tmp_R0_Y = Tmp_Point.Y;
             }
-            else if ((affinity_Matrices.Count > 0) && (affinity_Matrices.Count == 1))
+            else
             {
-                Tmp_R0_X = Rtc_Datas[0].Rtc_x * affinity_Matrices[0].Cos_Value + Rtc_Datas[0].Rtc_y * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_X;
-                Tmp_R0_Y = Rtc_Datas[0].Rtc_y * affinity_Matrices[0].Cos_Value - Rtc_Datas[0].Rtc_x * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_Y;
+                //获取数据落点
+                R0_m = Rtc_Cal_Data_Resolve.Seek_X_Pos(Rtc_Datas[0].Rtc_x);
+                R0_n = Rtc_Cal_Data_Resolve.Seek_Y_Pos(Rtc_Datas[0].Rtc_y);
+
+                //终点计算
+                if (affinity_Matrices.Count > 1)
+                {
+                    Tmp_R0_X = Rtc_Datas[0].Rtc_x * affinity_Matrices[R0_n * Para_List.Parameter.Rtc_Affinity_Col + R0_m].Cos_Value + Rtc_Datas[0].Rtc_y * affinity_Matrices[R0_n * Para_List.Parameter.Rtc_Affinity_Col + R0_m].Sin_Value + affinity_Matrices[R0_n * Para_List.Parameter.Rtc_Affinity_Col + R0_m].Delta_X;
+                    Tmp_R0_Y = Rtc_Datas[0].Rtc_y * affinity_Matrices[R0_n * Para_List.Parameter.Rtc_Affinity_Col + R0_m].Cos_Value - Rtc_Datas[0].Rtc_x * affinity_Matrices[R0_n * Para_List.Parameter.Rtc_Affinity_Col + R0_m].Sin_Value + affinity_Matrices[R0_n * Para_List.Parameter.Rtc_Affinity_Col + R0_m].Delta_Y;
+                }
+                else if ((affinity_Matrices.Count > 0) && (affinity_Matrices.Count == 1))
+                {
+                    Tmp_R0_X = Rtc_Datas[0].Rtc_x * affinity_Matrices[0].Cos_Value + Rtc_Datas[0].Rtc_y * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_X;
+                    Tmp_R0_Y = Rtc_Datas[0].Rtc_y * affinity_Matrices[0].Cos_Value - Rtc_Datas[0].Rtc_x * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_Y;
+                }
             }
+            
             
 #if !DEBUG
             //初始Jump到启动点位
@@ -489,28 +602,39 @@ namespace RTC_Fun
             foreach (var o in Rtc_Datas)
             {
 
-                //获取数据落点
-                End_m = Rtc_Cal_Data_Resolve.Seek_X_Pos(o.End_x);                
-                End_n = Rtc_Cal_Data_Resolve.Seek_Y_Pos(o.End_y);
-                Center_m = Rtc_Cal_Data_Resolve.Seek_X_Pos(o.Center_x);
-                Center_n = Rtc_Cal_Data_Resolve.Seek_Y_Pos(o.Center_y);
+                if (Para_List.Parameter.Rtc_Affinity_Type == 2)
+                {
+                    Tmp_Point = new Vector(Rtc_Cal_Data_Resolve.Get_Line_Fit_Coordinate(o.End_x, o.End_y, Fit_Matrices));
+                    Tmp_End_X = Tmp_Point.X;
+                    Tmp_End_Y = Tmp_Point.Y;
+                    Tmp_Point = new Vector(Rtc_Cal_Data_Resolve.Get_Line_Fit_Coordinate(o.Center_x, o.Center_y, Fit_Matrices));
+                    Tmp_Center_X = Tmp_Point.X;
+                    Tmp_Center_Y = Tmp_Point.Y; ;
+                }
+                else
+                {
 
-                //终点计算
-                if (affinity_Matrices.Count > 1)
-                {
-                    Tmp_End_X = o.End_x * affinity_Matrices[End_n * Para_List.Parameter.Rtc_Affinity_Col + End_m].Cos_Value + o.End_y * affinity_Matrices[End_n * Para_List.Parameter.Rtc_Affinity_Col + End_m].Sin_Value + affinity_Matrices[End_n * Para_List.Parameter.Rtc_Affinity_Col + End_m].Delta_X;
-                    Tmp_End_Y = o.End_y * affinity_Matrices[End_n * Para_List.Parameter.Rtc_Affinity_Col + End_m].Cos_Value - o.End_x * affinity_Matrices[End_n * Para_List.Parameter.Rtc_Affinity_Col + End_m].Sin_Value + affinity_Matrices[End_n * Para_List.Parameter.Rtc_Affinity_Col + End_m].Delta_Y;
-                    Tmp_Center_X = o.Center_x * affinity_Matrices[Center_n * Para_List.Parameter.Rtc_Affinity_Col + Center_m].Cos_Value + o.Center_y * affinity_Matrices[Center_n * Para_List.Parameter.Rtc_Affinity_Col + Center_m].Sin_Value + affinity_Matrices[Center_n * Para_List.Parameter.Rtc_Affinity_Col + Center_m].Delta_X;
-                    Tmp_Center_Y = o.Center_y * affinity_Matrices[Center_n * Para_List.Parameter.Rtc_Affinity_Col + Center_m].Cos_Value - o.Center_x * affinity_Matrices[Center_n * Para_List.Parameter.Rtc_Affinity_Col + Center_m].Sin_Value + affinity_Matrices[Center_n * Para_List.Parameter.Rtc_Affinity_Col + Center_m].Delta_Y;
+                    //获取数据落点
+                    End_m = Rtc_Cal_Data_Resolve.Seek_X_Pos(o.End_x);
+                    End_n = Rtc_Cal_Data_Resolve.Seek_Y_Pos(o.End_y);
+                    Center_m = Rtc_Cal_Data_Resolve.Seek_X_Pos(o.Center_x);
+                    Center_n = Rtc_Cal_Data_Resolve.Seek_Y_Pos(o.Center_y);
+                    //终点计算
+                    if (affinity_Matrices.Count > 1)
+                    {
+                        Tmp_End_X = o.End_x * affinity_Matrices[End_n * Para_List.Parameter.Rtc_Affinity_Col + End_m].Cos_Value + o.End_y * affinity_Matrices[End_n * Para_List.Parameter.Rtc_Affinity_Col + End_m].Sin_Value + affinity_Matrices[End_n * Para_List.Parameter.Rtc_Affinity_Col + End_m].Delta_X;
+                        Tmp_End_Y = o.End_y * affinity_Matrices[End_n * Para_List.Parameter.Rtc_Affinity_Col + End_m].Cos_Value - o.End_x * affinity_Matrices[End_n * Para_List.Parameter.Rtc_Affinity_Col + End_m].Sin_Value + affinity_Matrices[End_n * Para_List.Parameter.Rtc_Affinity_Col + End_m].Delta_Y;
+                        Tmp_Center_X = o.Center_x * affinity_Matrices[Center_n * Para_List.Parameter.Rtc_Affinity_Col + Center_m].Cos_Value + o.Center_y * affinity_Matrices[Center_n * Para_List.Parameter.Rtc_Affinity_Col + Center_m].Sin_Value + affinity_Matrices[Center_n * Para_List.Parameter.Rtc_Affinity_Col + Center_m].Delta_X;
+                        Tmp_Center_Y = o.Center_y * affinity_Matrices[Center_n * Para_List.Parameter.Rtc_Affinity_Col + Center_m].Cos_Value - o.Center_x * affinity_Matrices[Center_n * Para_List.Parameter.Rtc_Affinity_Col + Center_m].Sin_Value + affinity_Matrices[Center_n * Para_List.Parameter.Rtc_Affinity_Col + Center_m].Delta_Y;
+                    }
+                    else if ((affinity_Matrices.Count > 0) && (affinity_Matrices.Count == 1))
+                    {
+                        Tmp_End_X = o.End_x * affinity_Matrices[0].Cos_Value + o.End_y * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_X;
+                        Tmp_End_Y = o.End_y * affinity_Matrices[0].Cos_Value - o.End_x * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_Y;
+                        Tmp_Center_X = o.Center_x * affinity_Matrices[0].Cos_Value + o.Center_y * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_X;
+                        Tmp_Center_Y = o.Center_y * affinity_Matrices[0].Cos_Value - o.Center_x * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_Y;
+                    }
                 }
-                else if ((affinity_Matrices.Count > 0) && (affinity_Matrices.Count == 1))
-                {
-                    Tmp_End_X = o.End_x * affinity_Matrices[0].Cos_Value + o.End_y * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_X;
-                    Tmp_End_Y = o.End_y * affinity_Matrices[0].Cos_Value - o.End_x * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_Y;
-                    Tmp_Center_X = o.Center_x * affinity_Matrices[0].Cos_Value + o.Center_y * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_X;
-                    Tmp_Center_Y = o.Center_y * affinity_Matrices[0].Cos_Value - o.Center_x * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_Y;
-                }
-                
 #if !DEBUG
                 if (o.Type == 11)//arc_abs 绝对圆弧
                 {
@@ -540,7 +664,7 @@ namespace RTC_Fun
             }
 #if !DEBUG
             //结束Jump到启动点位
-            RTC5Wrap.jump_abs(0, 0);
+            //RTC5Wrap.jump_abs(0, 0);
 
             //设置List结束位置
             RTC5Wrap.set_end_of_list();
@@ -552,14 +676,7 @@ namespace RTC_Fun
             uint Busy;
             do
             {
-                RTC5Wrap.get_status(out Busy, out uint Position);
-                //退出
-                if (Exit_Flag)
-                {
-                    Draw_Stop();
-                    Exit_Flag = false;
-                    return;
-                }
+                RTC5Wrap.get_status(out Busy, out uint Position);                
             } while (Busy != 0U);
 #endif
         }

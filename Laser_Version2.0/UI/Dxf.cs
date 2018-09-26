@@ -940,16 +940,14 @@ namespace Laser_Build_1._0
         //参数保存
         private void button15_Click(object sender, EventArgs e)
         {
-            Para_List.Serialize_Parameter serialize_Parameter = new Para_List.Serialize_Parameter();
-            serialize_Parameter.Serialize("Para.xml");
+            Para_List.Serialize_Parameter.Serialize("Para.xml");
             richTextBox1.AppendText("参数保存成功！！！" + "\r\n");
         }
         //参数读取
         private void button14_Click(object sender, EventArgs e)
         {
-            Para_List.Serialize_Parameter serialize_Parameter = new Para_List.Serialize_Parameter();
-            serialize_Parameter.Reserialize("Para.xml");
-            richTextBox1.AppendText("参数读取成功！！！" + Para_List.Parameter.Gts_Affinity_Row + "\r\n");
+            Para_List.Serialize_Parameter.Reserialize("Para.xml");
+            richTextBox1.AppendText("参数读取成功！！！" + "\r\n");
         }               
 
         //清除调试信息窗口
@@ -1132,12 +1130,11 @@ namespace Laser_Build_1._0
         //生成Rtc标定数据
         private void button13_Click(object sender, EventArgs e)
         {
-            Data_Resolve get_rtc = new Data_Resolve();
-            Rtc_List_Data.Clear();
+           
             //RTC切割距离矫正数据
             //Rtc_List_Data =get_rtc.Generate_Calibration_Data(Para_List.Parameter.Rtc_Cal_Radius, Para_List.Parameter.Rtc_Cal_Interval);
             //RTC与ORG 距离数据
-            //Rtc_List_Data =get_rtc.Generate_Org_Rtc_Data(Para_List.Parameter.Rtc_Cal_Radius, Para_List.Parameter.Rtc_Cal_Interval);
+            Rtc_List_Data  = Calibration.Generate_Org_Rtc_Data(Para_List.Parameter.Rtc_Cal_Radius, Para_List.Parameter.Rtc_Cal_Interval);
             for (int i = 0; i < Rtc_List_Data.Count; i++)
             {
                 for (int j = 0; j < Rtc_List_Data[i].Count; j++)
@@ -1235,7 +1232,7 @@ namespace Laser_Build_1._0
             Gts_Cal_Data_Resolve.Resolve(Serialize_Data.Reserialize_Correct_Data("Gts_Correct_Data.xml"));
 
             //将Affinity数据转换为CSV并保存
-            CSV_RW.SaveCSV(CSV_RW.Affinity_Matrix_DataTable(Serialize_Data.Reserialize_Affinity_Matrix(File_Name)), File_Name);
+            //CSV_RW.SaveCSV(CSV_RW.Affinity_Matrix_DataTable(Serialize_Data.Reserialize_Affinity_Matrix(File_Name)), File_Name);
 
             //将Gts Correctdata数据转换为CSV并保存
             //CSV_RW.SaveCSV(CSV_RW.Correct_Data_DataTable(Serialize_Data.Reserialize_Correct_Data("Gts_Correct_Data.xml")), "Gts_Correct_Data");
@@ -1244,9 +1241,8 @@ namespace Laser_Build_1._0
         //RTC矫正加工
         private void Correct_Rtc_Click(object sender, EventArgs e)
         {
-            //Thread Integrate_thread = new Thread(Integrated_Correct_Start);
-            ///Integrate_thread.Start();
-            Integrated_Correct_Start();
+            Thread Integrated_Correct_thread = new Thread(Integrated_Correct_Start);
+            Integrated_Correct_thread.Start();
         }
         private void Integrated_Correct_Start()
         {

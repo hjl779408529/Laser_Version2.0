@@ -50,6 +50,8 @@ namespace Laser_Version2._0
             textBox8.Text = Convert.ToString(Para_List.Parameter.Rtc_YPos_Reference);
             Home_Vector = Para_List.Parameter.Rtc_Home;
 
+            Mark_Speed.Text = (((decimal)Para_List.Parameter.Mark_Speed / Para_List.Parameter.Rtc_XPos_Reference) * 1000m).ToString();
+
         }
         //线程函数
         private void Refresh_Timer_Elapsed_Thread(object sender, ElapsedEventArgs e)
@@ -206,6 +208,22 @@ namespace Laser_Version2._0
                 return;
             }
             Para_List.Parameter.Rtc_YPos_Reference = tem;
+        }
+
+        private void Mark_Speed_TextChanged(object sender, EventArgs e)
+        {
+            if (!decimal.TryParse(Mark_Speed.Text, out decimal tem))
+            {
+                MessageBox.Show("请正确输入数字");
+                return;
+            }
+            Para_List.Parameter.Mark_Speed =(double)(tem * Para_List.Parameter.Rtc_XPos_Reference / 1000m);
+        }
+        //参数生效
+        private void Change_Para_List_Click(object sender, EventArgs e)
+        {
+            //Para_List.Serialize_Parameter.Reserialize("Para.xml");
+            RTC_Fun.Factory.Change_Para();
         }
     }
 }

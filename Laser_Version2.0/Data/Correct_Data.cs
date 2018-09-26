@@ -18,6 +18,7 @@ using System.Xml.Serialization;
 using System.Windows.Forms;
 using MathNet.Numerics;
 using Laser_Version2._0;
+using System.Data;
 
 namespace Laser_Build_1._0
 {
@@ -780,6 +781,8 @@ namespace Laser_Build_1._0
             Mat mat = new Mat(new Size(3, 2), Emgu.CV.CvEnum.DepthType.Cv32F, 1); //2行 3列 的矩阵
             //定义仿射变换矩阵转换数组
             double[] temp_array;
+            //拟合高阶次数
+            short Line_Re = 4;
             //数据处理
             if (Para_List.Parameter.Gts_Calibration_Col * Para_List.Parameter.Gts_Calibration_Row == correct_Datas.Count)//矫正和差异数据完整
             {
@@ -823,20 +826,44 @@ namespace Laser_Build_1._0
                             //提取X轴拟合数据
                             src_x[j] = (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Xo);
                             dst_x[j] = (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Xm);
-                            R_X = Fit.Line(src_x, dst_x);
                             //提取Y轴拟合数据
                             src_y[j] = (float)(correct_Datas[i + j * Para_List.Parameter.Gts_Calibration_Col].Yo);
                             dst_y[j] = (float)(correct_Datas[i + j * Para_List.Parameter.Gts_Calibration_Col].Ym);
-                            R_Y = Fit.Line(src_y, dst_y);
+                            
                         }
-                        //提取拟合直线数据
-                        Temp_Fit_Data = new Double_Fit_Data
+                        //高阶曲线拟合
+                        if (Line_Re >= 2)
                         {
-                            K_X1 = (decimal)R_X.Item2,
-                            Delta_X = (decimal)R_X.Item1,
-                            K_Y1 = (decimal)R_Y.Item2,
-                            Delta_Y = (decimal)R_Y.Item1
-                        };
+                            double[] Res_x = Fit.Polynomial(src_x, dst_x, Line_Re);
+                            double[] Res_y = Fit.Polynomial(src_y, dst_y, Line_Re);
+                            //提取拟合直线数据
+                            Temp_Fit_Data = new Double_Fit_Data
+                            {
+                                K_X4 = (decimal)Res_x[4],
+                                K_X3 = (decimal)Res_x[3],
+                                K_X2 = (decimal)Res_x[2],
+                                K_X1 = (decimal)Res_x[1],
+                                Delta_X = (decimal)Res_x[0],
+                                K_Y4 = (decimal)Res_y[4],
+                                K_Y3 = (decimal)Res_y[3],
+                                K_Y2 = (decimal)Res_y[2],
+                                K_Y1 = (decimal)Res_y[1],
+                                Delta_Y = (decimal)Res_y[0]
+                            };
+                        }
+                        else
+                        {
+                            R_X = Fit.Line(src_x, dst_x);
+                            R_Y = Fit.Line(src_y, dst_y);
+                            //提取拟合直线数据
+                            Temp_Fit_Data = new Double_Fit_Data
+                            {
+                                K_X1 = (decimal)R_X.Item2,
+                                Delta_X = (decimal)R_X.Item1,
+                                K_Y1 = (decimal)R_Y.Item2,
+                                Delta_Y = (decimal)R_Y.Item1
+                            };
+                        }                        
                         //保存进入Line_Fit_Data
                         Line_Fit_Data.Add(new Double_Fit_Data(Temp_Fit_Data));
                         //清空数据
@@ -848,8 +875,8 @@ namespace Laser_Build_1._0
                 else
                 {
                     //定义点位数组 
-                    PointF[] srcTri = new PointF[4];//标准数据
-                    PointF[] dstTri = new PointF[4];//差异化数据
+                    PointF[] srcTri = new PointF[3];//标准数据
+                    PointF[] dstTri = new PointF[3];//差异化数据
                     //数据处理
                     for (i = 0; i < Para_List.Parameter.Gts_Calibration_Col - 1; i++)
                     {
@@ -860,17 +887,17 @@ namespace Laser_Build_1._0
                             srcTri[0] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Xm), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Ym));
                             srcTri[1] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row].Xm), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row].Ym));
                             srcTri[2] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row + 1].Xm), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row + 1].Ym));
-                            srcTri[3] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + 1].Xm), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + 1].Ym));
+                            //srcTri[3] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + 1].Xm), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + 1].Ym));
 
                             //仿射数据  测量坐标
                             dstTri[0] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Xo), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Yo));
                             dstTri[1] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row].Xo), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row].Yo));
                             dstTri[2] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row + 1].Xo), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row + 1].Yo));
-                            dstTri[3] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + 1].Xo), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + 1].Yo));
+                            //dstTri[3] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + 1].Xo), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + 1].Yo));
 
                             //计算仿射变换矩阵
-                            //mat = CvInvoke.GetAffineTransform(srcTri, dstTri);
-                            mat = CvInvoke.EstimateRigidTransform(srcTri, dstTri, false);
+                            mat = CvInvoke.GetAffineTransform(srcTri, dstTri);
+                            //mat = CvInvoke.EstimateRigidTransform(srcTri, dstTri, false);
                             //提取矩阵数据
                             temp_array = mat.GetDoubleArray();
                             //获取仿射变换参数
@@ -1013,8 +1040,8 @@ namespace Laser_Build_1._0
             //临时定位变量
             Int16 m, n;
             decimal X_per, Y_per;
-            decimal K_x, B_x;
-            decimal K_y, B_y; 
+            decimal K_x1, K_x2, K_x3, K_x4, B_x;
+            decimal K_y1, K_y2, K_y3, K_y4, B_y;
             //获取落点
             m = Seek_X_Pos(x);
             n = Seek_Y_Pos(y);
@@ -1022,12 +1049,18 @@ namespace Laser_Build_1._0
             X_per = Math.Abs(x - m * Para_List.Parameter.Gts_Calibration_Cell) / Para_List.Parameter.Gts_Calibration_Cell;
             Y_per = Math.Abs(y - m * Para_List.Parameter.Gts_Calibration_Cell) / Para_List.Parameter.Gts_Calibration_Cell;
             //计算实际 线性拟合数据
-            K_x = (line_fit_data[m + 1].K_X1 - line_fit_data[m].K_X1) * X_per + line_fit_data[m].K_X1;
+            K_x1 = (line_fit_data[m + 1].K_X1 - line_fit_data[m].K_X1) * X_per + line_fit_data[m].K_X1;
+            K_x2 = (line_fit_data[m + 1].K_X2 - line_fit_data[m].K_X2) * X_per + line_fit_data[m].K_X2;
+            K_x3 = (line_fit_data[m + 1].K_X3 - line_fit_data[m].K_X3) * X_per + line_fit_data[m].K_X3;
+            K_x4 = (line_fit_data[m + 1].K_X4 - line_fit_data[m].K_X4) * X_per + line_fit_data[m].K_X4;
             B_x = (line_fit_data[m + 1].Delta_X - line_fit_data[m].Delta_X) * X_per + line_fit_data[m].Delta_X;
-            K_y = (line_fit_data[m + 1].K_Y1 - line_fit_data[m].K_Y1) * Y_per + line_fit_data[m].K_Y1;
+            K_y1 = (line_fit_data[m + 1].K_Y1 - line_fit_data[m].K_Y1) * Y_per + line_fit_data[m].K_Y1;
+            K_y2 = (line_fit_data[m + 1].K_Y2 - line_fit_data[m].K_Y2) * Y_per + line_fit_data[m].K_Y2;
+            K_y3 = (line_fit_data[m + 1].K_Y3 - line_fit_data[m].K_Y3) * Y_per + line_fit_data[m].K_Y3;
+            K_y4 = (line_fit_data[m + 1].K_Y4 - line_fit_data[m].K_Y4) * Y_per + line_fit_data[m].K_Y4;
             B_y = (line_fit_data[m + 1].Delta_Y - line_fit_data[m].Delta_Y) * Y_per + line_fit_data[m].Delta_Y;
             //返回实际坐标
-            return new Vector(K_x * x + B_x,K_y * y + B_y);
+            return new Vector(K_x4 * x * x * x * x + K_x3 * x * x * x + K_x2 * x * x + K_x1 * x + B_x, K_y4 * y * y * y * y + K_y3 * y * y * y + K_y2 * y * y + K_y1 * y + B_y);
         }
     }
     //RTC校准数据处理
@@ -1040,11 +1073,15 @@ namespace Laser_Build_1._0
             //建立变量
             List<Affinity_Matrix> Result = new List<Affinity_Matrix>();
             Affinity_Matrix Temp_Affinity_Matrix = new Affinity_Matrix();
+            List<Double_Fit_Data> Line_Fit_Data = new List<Double_Fit_Data>();
+            Double_Fit_Data Temp_Fit_Data = new Double_Fit_Data();
             Int16 i, j;
             //定义仿射变换数组 
             Mat mat = new Mat(new Size(3, 2), Emgu.CV.CvEnum.DepthType.Cv32F, 1); //2行 3列 的矩阵
             //定义仿射变换矩阵转换数组
             double[] temp_array;
+            //拟合高阶次数
+            short Line_Re = 4;
             //数据处理
             if (Para_List.Parameter.Rtc_Calibration_Col * Para_List.Parameter.Rtc_Calibration_Row == correct_Datas.Count)//矫正和差异数据完整
             {
@@ -1070,6 +1107,69 @@ namespace Laser_Build_1._0
                     Temp_Affinity_Matrix.Empty();
                     //保存为文件
                     Serialize_Data.Serialize_Affinity_Matrix(Result, "Rtc_Affinity_Matrix_All.xml");
+                }
+                else if (Para_List.Parameter.Rtc_Affinity_Type == 2)//线性拟合
+                {
+                    //初始化数据
+                    double[] src_x = new double[Para_List.Parameter.Rtc_Calibration_Col];
+                    double[] dst_x = new double[Para_List.Parameter.Rtc_Calibration_Col];
+                    Tuple<double, double> R_X = new Tuple<double, double>(0, 0);
+                    double[] src_y = new double[Para_List.Parameter.Rtc_Calibration_Row];
+                    double[] dst_y = new double[Para_List.Parameter.Rtc_Calibration_Row];
+                    Tuple<double, double> R_Y = new Tuple<double, double>(0, 0);
+                    //拟合数据
+                    for (i = 0; i < Para_List.Parameter.Rtc_Calibration_Col; i++)
+                    {
+                        for (j = 0; j < Para_List.Parameter.Rtc_Calibration_Row; j++)
+                        {
+                            //提取X轴拟合数据
+                            src_x[j] = (float)(correct_Datas[j + i * Para_List.Parameter.Rtc_Calibration_Col].Xo);
+                            dst_x[j] = (float)(correct_Datas[j + i * Para_List.Parameter.Rtc_Calibration_Col].Xm);
+                            //提取Y轴拟合数据
+                            src_y[j] = (float)(correct_Datas[i + j * Para_List.Parameter.Rtc_Calibration_Col].Yo);
+                            dst_y[j] = (float)(correct_Datas[i + j * Para_List.Parameter.Rtc_Calibration_Col].Ym);
+                            
+                        }
+                        //高阶曲线拟合
+                        if (Line_Re >= 2)
+                        {
+                            double[] Res_x = Fit.Polynomial(src_x, dst_x, Line_Re);
+                            double[] Res_y = Fit.Polynomial(src_y, dst_y, Line_Re);
+                            //提取拟合直线数据
+                            Temp_Fit_Data = new Double_Fit_Data
+                            {
+                                K_X4 = (decimal)Res_x[4],
+                                K_X3 = (decimal)Res_x[3],
+                                K_X2 = (decimal)Res_x[2],
+                                K_X1 = (decimal)Res_x[1],
+                                Delta_X = (decimal)Res_x[0],
+                                K_Y4 = (decimal)Res_y[4],
+                                K_Y3 = (decimal)Res_y[3],
+                                K_Y2 = (decimal)Res_y[2],
+                                K_Y1 = (decimal)Res_y[1],
+                                Delta_Y = (decimal)Res_y[0]
+                            };
+                        }
+                        else//1阶线性拟合
+                        {
+                            R_X = Fit.Line(src_x, dst_x);
+                            R_Y = Fit.Line(src_y, dst_y);
+                            //提取拟合直线数据
+                            Temp_Fit_Data = new Double_Fit_Data
+                            {
+                                K_X1 = (decimal)R_X.Item2,
+                                Delta_X = (decimal)R_X.Item1,
+                                K_Y1 = (decimal)R_Y.Item2,
+                                Delta_Y = (decimal)R_Y.Item1
+                            };
+                        }
+                        //保存进入Line_Fit_Data
+                        Line_Fit_Data.Add(new Double_Fit_Data(Temp_Fit_Data));
+                        //清空数据
+                        Temp_Fit_Data.Empty();
+                    }
+                    //保存轴拟合数据
+                    CSV_RW.SaveCSV(CSV_RW.Double_Fit_Data_DataTable(Line_Fit_Data), "Rtc_Line_Fit_Data");
                 }
                 else
                 {
@@ -1145,8 +1245,8 @@ namespace Laser_Build_1._0
             //临时定位变量
             Int16 m, n;
             decimal X_per, Y_per;
-            decimal K_x, B_x;
-            decimal K_y, B_y;
+            decimal K_x1, K_x2, K_x3, K_x4, B_x;
+            decimal K_y1, K_y2, K_y3, K_y4, B_y; 
             //获取落点
             m = Seek_X_Pos(x);
             n = Seek_Y_Pos(y);
@@ -1154,15 +1254,80 @@ namespace Laser_Build_1._0
             X_per = Math.Abs(x - m * Para_List.Parameter.Rtc_Calibration_Cell) / Para_List.Parameter.Rtc_Calibration_Cell;
             Y_per = Math.Abs(y - m * Para_List.Parameter.Rtc_Calibration_Cell) / Para_List.Parameter.Rtc_Calibration_Cell;
             //计算实际 线性拟合数据
-            K_x = (line_fit_data[m + 1].K_X1 - line_fit_data[m].K_X1) * X_per + line_fit_data[m].K_X1;
+            K_x1 = (line_fit_data[m + 1].K_X1 - line_fit_data[m].K_X1) * X_per + line_fit_data[m].K_X1;
+            K_x2 = (line_fit_data[m + 1].K_X2 - line_fit_data[m].K_X2) * X_per + line_fit_data[m].K_X2;
+            K_x3 = (line_fit_data[m + 1].K_X3 - line_fit_data[m].K_X3) * X_per + line_fit_data[m].K_X3;
+            K_x4 = (line_fit_data[m + 1].K_X4 - line_fit_data[m].K_X4) * X_per + line_fit_data[m].K_X4;
             B_x = (line_fit_data[m + 1].Delta_X - line_fit_data[m].Delta_X) * X_per + line_fit_data[m].Delta_X;
-            K_y = (line_fit_data[m + 1].K_Y1 - line_fit_data[m].K_Y1) * Y_per + line_fit_data[m].K_Y1;
+            K_y1 = (line_fit_data[m + 1].K_Y1 - line_fit_data[m].K_Y1) * Y_per + line_fit_data[m].K_Y1;
+            K_y2 = (line_fit_data[m + 1].K_Y2 - line_fit_data[m].K_Y2) * Y_per + line_fit_data[m].K_Y2;
+            K_y3 = (line_fit_data[m + 1].K_Y3 - line_fit_data[m].K_Y3) * Y_per + line_fit_data[m].K_Y3;
+            K_y4 = (line_fit_data[m + 1].K_Y4 - line_fit_data[m].K_Y4) * Y_per + line_fit_data[m].K_Y4;
             B_y = (line_fit_data[m + 1].Delta_Y - line_fit_data[m].Delta_Y) * Y_per + line_fit_data[m].Delta_Y;
             //返回实际坐标
-            return new Vector(K_x * x + B_x, K_y * y + B_y);
+            return new Vector(K_x4 * x * x * x * x + K_x3 * x * x * x + K_x2 * x * x + K_x1 * x + B_x, K_y4 * y * y * y * y + K_y3 * y * y * y + K_y2 * y * y + K_y1 * y + B_y);
         }
     }
+    class Laser_Watt_Cal
+    {
+        //生成激光 百分比 与 功率的对应关系
+        public static List<Fit_Data> Resolve(DataTable New_Data)
+        {
 
+            //建立变量
+            List<Fit_Data> Result = new List<Fit_Data>();
+            Fit_Data Temp_Fit_Data = new Fit_Data();
+            Int16 i;
+            //拟合高阶次数
+            short Line_Re = 4;
+            //初始化数据
+            double[] src = new double[New_Data.Rows.Count];
+            double[] dst = new double[New_Data.Rows.Count];
+            Tuple<double, double> R = new Tuple<double, double>(0, 0);
+            //数据处理
+            for (i = 0; i < New_Data.Rows.Count; i++)
+            {                
+                if ((decimal.TryParse(New_Data.Rows[i][0].ToString(), out decimal X0 )) && (decimal.TryParse(New_Data.Rows[i][1].ToString(), out decimal X1)))
+                {
+                    src[i] = (float)X0;
+                    dst[i] = (float)X1;
+                }                
+            }
+            //高阶曲线拟合
+            if (Line_Re >= 2)
+            {
+                double[] Res= Fit.Polynomial(src, dst, Line_Re);
+                //提取拟合直线数据
+                Temp_Fit_Data = new Fit_Data
+                {
+                    K4 = (decimal)Res[4],
+                    K3 = (decimal)Res[3],
+                    K2 = (decimal)Res[2],
+                    K1 = (decimal)Res[1],
+                    Delta = (decimal)Res[0]
+                };
+            }
+            else//1阶线性拟合
+            {
+                //拟合
+                R = Fit.Line(src, dst);
+                //提取拟合直线数据
+                Temp_Fit_Data = new Fit_Data
+                {
+                    K1 = (decimal)R.Item2,
+                    Delta = (decimal)R.Item1
+                };
+            }
+            //结果追加
+            Result.Add(new Fit_Data(Temp_Fit_Data));
+            //清空数据
+            Temp_Fit_Data.Empty();
+            //保存功率矫正拟合数据
+            CSV_RW.SaveCSV(CSV_RW.Fit_Data_DataTable(Result), "Laser_Watt_Fit_Data");
+            //返回结果
+            return Result;
+        }
+    }
     //坐标转换 直接对从DXf的Arc、Circle、Line的坐标信息进行处理，返回对应的坐标信息，后续直接使用
     public class Transform
     {

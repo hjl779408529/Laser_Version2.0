@@ -144,7 +144,7 @@ namespace Laser_Build_1._0
                             RTC_Fun.Motion.Home();
 #endif
                             //Gts移动到启动位置 上一list数据的结尾数据或本次的结尾;待测试
-                            GTS_Fun.Interpolation.Gts_Ready(List_Datas[i][0].Start_x, List_Datas[i][0].Start_y);
+                            GTS_Fun.Interpolation.Gts_Ready_Correct(List_Datas[i][0].Start_x, List_Datas[i][0].Start_y);
                             //打开激光
 #if !DEBUG
                             RTC_Fun.Motion.Open_Laser();
@@ -194,9 +194,11 @@ namespace Laser_Build_1._0
                 if (Exit_Flag)
                 {
                     Exit_Flag = false;
+                    RTC_Fun.Motion.Home();
                     return;
                 }
             }
+            RTC_Fun.Motion.Home();
         }
 
         private void Axis01_Home()

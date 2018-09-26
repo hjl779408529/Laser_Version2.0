@@ -37,22 +37,17 @@
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.textBox3 = new System.Windows.Forms.TextBox();
             this.textBox4 = new System.Windows.Forms.TextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.label7 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.label9 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.textBox5 = new System.Windows.Forms.TextBox();
             this.textBox6 = new System.Windows.Forms.TextBox();
             this.button6 = new System.Windows.Forms.Button();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.button7 = new System.Windows.Forms.Button();
             this.button8 = new System.Windows.Forms.Button();
             this.button9 = new System.Windows.Forms.Button();
@@ -60,9 +55,11 @@
             this.textBox7 = new System.Windows.Forms.TextBox();
             this.label12 = new System.Windows.Forms.Label();
             this.textBox8 = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.Mark_Speed = new System.Windows.Forms.TextBox();
+            this.Change_Para_List = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
-            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // button1
@@ -149,24 +146,6 @@
             this.label2.TabIndex = 8;
             this.label2.Text = "Y步距/mm";
             // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(33, 54);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(62, 18);
-            this.label3.TabIndex = 9;
-            this.label3.Text = "label3";
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(193, 54);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(62, 18);
-            this.label4.TabIndex = 10;
-            this.label4.Text = "label4";
-            // 
             // label5
             // 
             this.label5.AutoSize = true;
@@ -213,24 +192,6 @@
             this.groupBox1.Size = new System.Drawing.Size(464, 104);
             this.groupBox1.TabIndex = 15;
             this.groupBox1.TabStop = false;
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(193, 145);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(62, 18);
-            this.label7.TabIndex = 17;
-            this.label7.Text = "label7";
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(33, 145);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(62, 18);
-            this.label8.TabIndex = 16;
-            this.label8.Text = "label8";
             // 
             // groupBox2
             // 
@@ -289,18 +250,6 @@
             this.button6.UseVisualStyleBackColor = true;
             this.button6.Click += new System.EventHandler(this.button6_Click);
             // 
-            // groupBox3
-            // 
-            this.groupBox3.Controls.Add(this.label7);
-            this.groupBox3.Controls.Add(this.label8);
-            this.groupBox3.Controls.Add(this.label4);
-            this.groupBox3.Controls.Add(this.label3);
-            this.groupBox3.Location = new System.Drawing.Point(509, 26);
-            this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(325, 199);
-            this.groupBox3.TabIndex = 18;
-            this.groupBox3.TabStop = false;
-            // 
             // button7
             // 
             this.button7.Location = new System.Drawing.Point(162, 251);
@@ -313,7 +262,7 @@
             // 
             // button8
             // 
-            this.button8.Location = new System.Drawing.Point(514, 278);
+            this.button8.Location = new System.Drawing.Point(523, 350);
             this.button8.Name = "button8";
             this.button8.Size = new System.Drawing.Size(115, 37);
             this.button8.TabIndex = 19;
@@ -323,7 +272,7 @@
             // 
             // button9
             // 
-            this.button9.Location = new System.Drawing.Point(707, 278);
+            this.button9.Location = new System.Drawing.Point(710, 350);
             this.button9.Name = "button9";
             this.button9.Size = new System.Drawing.Size(115, 37);
             this.button9.TabIndex = 20;
@@ -334,7 +283,7 @@
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(500, 347);
+            this.label11.Location = new System.Drawing.Point(509, 419);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(143, 18);
             this.label11.TabIndex = 16;
@@ -342,7 +291,7 @@
             // 
             // textBox7
             // 
-            this.textBox7.Location = new System.Drawing.Point(509, 371);
+            this.textBox7.Location = new System.Drawing.Point(518, 443);
             this.textBox7.Name = "textBox7";
             this.textBox7.Size = new System.Drawing.Size(125, 28);
             this.textBox7.TabIndex = 15;
@@ -351,7 +300,7 @@
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(693, 347);
+            this.label12.Location = new System.Drawing.Point(696, 419);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(143, 18);
             this.label12.TabIndex = 22;
@@ -359,17 +308,47 @@
             // 
             // textBox8
             // 
-            this.textBox8.Location = new System.Drawing.Point(702, 371);
+            this.textBox8.Location = new System.Drawing.Point(705, 443);
             this.textBox8.Name = "textBox8";
             this.textBox8.Size = new System.Drawing.Size(125, 28);
             this.textBox8.TabIndex = 21;
             this.textBox8.TextChanged += new System.EventHandler(this.textBox8_TextChanged);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(518, 56);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(125, 18);
+            this.label3.TabIndex = 16;
+            this.label3.Text = "Mark速度 mm/s";
+            // 
+            // Mark_Speed
+            // 
+            this.Mark_Speed.Location = new System.Drawing.Point(523, 80);
+            this.Mark_Speed.Name = "Mark_Speed";
+            this.Mark_Speed.Size = new System.Drawing.Size(115, 28);
+            this.Mark_Speed.TabIndex = 15;
+            this.Mark_Speed.TextChanged += new System.EventHandler(this.Mark_Speed_TextChanged);
+            // 
+            // Change_Para_List
+            // 
+            this.Change_Para_List.Location = new System.Drawing.Point(521, 151);
+            this.Change_Para_List.Name = "Change_Para_List";
+            this.Change_Para_List.Size = new System.Drawing.Size(115, 37);
+            this.Change_Para_List.TabIndex = 15;
+            this.Change_Para_List.Text = "参数生效";
+            this.Change_Para_List.UseVisualStyleBackColor = true;
+            this.Change_Para_List.Click += new System.EventHandler(this.Change_Para_List_Click);
             // 
             // Rtc_Handle
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(874, 490);
+            this.Controls.Add(this.Change_Para_List);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.Mark_Speed);
             this.Controls.Add(this.label12);
             this.Controls.Add(this.textBox8);
             this.Controls.Add(this.label11);
@@ -377,7 +356,6 @@
             this.Controls.Add(this.textBox7);
             this.Controls.Add(this.button8);
             this.Controls.Add(this.button7);
-            this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.label2);
@@ -395,8 +373,6 @@
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
-            this.groupBox3.ResumeLayout(false);
-            this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -413,22 +389,17 @@
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TextBox textBox3;
         private System.Windows.Forms.TextBox textBox4;
         private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Label label8;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.TextBox textBox5;
         private System.Windows.Forms.TextBox textBox6;
         private System.Windows.Forms.Button button6;
-        private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.Button button7;
         private System.Windows.Forms.Button button8;
         private System.Windows.Forms.Button button9;
@@ -436,5 +407,8 @@
         private System.Windows.Forms.TextBox textBox7;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.TextBox textBox8;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TextBox Mark_Speed;
+        private System.Windows.Forms.Button Change_Para_List;
     }
 }

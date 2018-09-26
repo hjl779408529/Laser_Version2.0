@@ -1195,7 +1195,7 @@ namespace Laser_Build_1._0
             int i = 0;
             int j = 0;
             int m = 0;
-            List<Vector> Temp_Vector = new List<Vector>();//用于获取交点的数据
+            Vector Temp_Vector = new Vector();//用于获取交点的数据
             //初始清除
             Result.Clear();
             Temp_Interpolation_List_Data.Clear();
@@ -1235,12 +1235,9 @@ namespace Laser_Build_1._0
                                     }
                                     else if (In_Data[i + 1][0].Type == 2)// 圆弧
                                     {
-                                        Temp_Vector = Cal_Cross_Data(In_Data[i][j], In_Data[i + 1][0]);//计算当前层 与 下级层第一个切入圆弧的交点
-                                        if (Temp_Vector.Count >= 1)
-                                        {
-                                            Temp_Data.End_x = Temp_Vector[0].X;
-                                            Temp_Data.End_y = Temp_Vector[0].Y;
-                                        }
+                                        Temp_Vector = Cal_Cross_Data(In_Data[i][j], In_Data[i + 1][0]);//计算当前层 与 下级层第一个切入圆弧的交点                                        
+                                        Temp_Data.End_x = Temp_Vector.X;
+                                        Temp_Data.End_y = Temp_Vector.Y;
                                         //追加数据
                                         Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
                                         //追加返回值
@@ -1283,11 +1280,8 @@ namespace Laser_Build_1._0
                                     if (Differ_Err(In_Data[i + 1][0].Start_x, In_Data[i + 1][0].Start_y, In_Data[i + 1][In_Data[i + 1].Count-1].End_x, In_Data[i + 1][In_Data[i + 1].Count - 1].End_y))
                                     {
                                         Temp_Vector = Cal_Cross_Data(In_Data[i + 1][In_Data[i + 1].Count - 1], In_Data[i + 1][0]);//计算当前层 与 下级层
-                                        if (Temp_Vector.Count >= 1)
-                                        {
-                                            Temp_Data.End_x = Temp_Vector[0].X;
-                                            Temp_Data.End_y = Temp_Vector[0].Y;
-                                        }
+                                        Temp_Data.End_x = Temp_Vector.X;
+                                        Temp_Data.End_y = Temp_Vector.Y;
                                         //追加数据
                                         Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
                                         //追加返回值
@@ -1361,25 +1355,41 @@ namespace Laser_Build_1._0
                             {
                                 //获取赋值
                                 Temp_Data = new Interpolation_Data(In_Data[i][0]);
-                                Temp_Vector = Cal_Cross_Data(In_Data[i][In_Data[i].Count - 1], In_Data[i][0]);//计算结尾层 与 0层
-                                if (Temp_Vector.Count >= 1)
-                                {
-                                    Temp_Data.Start_x = Temp_Vector[0].X;
-                                    Temp_Data.Start_y = Temp_Vector[0].Y;
-                                }
+                                Temp_Vector =new Vector(Cal_Cross_Data(In_Data[i][In_Data[i].Count - 1], In_Data[i][0]));//计算结尾层 与 0层  起始点
+                                Temp_Data.Start_x = Temp_Vector.X;
+                                Temp_Data.Start_y = Temp_Vector.Y;
+                                Temp_Vector = new Vector(Cal_Cross_Data(In_Data[i][0], In_Data[i][1]));//计算0层 与 1层  终止点
+                                Temp_Data.End_x = Temp_Vector.X;
+                                Temp_Data.End_y = Temp_Vector.Y;
                                 //追加数据
                                 Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
                             }
                             else if ((m > 0) && (m<= In_Data[i].Count-2))
                             {
-
+                                //获取赋值
+                                Temp_Data = new Interpolation_Data(In_Data[i][m]);
+                                Temp_Vector = new Vector(Cal_Cross_Data(In_Data[i][m-1], In_Data[i][m]));//计算当前层 与 上一层  起始点
+                                Temp_Data.Start_x = Temp_Vector.X;
+                                Temp_Data.Start_y = Temp_Vector.Y;
+                                Temp_Vector = new Vector(Cal_Cross_Data(In_Data[i][m], In_Data[i][m+1]));//计算当前层 与 +1层  终止点
+                                Temp_Data.End_x = Temp_Vector.X;
+                                Temp_Data.End_y = Temp_Vector.Y;
+                                //追加数据
+                                Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
                             }
                             else if (m == (In_Data[i].Count - 1))
                             {
-
+                                //获取赋值
+                                Temp_Data = new Interpolation_Data(In_Data[i][m]);
+                                Temp_Vector = new Vector(Cal_Cross_Data(In_Data[i][m - 1], In_Data[i][m]));//计算m层 与 上1层  起始点
+                                Temp_Data.Start_x = Temp_Vector.X;
+                                Temp_Data.Start_y = Temp_Vector.Y;
+                                Temp_Vector = new Vector(Cal_Cross_Data(In_Data[i][m], In_Data[i][0]));//计算m层 与 下一层  终止点
+                                Temp_Data.End_x = Temp_Vector.X;
+                                Temp_Data.End_y = Temp_Vector.Y;
+                                //追加数据
+                                Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
                             }
-
-
                         }
                     }
                     else
@@ -1807,7 +1817,6 @@ namespace Laser_Build_1._0
                     }
                 }
             }
-
 
             //处理二次结果，合并走直线的Gts数据，下次为Rtc加工，则变动该GTS数据终点坐标为RTC加工的gts基准位置
             for (int cal = 0; cal < Result.Count; cal++)
@@ -2457,10 +2466,11 @@ namespace Laser_Build_1._0
         }
         /***************************************************辅助函数***************************************************************/
         //计算等距线交点 
-        public List<Vector> Cal_Cross_Data(Interpolation_Data Indata_1,Interpolation_Data Indata_2)
+        public Vector Cal_Cross_Data(Interpolation_Data Indata_1,Interpolation_Data Indata_2)
         {
+            //直线使用 矢量的单位向量 
             Vector_Calculate Vec_Cal = new Vector_Calculate();
-            List<Vector> Result = new List<Vector>();
+            Vector Result = new Vector(); 
             decimal Radius = 0.0m;
             
             //钻孔、落料、无三种模式切换
@@ -2468,117 +2478,159 @@ namespace Laser_Build_1._0
             if (Para_List.Parameter.Cutter_Type==0)
             {
                 Radius = 0.0m;
+                Log.Info("无补偿，返回原坐标！！！");
+                Result = new Vector(Indata_1.End_x, Indata_1.End_y);
+                return Result;
             }
             else if (Para_List.Parameter.Cutter_Type == 1)
             {
-                Radius = Para_List.Parameter.Cutter_Radius;
+                Radius = - Para_List.Parameter.Cutter_Radius;
             }
             else if (Para_List.Parameter.Cutter_Type == 2)
             {
-                Radius = -Para_List.Parameter.Cutter_Radius;
+                Radius = Para_List.Parameter.Cutter_Radius;
             }
-            
+            //数据处理划分
             if ((Indata_1.Type==1) && (Indata_2.Type == 1)) //直线和直线
             {
                 //向量以交点为起始点，分别指向当前刀具加工方向，下一段刀具加工方向
-                Vector Line1 = new Vector(Indata_1.End_x - Indata_1.Start_x, Indata_1.End_y - Indata_1.Start_y);
-                Vector Line2 = new Vector(Indata_2.End_x - Indata_2.Start_x, Indata_2.End_y - Indata_2.Start_y);
+                //使用单位矢量
+                Vector Line1 = new Vector((Indata_1.End_x - Indata_1.Start_x) / (new Vector(Indata_1.End_x - Indata_1.Start_x, Indata_1.End_y - Indata_1.Start_y).Length()), (Indata_1.End_y - Indata_1.Start_y) / (new Vector(Indata_1.End_x - Indata_1.Start_x, Indata_1.End_y - Indata_1.Start_y).Length()));
+                Vector Line2 = new Vector((Indata_2.End_x - Indata_2.Start_x) / (new Vector(Indata_2.End_x - Indata_2.Start_x, Indata_2.End_y - Indata_2.Start_y).Length()), (Indata_2.End_y - Indata_2.Start_y) / (new Vector(Indata_2.End_x - Indata_2.Start_x, Indata_2.End_y - Indata_2.Start_y).Length()));
                 decimal Angle = Vec_Cal.AngleBetweenVector(Line1, Line2);
                 //计算等距线交点
                 if (Angle == 180) //角度为180,共线且方向相反
                 {
-                    Log.Info("两直线所在向量夹角为180，数据错误！！！");
-                    Result.Add(new Vector(0, 0));
+                    Log.Info("两直线所在向量夹角为180，沿用原坐标！！！");
+                    Result = new Vector(Indata_1.End_x, Indata_1.End_y);
                 }
-                else if (Angle == 0) //角度为0,共线
+                else if ((Angle == 0) || (Angle == 360)) //角度为0 或360,共线同向
                 {
-                    Result.Add(new Vector(Indata_1.End_x - Radius * Line1.Y, Indata_1.End_y+ Radius * Line1.X));
+                    Result = new Vector(Indata_1.End_x - Radius * Line2.Y, Indata_1.End_y+ Radius * Line2.X);
                 }
                 else
                 {
-                    Result.Add(new Vector(Indata_1.End_x + Radius * (Line2.X - Line1.X) / (Line1.X * Line2.Y - Line2.X * Line1.Y), Indata_1.End_y + Radius * (Line2.Y - Line1.Y) / (Line1.X * Line2.Y - Line2.X * Line1.Y)));
+                    Result = new Vector(Indata_1.End_x + Radius * (Line2.X - Line1.X) / (Line1.X * Line2.Y - Line2.X * Line1.Y), Indata_1.End_y + Radius * (Line2.Y - Line1.Y) / (Line1.X * Line2.Y - Line2.X * Line1.Y));
                 }
             }
             else if ((Indata_1.Type == 1) && (Indata_2.Type == 2))//直线和圆弧
             {
                 //向量以交点为起始点，分别指向当前刀具加工方向，下一段刀具加工方向
-                Vector Line = new Vector(Indata_1.End_x - Indata_1.Start_x, Indata_1.End_y - Indata_1.Start_y);
+                //使用单位矢量
+                Vector Line = new Vector((Indata_1.End_x - Indata_1.Start_x) / (new Vector(Indata_1.End_x - Indata_1.Start_x, Indata_1.End_y - Indata_1.Start_y).Length()), (Indata_1.End_y - Indata_1.Start_y) / (new Vector(Indata_1.End_x - Indata_1.Start_x, Indata_1.End_y - Indata_1.Start_y).Length()));
+                //保持坐标值 矢量
                 Vector Center_Start = new Vector(Indata_2.Center_x - Indata_2.Start_x, Indata_2.Center_y - Indata_2.Start_y);
                 //圆弧方向  顺圆弧、逆圆弧
                 decimal R = 0.0m;
                 if (Indata_2.Circle_dir == 0)
                 {
-                    R = Indata_2.Circle_radius;
+                    R = -Indata_2.Circle_radius;
                 }
                 else
                 {
-                    R = -Indata_2.Circle_radius;
+                    R = Indata_2.Circle_radius;
                 }
                 //圆弧方向矢量 
-                Vector Tangent_Line = new Vector(Center_Start.Y/R, - Center_Start.X / R); 
-                decimal F =(decimal)Math.Sqrt((double)((R + Radius) * (R + Radius) - (Tangent_Line.Y * Line.X - Tangent_Line.X * Line.Y - Radius) * (Tangent_Line.Y * Line.X - Tangent_Line.X * Line.Y - Radius)));
-                //计算(直线矢量 与 交点至圆心的矢量) 夹角
-                decimal Angle_Line_Radial = Vec_Cal.AngleBetweenVector(Center_Start,Line);
-                //计算(直线矢量 与 圆弧切线的矢量) 夹角
-                decimal Angle_Line_Tangent = Vec_Cal.AngleBetweenVector(Line, Center_Start);
+                Vector Tangent_Line = new Vector(-Center_Start.Y / R, Center_Start.X / R);
+                //decimal F =(decimal)Math.Sqrt((double)((R + Radius) * (R + Radius) - (Tangent_Line.Y * Line.X - Tangent_Line.X * Line.Y - Radius) * (Tangent_Line.Y * Line.X - Tangent_Line.X * Line.Y - Radius)));
+                //计算(直线矢量 与 圆弧径向矢量) 夹角
+                decimal Angle_Line_Radial = Vec_Cal.AngleBetweenVector(Line, Center_Start);
+                //计算(直线矢量 与 圆弧切线矢量) 夹角
+                decimal Angle_Line_Tangent = Vec_Cal.AngleBetweenVector(Line, Tangent_Line);
                 //目前只考虑 外切
                 if (Angle_Line_Tangent == 180) //角度为180,共线且方向相反
                 {
-                    Log.Info("直线与圆弧切线方向夹角为 180，数据错误！！！");
-                    Result.Add(new Vector(Indata_1.End_x, Indata_1.End_y));
+                    Log.Info("直线与圆弧切线方向夹角为 180，沿用原坐标！！！");
+                    Result = new Vector(Indata_1.End_x - Radius * Tangent_Line.Y, Indata_1.End_y + Radius * Tangent_Line.X);                   
                 }
-                else if (Angle_Line_Tangent == 0) //角度为0,共线同向
+                else if ((Angle_Line_Tangent == 0) || (Angle_Line_Tangent == 360)) //角度为0 或360,共线同向
                 {
-                    Result.Add(new Vector(Indata_1.End_x - Radius * Line.Y, Indata_1.End_y + Radius * Line.X));
+                    Result = new Vector(Indata_1.End_x, Indata_1.End_y);
                 }
                 else
                 {
                     Log.Info("直线与圆弧非外切，沿用原坐标！！！");
-                    Result.Add(new Vector(Indata_1.End_x, Indata_1.End_y));
+                    Result = new Vector(Indata_1.End_x, Indata_1.End_y);
                 }
             }
             else if ((Indata_1.Type == 2) && (Indata_2.Type == 1))//圆弧和直线
             {
                 //向量以交点为起始点，分别指向当前刀具加工方向，下一段刀具加工方向
-                Vector Line = new Vector(Indata_1.End_x - Indata_1.Start_x, Indata_1.End_y - Indata_1.Start_y);
-                Vector Center_Start = new Vector(Indata_2.Center_x - Indata_2.End_x, Indata_2.Center_y - Indata_2.End_y);
+                //使用单位矢量
+                Vector Line = new Vector((Indata_2.End_x - Indata_2.Start_x) / (new Vector(Indata_2.End_x - Indata_2.Start_x, Indata_2.End_y - Indata_2.Start_y).Length()), (Indata_2.End_y - Indata_2.Start_y) / (new Vector(Indata_2.End_x - Indata_2.Start_x, Indata_2.End_y - Indata_2.Start_y).Length()));
+                //保持坐标值 矢量
+                Vector Center_Start = new Vector(Indata_1.Center_x - Indata_1.Start_x, Indata_1.Center_y - Indata_1.Start_y);
+                Vector Line_01 = new Vector(Indata_1.Start_x + Center_Start.X - Indata_2.Start_x, Indata_1.Start_y + Center_Start.Y - Indata_2.Start_y);
                 //圆弧方向  顺圆弧、逆圆弧
                 decimal R = 0.0m;
-                if (Indata_2.Circle_dir == 0)
+                if (Indata_1.Circle_dir == 0)
                 {
-                    R = Indata_2.Circle_radius;
+                    R = -Indata_1.Circle_radius;
                 }
                 else
                 {
-                    R = -Indata_2.Circle_radius;
+                    R = Indata_1.Circle_radius;
                 }
                 //圆弧方向矢量 
-                Vector Tangent_Line = new Vector(Center_Start.Y / R, -Center_Start.X / R);
-                decimal F = (decimal)Math.Sqrt((double)((R + Radius) * (R + Radius) - (Tangent_Line.Y * Line.X - Tangent_Line.X * Line.Y - Radius) * (Tangent_Line.Y * Line.X - Tangent_Line.X * Line.Y - Radius)));
-                //计算(直线矢量 与 交点至圆心的矢量) 夹角
+                Vector Tangent_Line = new Vector(- Line_01.Y / R, Line_01.X / R);
+                //decimal F = (decimal)Math.Sqrt((double)((R + Radius) * (R + Radius) - (Tangent_Line.Y * Line.X - Tangent_Line.X * Line.Y - Radius) * (Tangent_Line.Y * Line.X - Tangent_Line.X * Line.Y - Radius)));
+                //计算(圆弧径向矢量 与 直线矢量) 夹角
                 decimal Angle_Line_Radial = Vec_Cal.AngleBetweenVector(Center_Start, Line);
-                //计算(直线矢量 与 圆弧切线的矢量) 夹角
-                decimal Angle_Line_Tangent = Vec_Cal.AngleBetweenVector(Line, Center_Start);
+                //计算(圆弧切线的矢量 与 直线矢量) 夹角
+                decimal Angle_Line_Tangent = Vec_Cal.AngleBetweenVector(Tangent_Line, Line);
                 //目前只考虑 外切
                 if (Angle_Line_Tangent == 180) //角度为180,共线且方向相反
                 {
-                    Log.Info("圆弧切线方向与直线夹角为 180，数据错误！！！");
-                    Result.Add(new Vector(0, 0));
+                    Log.Info("圆弧切线方向与直线夹角为 180，沿用原坐标！！！");
+                    Result = new Vector(Indata_1.End_x - Radius * Tangent_Line.Y, Indata_1.End_y + Radius * Tangent_Line.X);
                 }
-                else if (Angle_Line_Tangent == 0) //角度为0,共线同向
+                else if ((Angle_Line_Tangent == 0) || (Angle_Line_Tangent == 360)) //角度为0 或360,共线同向
                 {
-                    Result.Add(new Vector(Indata_2.Start_x - Radius * Line.Y, Indata_2.Start_y + Radius * Line.X));
+                    Result = new Vector(Indata_1.End_x, Indata_1.End_y);
                 }
                 else
                 {
                     Log.Info("圆弧与直线非外切，沿用原坐标！！！");
-                    Result.Add(new Vector(Indata_2.Start_x, Indata_2.Start_y)); 
+                    Result = new Vector(Indata_1.End_x, Indata_1.End_y);
                 }
             }
             else if ((Indata_1.Type == 2) && (Indata_2.Type == 2))//圆弧和圆弧
             {
+                //圆弧1的矢量
+                //保持坐标值 矢量
+                Vector Center_Start_01 = new Vector(Indata_1.Center_x - Indata_1.Start_x, Indata_1.Center_y - Indata_1.Start_y);
+                Vector Line_01 = new Vector(Indata_1.Start_x + Center_Start_01.X - Indata_1.End_x, Indata_1.Start_y + Center_Start_01.Y - Indata_1.End_y);
+                //圆弧方向  顺圆弧、逆圆弧
+                decimal R1 = 0.0m;
+                if (Indata_1.Circle_dir == 0) 
+                {
+                    R1 = -Indata_1.Circle_radius;
+                }
+                else
+                {
+                    R1 = Indata_1.Circle_radius;
+                }
+                //圆弧1切线矢量 
+                Vector Tangent_Line_01 = new Vector(-Line_01.Y / R1, Line_01.X / R1);
+
+                //圆弧2的矢量
+                //保持坐标值 矢量
+                Vector Center_Start_02 = new Vector(Indata_2.Center_x - Indata_2.Start_x, Indata_2.Center_y - Indata_2.Start_y);
+                //圆弧方向  顺圆弧、逆圆弧
+                decimal R2 = 0.0m;
+                if (Indata_2.Circle_dir == 0)
+                {
+                    R2 = -Indata_2.Circle_radius;
+                }
+                else
+                {
+                    R2 = Indata_2.Circle_radius;
+                }
+                //圆弧2切线矢量 
+                Vector Tangent_Line_02 = new Vector(Center_Start_02.X, Center_Start_02.Y);  
+
                 Log.Info("圆弧与圆弧 数据不处理，沿用原坐标！！！");
-                Result.Add(new Vector(Indata_1.End_x, Indata_1.End_y));
+                Result = new Vector(Indata_1.End_x, Indata_1.End_y);
             }  
             //结果返回
             return Result;

@@ -158,8 +158,7 @@ namespace Laser_Build_1._0
             RTC_Fun.Factory.Free();
 
             //保存设备参数至文件
-            Para_List.Serialize_Parameter Save_Parameter = new Para_List.Serialize_Parameter();
-            Save_Parameter.Serialize("Para.xml");
+            Para_List.Serialize_Parameter.Serialize("Para.xml");
         }
 
         private void button1_Click(object sender, EventArgs e)

@@ -36,8 +36,6 @@ namespace Initialization
             GTS_Fun.Interpolation Gts_Fun_Interpolation = new GTS_Fun.Interpolation(); 
 
         }
-
-
         //激光器初始化内容
         public void Rtc_Initial()
         {
@@ -48,10 +46,8 @@ namespace Initialization
             RTC_Fun.Motion Rtc_Fun_Motion = new RTC_Fun.Motion();
         }
         //公共初始化内容
-
         //文件目录指定  配置文件夹所在目录
-        const string Dir = @"./\Config";//当前目录下的Config文件夹           
-
+        const string Dir = @"./\Config";//当前目录下的Config文件夹
         public void Common_Initial()
         {
             //建立配置文件存储目录
@@ -61,11 +57,9 @@ namespace Initialization
             }
             //读取参数
             //配方数据读取
-            Para_List.Serialize_Parameter Load_Parameter = new Para_List.Serialize_Parameter();
-            Load_Parameter.Reserialize("Para.xml"); 
+            Para_List.Serialize_Parameter.Reserialize("Para.xml");
 
         }
-
         //232通讯初始化
         public void RS232_Initial() 
         {
@@ -83,6 +77,8 @@ namespace Initialization
         {
             T_Client.TCP_Start();
         }
+        //laser 功率矫正初始化
+
     }
 
 

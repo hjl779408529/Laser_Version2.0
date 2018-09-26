@@ -219,7 +219,6 @@ namespace Laser_Version2._0
             //结果返回
             return Result;
         }
-
         public static List<Double_Fit_Data> DataTable_Double_Fit_Data(DataTable New_Data) 
         {
             List<Double_Fit_Data> Result = new List<Double_Fit_Data>();
@@ -258,6 +257,42 @@ namespace Laser_Version2._0
             for (int i = 0; i < New_Data.Count; i++)
             {
                 Result.Rows.Add(new object[] { New_Data[i].K_X1, New_Data[i].K_X2, New_Data[i].K_X3, New_Data[i].K_X4, New_Data[i].Delta_X, New_Data[i].K_Y1, New_Data[i].K_Y2, New_Data[i].K_Y3, New_Data[i].K_Y4, New_Data[i].Delta_Y });
+            }
+            //结果返回
+            return Result;
+        }
+        public static List<Fit_Data> DataTable_Fit_Data(DataTable New_Data) 
+        {
+            List<Fit_Data> Result = new List<Fit_Data>();
+            if (New_Data.Columns.Count == 10) //确定数据格式是否合适
+            {
+                for (int i = 0; i < New_Data.Rows.Count; i++)
+                {
+                    if ((decimal.TryParse(New_Data.Rows[i][0].ToString(), out decimal K1)) && (decimal.TryParse(New_Data.Rows[i][1].ToString(), out decimal K2)) && (decimal.TryParse(New_Data.Rows[i][2].ToString(), out decimal K3)) && (decimal.TryParse(New_Data.Rows[i][3].ToString(), out decimal K4)) && (decimal.TryParse(New_Data.Rows[i][3].ToString(), out decimal Delta)))
+                    {
+                        Result.Add(new Fit_Data(K1, K2, K3, K4, Delta));
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("数据格式异常！！！");
+            }
+            return Result;
+
+        }
+        public static DataTable Fit_Data_DataTable(List<Fit_Data> New_Data)
+        {
+            DataTable Result = new DataTable();
+            Result.Columns.Add("1次系数", typeof(decimal));//添加列
+            Result.Columns.Add("2次系数", typeof(decimal));
+            Result.Columns.Add("3次系数", typeof(decimal));
+            Result.Columns.Add("4次系数", typeof(decimal));
+            Result.Columns.Add("常数", typeof(decimal));
+            //数据赋值
+            for (int i = 0; i < New_Data.Count; i++)
+            {
+                Result.Rows.Add(new object[] { New_Data[i].K1, New_Data[i].K2, New_Data[i].K3, New_Data[i].K4, New_Data[i].Delta});
             }
             //结果返回
             return Result;

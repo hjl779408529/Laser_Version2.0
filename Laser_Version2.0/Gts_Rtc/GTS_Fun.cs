@@ -43,238 +43,224 @@ namespace GTS_Fun
             Log.Commandhandler("Gts_Initial---GT_Close", Com_Return);
         }
     }        
-
-
     //回原点
     class Axis_Home
-    {
-        //命令返回值
-        public static short Gts_Return;       
-
+    {   
         //定义回零运动标志，防止多次触发
-        private static bool Homing_Flag;
         public static int Home(short Axis)
         {
-            if (!Homing_Flag)
+            //命令返回值
+            short Gts_Return;
+            short Capture;//捕获状态值
+            MC.TTrapPrm Home_TrapPrm = new MC.TTrapPrm();
+            int Axis_Sta;//轴状态
+            uint Axis_Pclock;//轴时钟
+            Int32 Axis_Pos;//回零是触发Home开关时的轴位置
+            double prfPos;//回零运动过程中规划位置
+            //double encPos;//回零运动过程中编码器位置
+
+            //停止轴运动
+            Gts_Return = MC.GT_Stop(1 << (Axis - 1), 0); //平滑停止轴运动
+            Log.Commandhandler("Motion--停止轴运动", Gts_Return);
+
+            //清除指定轴报警和限位
+            Gts_Return = MC.GT_ClrSts(Axis, 1);
+            Log.Commandhandler("Axis_Home----GT_ClrSts", Gts_Return);
+
+            //回零准备，向正方向前进20mm，后触发回零
+            //切换到点动模式
+            Gts_Return = MC.GT_PrfTrap(Axis);
+            Log.Commandhandler("Axis_Home----GT_PrfTrap", Gts_Return);
+
+            //读取点动模式运动参数
+            Gts_Return = MC.GT_GetTrapPrm(Axis, out Home_TrapPrm);
+            Log.Commandhandler("Axis_Home----GT_GetTrapPrm", Gts_Return);
+
+            //设置点动模式运动参数
+            Home_TrapPrm.acc = Convert.ToDouble(Para_List.Parameter.Home_acc / Para_List.Parameter.Gts_Acc_reference);
+            Home_TrapPrm.dec = Convert.ToDouble(Para_List.Parameter.Home_dcc / Para_List.Parameter.Gts_Acc_reference);
+            Home_TrapPrm.smoothTime = Para_List.Parameter.Home_smoothTime;
+
+            //设置点动模式运动参数
+            Gts_Return = MC.GT_SetTrapPrm(Axis, ref Home_TrapPrm);
+            Log.Commandhandler("Axis_Home----GT_SetTrapPrm", Gts_Return);
+
+            //设置点动模式目标速度，即回原点速度
+            Gts_Return = MC.GT_SetVel(Axis, Convert.ToDouble(Para_List.Parameter.Home_High_Speed / Para_List.Parameter.Gts_Vel_reference));
+            Log.Commandhandler("Axis_Home----GT_SetVel", Gts_Return);
+
+            //设置点动模式目标位置，即原点准备距离 20mm
+            Gts_Return = MC.GT_SetPos(Axis, Convert.ToInt32(20 * Para_List.Parameter.Gts_Pos_reference));
+            Log.Commandhandler("Axis_Home----GT_SetPos", Gts_Return);
+
+            //启动运动
+            Gts_Return = MC.GT_Update(1 << (Axis - 1));
+            Log.Commandhandler("Axis_Home----GT_Update", Gts_Return);
+
+            do
             {
-                //反转回零标志
-                Homing_Flag = !Homing_Flag;
+                //读取轴状态
+                Gts_Return = MC.GT_GetSts(Axis, out Axis_Sta, 1, out Axis_Pclock);
 
-                short Capture;//捕获状态值
-                MC.TTrapPrm Home_TrapPrm = new MC.TTrapPrm();
+            } while ((Axis_Sta & 0x400) != 0);
 
-                int Axis_Sta;//轴状态
-                uint Axis_Pclock;//轴时钟
-                Int32 Axis_Pos;//回零是触发Home开关时的轴位置
-                double prfPos;//回零运动过程中规划位置
-                //double encPos;//回零运动过程中编码器位置
+            //停止轴运动
+            Gts_Return = MC.GT_Stop(1 << (Axis - 1), 0); //平滑停止轴运动
+            Log.Commandhandler("Motion--停止轴运动", Gts_Return);
 
-                //清除指定轴报警和限位
-                Gts_Return = MC.GT_ClrSts(Axis, 1);
-                Log.Commandhandler("Axis_Home----GT_ClrSts", Gts_Return);
+            //延时一段时间，等待电机稳定
+            Common_Method.Delay_Time.Delay(200);//200ms
 
-                //回零准备，向正方向前进20mm，后触发回零
-                //切换到点动模式
-                Gts_Return = MC.GT_PrfTrap(Axis);
-                Log.Commandhandler("Axis_Home----GT_PrfTrap", Gts_Return);
+            //触发回零
+            //启动Home捕捉
+            Gts_Return = MC.GT_SetCaptureMode(Axis, MC.CAPTURE_HOME);
+            Log.Commandhandler("Axis_Home----GT_SetCaptureMode", Gts_Return);
 
-                //读取点动模式运动参数
-                Gts_Return = MC.GT_GetTrapPrm(Axis, out Home_TrapPrm);
-                Log.Commandhandler("Axis_Home----GT_GetTrapPrm", Gts_Return);
+            //切换到点动模式
+            Gts_Return = MC.GT_PrfTrap(Axis);
+            Log.Commandhandler("Axis_Home----GT_PrfTrap", Gts_Return);
 
-                //设置点动模式运动参数
-                Home_TrapPrm.acc = Convert.ToDouble(Para_List.Parameter.Home_acc / Para_List.Parameter.Gts_Acc_reference);
-                Home_TrapPrm.dec = Convert.ToDouble(Para_List.Parameter.Home_dcc / Para_List.Parameter.Gts_Acc_reference);
-                Home_TrapPrm.smoothTime = Para_List.Parameter.Home_smoothTime;
+            //读取点动模式运动参数
+            Gts_Return = MC.GT_GetTrapPrm(Axis, out Home_TrapPrm);
+            Log.Commandhandler("Axis_Home----GT_GetTrapPrm", Gts_Return);
 
-                //设置点动模式运动参数
-                Gts_Return = MC.GT_SetTrapPrm(Axis, ref Home_TrapPrm);
-                Log.Commandhandler("Axis_Home----GT_SetTrapPrm", Gts_Return);
+            //设置点动模式运动参数
+            Home_TrapPrm.acc = Convert.ToDouble(Para_List.Parameter.Home_acc / Para_List.Parameter.Gts_Acc_reference);
+            Home_TrapPrm.dec = Convert.ToDouble(Para_List.Parameter.Home_dcc / Para_List.Parameter.Gts_Acc_reference);
+            Home_TrapPrm.smoothTime = Para_List.Parameter.Home_smoothTime;
 
-                //设置点动模式目标速度，即回原点速度
-                Gts_Return = MC.GT_SetVel(Axis, Convert.ToDouble(Para_List.Parameter.Home_High_Speed / Para_List.Parameter.Gts_Vel_reference));
-                Log.Commandhandler("Axis_Home----GT_SetVel", Gts_Return);
+            //设置点动模式运动参数
+            Gts_Return = MC.GT_SetTrapPrm(Axis, ref Home_TrapPrm);
+            Log.Commandhandler("Axis_Home----GT_SetTrapPrm", Gts_Return);
 
-                //设置点动模式目标位置，即原点准备距离 20mm
-                Gts_Return = MC.GT_SetPos(Axis, Convert.ToInt32(20 * Para_List.Parameter.Gts_Pos_reference));
-                Log.Commandhandler("Axis_Home----GT_SetPos", Gts_Return);
+            //设置点动模式目标速度，即回原点速度
+            Gts_Return = MC.GT_SetVel(Axis, Convert.ToDouble(Para_List.Parameter.Home_High_Speed / Para_List.Parameter.Gts_Vel_reference));
+            Log.Commandhandler("Axis_Home----GT_SetVel", Gts_Return);
 
-                //启动运动
-                Gts_Return = MC.GT_Update(1 << (Axis - 1));
-                Log.Commandhandler("Axis_Home----GT_Update", Gts_Return);
+            //设置点动模式目标位置，即原点搜索距离
+            Gts_Return = MC.GT_SetPos(Axis, Convert.ToInt32(Para_List.Parameter.Search_Home * Para_List.Parameter.Gts_Pos_reference));
+            Log.Commandhandler("Axis_Home----GT_SetPos", Gts_Return);
 
-                do
+            //启动运动
+            Gts_Return = MC.GT_Update(1 << (Axis - 1));
+            Log.Commandhandler("Axis_Home----GT_Update", Gts_Return);
+
+
+            do
+            {
+                //读取轴状态
+                Gts_Return = MC.GT_GetSts(Axis, out Axis_Sta, 1, out Axis_Pclock);
+                //读取捕获状态
+                Gts_Return = MC.GT_GetCaptureStatus(Axis, out Capture, out Axis_Pos, 1, out Axis_Pclock);
+                //读取编码器位置
+                //Gts_Return = MC.GT_GetEncPos(Axis, out encPos, 1, out Axis_Pclock);
+                //如果运动停止，返回出错信息
+                if (0 == (Axis_Sta & 0x400))
                 {
-                    //读取轴状态
-                    Gts_Return = MC.GT_GetSts(Axis, out Axis_Sta, 1, out Axis_Pclock);
+                    Log.Commandhandler("Axis_Home----No Home found!!", 1);
+                    return 1;//整个过程Home信号一直没有触发，返回值为1                    
+                }
+            } while (Capture == 0);
 
-                } while ((Axis_Sta & 0x400) != 0);
+            /********************************待评估***********************************/
+            /*
+            //清除捕捉状态
+            //Gts_Return = MC.GT_ClearCaptureStatus(Axis);
+            //Log.Commandhandler("Axis_Home----清除捕捉状态", Gts_Return);
 
-                //停止轴运动
-                Gts_Return = MC.GT_Stop(1 << (Axis - 1), 0); //平滑停止轴运动
-                Log.Commandhandler("Motion--停止轴运动", Gts_Return);
+            //设置捕捉Home 下降沿
+            //Gts_Return = MC.GT_SetCaptureSense(Axis, MC.CAPTURE_HOME, 0);
+            //Log.Commandhandler("Axis_Home----设置捕捉Home 下降沿", Gts_Return);
 
-                //延时一段时间，等待电机稳定
-                Common_Method.Delay_Time.Delay(200);//200ms
+            //设定目标位置为捕获位置+偏移量
+            Gts_Return = MC.GT_SetPos(Axis, Axis_Pos + Home_OffSet);
+            Log.Commandhandler("Axis_Home----GT_SetPos", Gts_Return);
 
-                //触发回零
-                //启动Home捕捉
-                Gts_Return = MC.GT_SetCaptureMode(Axis, MC.CAPTURE_HOME);
-                Log.Commandhandler("Axis_Home----GT_SetCaptureMode", Gts_Return);
+            //在运动状态下更新目标位置
+            Gts_Return = MC.GT_Update(1 << (Axis - 1));
+            Log.Commandhandler("Axis_Home----GT_Update", Gts_Return);              
 
-                //切换到点动模式
-                Gts_Return = MC.GT_PrfTrap(Axis);
-                Log.Commandhandler("Axis_Home----GT_PrfTrap", Gts_Return);
-
-                //读取点动模式运动参数
-                Gts_Return = MC.GT_GetTrapPrm(Axis, out Home_TrapPrm);
-                Log.Commandhandler("Axis_Home----GT_GetTrapPrm", Gts_Return);
-
-                //设置点动模式运动参数
-                Home_TrapPrm.acc = Convert.ToDouble(Para_List.Parameter.Home_acc / Para_List.Parameter.Gts_Acc_reference);
-                Home_TrapPrm.dec = Convert.ToDouble(Para_List.Parameter.Home_dcc / Para_List.Parameter.Gts_Acc_reference);
-                Home_TrapPrm.smoothTime = Para_List.Parameter.Home_smoothTime;
-
-                //设置点动模式运动参数
-                Gts_Return = MC.GT_SetTrapPrm(Axis, ref Home_TrapPrm);
-                Log.Commandhandler("Axis_Home----GT_SetTrapPrm", Gts_Return);
-
-                //设置点动模式目标速度，即回原点速度
-                Gts_Return = MC.GT_SetVel(Axis, Convert.ToDouble(Para_List.Parameter.Home_High_Speed / Para_List.Parameter.Gts_Vel_reference));
-                Log.Commandhandler("Axis_Home----GT_SetVel", Gts_Return);
-
-                //设置点动模式目标位置，即原点搜索距离
-                Gts_Return = MC.GT_SetPos(Axis, Convert.ToInt32(Para_List.Parameter.Search_Home * Para_List.Parameter.Gts_Pos_reference));
-                Log.Commandhandler("Axis_Home----GT_SetPos", Gts_Return);
-
-                //启动运动
-                Gts_Return = MC.GT_Update(1 << (Axis - 1));
-                Log.Commandhandler("Axis_Home----GT_Update", Gts_Return);
-
-
-                do
+            do
+            {
+                //读取轴状态
+                Gts_Return = MC.GT_GetSts(Axis, out Axis_Sta, 1, out Axis_Pclock);
+                //读取捕获状态
+                Gts_Return = MC.GT_GetCaptureStatus(Axis, out Capture, out Axis_Pos, 1, out Axis_Pclock);
+                //读取编码器位置
+                //Gts_Return = MC.GT_GetEncPos(Axis, out encPos, 1, out Axis_Pclock);
+                //如果运动停止，返回出错信息
+                if (0 == (Axis_Sta & 0x400))
                 {
-                    //读取轴状态
-                    Gts_Return = MC.GT_GetSts(Axis, out Axis_Sta, 1, out Axis_Pclock);
-                    //读取捕获状态
-                    Gts_Return = MC.GT_GetCaptureStatus(Axis, out Capture, out Axis_Pos, 1, out Axis_Pclock);
-                    //读取编码器位置
-                    //Gts_Return = MC.GT_GetEncPos(Axis, out encPos, 1, out Axis_Pclock);
-                    //如果运动停止，返回出错信息
-                    if (0 == (Axis_Sta & 0x400))
-                    {
-                        Log.Commandhandler("Axis_Home----No Home found!!", 1);
-                        //反转回零标志
-                        Homing_Flag = !Homing_Flag;
-                        return 1;//整个过程Home信号一直没有触发，返回值为1                    
-                    }
-                } while (Capture == 0);
-
-                /********************************待评估***********************************/
-                /*
-                //清除捕捉状态
-                //Gts_Return = MC.GT_ClearCaptureStatus(Axis);
-                //Log.Commandhandler("Axis_Home----清除捕捉状态", Gts_Return);
-
-                //设置捕捉Home 下降沿
-                //Gts_Return = MC.GT_SetCaptureSense(Axis, MC.CAPTURE_HOME, 0);
-                //Log.Commandhandler("Axis_Home----设置捕捉Home 下降沿", Gts_Return);
-
-                //设定目标位置为捕获位置+偏移量
-                Gts_Return = MC.GT_SetPos(Axis, Axis_Pos + Home_OffSet);
-                Log.Commandhandler("Axis_Home----GT_SetPos", Gts_Return);
-
-                //在运动状态下更新目标位置
-                Gts_Return = MC.GT_Update(1 << (Axis - 1));
-                Log.Commandhandler("Axis_Home----GT_Update", Gts_Return);              
-
-                do
-                {
-                    //读取轴状态
-                    Gts_Return = MC.GT_GetSts(Axis, out Axis_Sta, 1, out Axis_Pclock);
-                    //读取捕获状态
-                    Gts_Return = MC.GT_GetCaptureStatus(Axis, out Capture, out Axis_Pos, 1, out Axis_Pclock);
-                    //读取编码器位置
-                    //Gts_Return = MC.GT_GetEncPos(Axis, out encPos, 1, out Axis_Pclock);
-                    //如果运动停止，返回出错信息
-                    if (0 == (Axis_Sta & 0x400))
-                    {
-                        Log.Commandhandler("Axis_Home----No Home found!!", 1);
-                        //反转回零标志
-                        Homing_Flag = !Homing_Flag;
-                        return 1;//整个过程Home信号一直没有触发，返回值为1                    
-                    }
-                } while (Capture ==0);
-                */
-                /********************************待评估***********************************/
-
-                //停止轴运动
-                Gts_Return = MC.GT_Stop(1 << (Axis - 1), 0); //平滑停止轴运动
-                Log.Commandhandler("Motion--停止轴运动", Gts_Return);
-
-                //延时一段时间，等待电机稳定
-                Common_Method.Delay_Time.Delay(200);//200ms
-                //位置清零            
-                Gts_Return = MC.GT_ZeroPos(Axis, 1);
-                Log.Commandhandler("Axis_Home----GT_ZeroPos", Gts_Return);
-
-                /***************************Home_Offset偏置距离 开始********************************************/
-
-                //切换到点动模式
-                Gts_Return = MC.GT_PrfTrap(Axis);
-                Log.Commandhandler("Axis_Home----GT_PrfTrap", Gts_Return);
-
-                //读取点动模式运动参数
-                Gts_Return = MC.GT_GetTrapPrm(Axis, out Home_TrapPrm);
-                Log.Commandhandler("Axis_Home----GT_GetTrapPrm", Gts_Return);
-
-                //设置点动模式运动参数
-                Home_TrapPrm.acc = Convert.ToDouble(Para_List.Parameter.Home_acc / Para_List.Parameter.Gts_Acc_reference);
-                Home_TrapPrm.dec = Convert.ToDouble(Para_List.Parameter.Home_dcc / Para_List.Parameter.Gts_Acc_reference);
-                Home_TrapPrm.smoothTime = Para_List.Parameter.Home_smoothTime;
-
-                //设置点动模式运动参数
-                Gts_Return = MC.GT_SetTrapPrm(Axis, ref Home_TrapPrm);
-                Log.Commandhandler("Axis_Home----GT_SetTrapPrm", Gts_Return);
-
-                //设置点动模式目标速度，即回原点速度
-                Gts_Return = MC.GT_SetVel(Axis, Convert.ToDouble(Para_List.Parameter.Home_High_Speed / Para_List.Parameter.Gts_Vel_reference));
-                Log.Commandhandler("Axis_Home----GT_SetVel", Gts_Return);
-
-                //设置点动模式目标位置，即原点搜索距离
-                Gts_Return = MC.GT_SetPos(Axis, Convert.ToInt32(Para_List.Parameter.Home_OffSet * Para_List.Parameter.Gts_Pos_reference));
-                Log.Commandhandler("Axis_Home----GT_SetPos", Gts_Return);
-
-                //启动运动
-                Gts_Return = MC.GT_Update(1 << (Axis - 1));
-                Log.Commandhandler("Axis_Home----GT_Update", Gts_Return);
-
-                do
-                {
-                    //读取轴状态
-                    Gts_Return = MC.GT_GetSts(Axis, out Axis_Sta, 1, out Axis_Pclock);
-                    //读取规划位置
-                    Gts_Return = MC.GT_GetPrfPos(Axis, out prfPos, 1, out Axis_Pclock);
-                    //读取编码器位置
-                    //Gts_Return = MC.GT_GetEncPos(Axis, out encPos, 1, out Axis_Pclock);
-
-                } while ((Axis_Sta & 0x400) != 0);
-
-                //检查是否到达 Home_OffSet
-                if (prfPos != Convert.ToInt32(Para_List.Parameter.Home_OffSet * Para_List.Parameter.Gts_Pos_reference))
-                {
-                    Log.Commandhandler("Axis_Home----Move to Home_OffSet err!!", 1);
+                    Log.Commandhandler("Axis_Home----No Home found!!", 1);
                     //反转回零标志
                     Homing_Flag = !Homing_Flag;
-
-                    //置位Gts_Home标志
-                    Refresh.Gts_Home_Flag = Refresh.Axis01_Limit_Up && Refresh.Axis01_Limit_Down && Refresh.Axis01_Alarm && Refresh.Axis01_MC_Err && Refresh.Axis01_IO_EMG && Refresh.Axis02_Limit_Up && Refresh.Axis02_Limit_Down && Refresh.Axis02_Alarm && Refresh.Axis02_MC_Err && Refresh.Axis02_IO_EMG && Refresh.EXI1 ;//任意（轴限位、报警、使能关闭、急停），致使原点标志丢失
-                    return 2;
+                    return 1;//整个过程Home信号一直没有触发，返回值为1                    
                 }
-                /***************************Home_Offset偏置距离 结束********************************************/
+            } while (Capture ==0);
+            */
+            /********************************待评估***********************************/
+
+            //停止轴运动
+            Gts_Return = MC.GT_Stop(1 << (Axis - 1), 0); //平滑停止轴运动
+            Log.Commandhandler("Motion--停止轴运动", Gts_Return);
+
+            //延时一段时间，等待电机稳定
+            Common_Method.Delay_Time.Delay(200);//200ms
+            //位置清零            
+            Gts_Return = MC.GT_ZeroPos(Axis, 1);
+            Log.Commandhandler("Axis_Home----GT_ZeroPos", Gts_Return);
+
+            /***************************Home_Offset偏置距离 开始********************************************/
+
+            //切换到点动模式
+            Gts_Return = MC.GT_PrfTrap(Axis);
+            Log.Commandhandler("Axis_Home----GT_PrfTrap", Gts_Return);
+
+            //读取点动模式运动参数
+            Gts_Return = MC.GT_GetTrapPrm(Axis, out Home_TrapPrm);
+            Log.Commandhandler("Axis_Home----GT_GetTrapPrm", Gts_Return);
+
+            //设置点动模式运动参数
+            Home_TrapPrm.acc = Convert.ToDouble(Para_List.Parameter.Home_acc / Para_List.Parameter.Gts_Acc_reference);
+            Home_TrapPrm.dec = Convert.ToDouble(Para_List.Parameter.Home_dcc / Para_List.Parameter.Gts_Acc_reference);
+            Home_TrapPrm.smoothTime = Para_List.Parameter.Home_smoothTime;
+
+            //设置点动模式运动参数
+            Gts_Return = MC.GT_SetTrapPrm(Axis, ref Home_TrapPrm);
+            Log.Commandhandler("Axis_Home----GT_SetTrapPrm", Gts_Return);
+
+            //设置点动模式目标速度，即回原点速度
+            Gts_Return = MC.GT_SetVel(Axis, Convert.ToDouble(Para_List.Parameter.Home_High_Speed / Para_List.Parameter.Gts_Vel_reference));
+            Log.Commandhandler("Axis_Home----GT_SetVel", Gts_Return);
+
+            //设置点动模式目标位置，即原点搜索距离
+            Gts_Return = MC.GT_SetPos(Axis, Convert.ToInt32(Para_List.Parameter.Home_OffSet * Para_List.Parameter.Gts_Pos_reference));
+            Log.Commandhandler("Axis_Home----GT_SetPos", Gts_Return);
+
+            //启动运动
+            Gts_Return = MC.GT_Update(1 << (Axis - 1));
+            Log.Commandhandler("Axis_Home----GT_Update", Gts_Return);
+
+            do
+            {
+                //读取轴状态
+                Gts_Return = MC.GT_GetSts(Axis, out Axis_Sta, 1, out Axis_Pclock);
+                //读取规划位置
+                Gts_Return = MC.GT_GetPrfPos(Axis, out prfPos, 1, out Axis_Pclock);
+                //读取编码器位置
+                //Gts_Return = MC.GT_GetEncPos(Axis, out encPos, 1, out Axis_Pclock);
+
+            } while ((Axis_Sta & 0x400) != 0);
+
+            //检查是否到达 Home_OffSet
+            if (prfPos != Convert.ToInt32(Para_List.Parameter.Home_OffSet * Para_List.Parameter.Gts_Pos_reference))
+            {
+                Log.Commandhandler("Axis_Home----Move to Home_OffSet err!!", 1);
+                //置位Gts_Home标志
+                Refresh.Gts_Home_Flag = Refresh.Axis01_Limit_Up && Refresh.Axis01_Limit_Down && Refresh.Axis01_Alarm && Refresh.Axis01_MC_Err && Refresh.Axis01_IO_EMG && Refresh.Axis02_Limit_Up && Refresh.Axis02_Limit_Down && Refresh.Axis02_Alarm && Refresh.Axis02_MC_Err && Refresh.Axis02_IO_EMG && Refresh.EXI1 ;//任意（轴限位、报警、使能关闭、急停），致使原点标志丢失
+                return 2;
             }
-            //反转回零标志
-            Homing_Flag = !Homing_Flag;
+            /***************************Home_Offset偏置距离 结束********************************************/
             return 0;
         }
     }
@@ -443,9 +429,8 @@ namespace GTS_Fun
         private static MC.TCrdData[] crdData = new MC.TCrdData[4096];
         static IntPtr Crd_IntPtr = new IntPtr();
         public static double[] Crd_Pos = new double[2];//坐标系位置
-        public static List<Affinity_Matrix> affinity_Matrices;//校准数据集合
-        public static List<Double_Fit_Data> Fit_Matrices;//线性拟合校准数据集合 
-        public static bool Exit_Flag = false;
+        public static List<Affinity_Matrix> affinity_Matrices = new List<Affinity_Matrix>();//校准数据集合
+        public static List<Double_Fit_Data> Fit_Matrices = new List<Double_Fit_Data>();//线性拟合校准数据集合 
         //构造函数
         public Interpolation()
         {
@@ -469,16 +454,18 @@ namespace GTS_Fun
                 if (Para_List.Parameter.Gts_Affinity_Type == 1)//点阵匹配
                 {                    
                     affinity_Matrices = new List<Affinity_Matrix>(Serialize_Data.Reserialize_Affinity_Matrix(File_Name));
+                    Log.Info("Gts矫正文件加载成功！！！,数据数量：" + affinity_Matrices.Count);
                 }
                 else if (Para_List.Parameter.Gts_Affinity_Type == 2)//直线拟合
                 {
                     Fit_Matrices = new List<Double_Fit_Data>(CSV_RW.DataTable_Double_Fit_Data(CSV_RW.OpenCSV(File_Path)));
+                    Log.Info("Gts矫正文件加载成功！！！,数据数量：" + Fit_Matrices.Count);
                 }
                 else
                 {
                     affinity_Matrices = new List<Affinity_Matrix>(Serialize_Data.Reserialize_Affinity_Matrix(File_Name));
+                    Log.Info("Gts矫正文件加载成功！！！,数据数量：" + affinity_Matrices.Count);
                 }                
-                Log.Info("Gts矫正文件加载成功！！！");
             }
             else
             {
@@ -750,14 +737,6 @@ namespace GTS_Fun
                 //获取坐标系位置
                 Gts_Return = MC.GT_GetCrdPos(1, out Crd_Pos[0]);
 
-                //退出
-                if (Exit_Flag)
-                {
-                    Interpolation_Stop();//终止运动
-                    Exit_Flag = false;
-                    return;
-                }
-
             } while (run == 1);
         }
         //停止轴运动
@@ -840,30 +819,30 @@ namespace GTS_Fun
             Log.Commandhandler("Line_Interpolation--将前瞻数据压入控制器", Gts_Return);          
 #endif
 
-            string sdatetime = DateTime.Now.ToString("D");
-            string delimiter = ",";
-            string strHeader = "";
-            //保存的位置和文件名称
-            string File_Path = @"./\Config/" + "Gts_Ready "+ sdatetime + ".csv";
-            strHeader += "原X坐标,原Y坐标,补偿后X坐标,补偿后Y坐标,补偿前后X差值,补偿前后Y差值,取值坐标X位置,取值坐标Y位置";
-            bool isExit = File.Exists(File_Path);
-            StreamWriter sw = new StreamWriter(File_Path, true, Encoding.GetEncoding("gb2312"));
-            if (!isExit)
-            {
-                sw.WriteLine(strHeader);
-            }
-            //output rows data
-            string strRowValue = "";
-            strRowValue += x + delimiter
-                            + y + delimiter
-                            + Tmp_X + delimiter
-                            + Tmp_Y + delimiter
-                            + (Tmp_X - x) + delimiter
-                            + (Tmp_Y - y) + delimiter
-                            + Tmp_m + delimiter
-                            + Tmp_n + delimiter;
-            sw.WriteLine(strRowValue);
-            sw.Close();
+            //string sdatetime = DateTime.Now.ToString("D");
+            //string delimiter = ",";
+            //string strHeader = "";
+            ////保存的位置和文件名称
+            //string File_Path = @"./\Config/" + "Gts_Ready "+ sdatetime + ".csv";
+            //strHeader += "原X坐标,原Y坐标,补偿后X坐标,补偿后Y坐标,补偿前后X差值,补偿前后Y差值,取值坐标X位置,取值坐标Y位置";
+            //bool isExit = File.Exists(File_Path);
+            //StreamWriter sw = new StreamWriter(File_Path, true, Encoding.GetEncoding("gb2312"));
+            //if (!isExit)
+            //{
+            //    sw.WriteLine(strHeader);
+            //}
+            ////output rows data
+            //string strRowValue = "";
+            //strRowValue += x + delimiter
+            //                + y + delimiter
+            //                + Tmp_X + delimiter
+            //                + Tmp_Y + delimiter
+            //                + (Tmp_X - x) + delimiter
+            //                + (Tmp_Y - y) + delimiter
+            //                + Tmp_m + delimiter
+            //                + Tmp_n + delimiter;
+            //sw.WriteLine(strRowValue);
+            //sw.Close();
             
 
         }
