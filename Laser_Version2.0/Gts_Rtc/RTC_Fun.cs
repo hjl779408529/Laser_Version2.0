@@ -537,6 +537,67 @@ namespace RTC_Fun
                 RTC5Wrap.get_status(out Busy, out uint Position);
             } while (Busy != 0U);
         }
+        //执行指定的Interpolation_Data 图形数据 进行桶形矫正
+        public static void Draw_Cal(List<Interpolation_Data> Rtc_Datas, UInt32 List_No) 
+        {
+            //  wait list List_No to be not busy
+            //  load_list( List_No, 0) returns 1 if successful, otherwise 0
+            //  执行到POS 0
+            do
+            {
+
+            }
+            while (RTC5Wrap.load_list(List_No, 0u) == 0);
+            // Transmit the following list commands to the list buffer.
+            //RTC5Wrap.set_start_list(List_No);
+
+            //初始Jump到启动点位
+            RTC5Wrap.jump_abs(Convert.ToInt32(Rtc_Datas[0].Rtc_x * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToInt32(Rtc_Datas[0].Rtc_y * Para_List.Parameter.Rtc_YPos_Reference));
+
+            //生成数据
+            foreach (var o in Rtc_Datas)
+            {
+                if (o.Type == 11)//arc_abs 绝对圆弧
+                {
+                    RTC5Wrap.arc_abs(Convert.ToInt32(o.Center_x * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToInt32(o.Center_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToDouble(o.Angle));
+                }
+                else if (o.Type == 12)//arc_rel
+                {
+                    RTC5Wrap.arc_rel(Convert.ToInt32(o.Center_x * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToInt32(o.Center_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToDouble(o.Angle));
+                }
+                else if (o.Type == 13)//jump_abs
+                {
+                    RTC5Wrap.jump_abs(Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToInt32(o.End_y * Para_List.Parameter.Rtc_YPos_Reference));
+                }
+                else if (o.Type == 14)//jump_rel
+                {
+                    RTC5Wrap.jump_rel(Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToInt32(o.End_y * Para_List.Parameter.Rtc_YPos_Reference));
+                }
+                else if (o.Type == 15)//mark_abs
+                {
+                    RTC5Wrap.mark_abs(Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToInt32(o.End_y * Para_List.Parameter.Rtc_YPos_Reference));
+                }
+                else if (o.Type == 16)//mark_rel
+                {
+                    RTC5Wrap.mark_rel(Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToInt32(o.End_y * Para_List.Parameter.Rtc_YPos_Reference));
+                }
+            }
+            //结束Jump到启动点位
+            //RTC5Wrap.jump_abs(0,0);
+
+            //设置List结束位置
+            RTC5Wrap.set_end_of_list();
+
+            //启动执行
+            RTC5Wrap.execute_list(1u);
+
+            //Busy 运行等待结束
+            uint Busy;
+            do
+            {
+                RTC5Wrap.get_status(out Busy, out uint Position);
+            } while (Busy != 0U);
+        }
         public static void Draw_Stop()
         {
             //终止运行
@@ -747,5 +808,6 @@ namespace RTC_Fun
                 RTC5Wrap.get_status(out Busy, out uint Position);
             } while (Busy != 0U);
         }
+
     }
 }

@@ -356,8 +356,13 @@ namespace Laser_Build_1._0
                     //调用相机，获取对比的坐标信息
                     Common_Method.Delay_Time.Delay(200);//延时200ms
                     //Main.T_Client
-                    Cam_New = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(1));//触发拍照    
-                    
+                    Cam_New = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(1));//触发拍照 
+                    if ((Cam_New.X==999) || (Cam_New.Y == 999))
+                    {
+                        MessageBox.Show("相机通讯数据等待，请检查！！！");
+                        return new List<Correct_Data>();
+                    }
+                    //数据处理
                     if (j == 0)//X轴坐标归零
                     {
                         //计算差值
@@ -400,8 +405,118 @@ namespace Laser_Build_1._0
             Serialize_Data.Serialize_Correct_Data(Result, "Correct_Data_01.xml");
             MessageBox.Show("数据采集完成！！！");
             return Result;
-        }        
-        
+        }
+        public static List<Correct_Data> Get_Datas_Correct() 
+        {
+            //建立变量
+            List<Correct_Data> Result = new List<Correct_Data>();
+            Correct_Data Temp_Correct_Data = new Correct_Data();
+
+            //建立变量
+            Vector Cam_Old = new Vector();
+            Vector Cam_New = new Vector();
+            decimal Cam_Delta_X = 0, Cam_Delta_Y = 0;
+            int i = 0, j = 0;
+
+            ////两轴回零
+            //Thread Axis01_home_thread = new Thread(this.Axis01_Home);
+            //Thread Axis02_home_thread = new Thread(this.Axis02_Home);
+            //Axis01_home_thread.Start();
+            //Axis02_home_thread.Start();
+            ////等待线程结束
+            //Axis01_home_thread.Join();
+            //Axis02_home_thread.Join();
+
+            //建立直角坐标系
+            GTS_Fun.Interpolation.Coordination(Para_List.Parameter.Work.X, Para_List.Parameter.Work.Y);
+            //定位到加工坐标原点
+            GTS_Fun.Interpolation.Clear_FIFO();
+            GTS_Fun.Interpolation.Line_FIFO(0, 0);//将直线插补数据写入
+            GTS_Fun.Interpolation.Interpolation_Start();
+            //停止坐标系运动
+            GTS_Fun.Interpolation.Interpolation_Stop();
+
+            //1轴-x轴，2轴-y轴，X轴归零，y轴归 步距*i
+            //motion.Abs(1, Convert.ToDouble(500 / Para_List.Parameter.Acc_reference), Convert.ToDouble(500 / Para_List.Parameter.Acc_reference), 2, Convert.ToInt32(Para_List.Parameter.Work_X), Convert.ToDouble(100 / Para_List.Parameter.Vel_reference));//绝对定位至坐标系X为零
+            //motion.Abs(2, Convert.ToDouble(500 / Para_List.Parameter.Acc_reference), Convert.ToDouble(500 / Para_List.Parameter.Acc_reference), 2, Convert.ToInt32(Para_List.Parameter.Work_Y), Convert.ToDouble(100 / Para_List.Parameter.Vel_reference));//绝对定位至坐标系Y为零
+
+            //2.5mm步距进行数据提取和整合，使用INC指令
+            for (i = 0; i < Para_List.Parameter.Gts_Calibration_Row; i++)
+            {
+                //1轴-x轴，2轴-y轴，X轴归零，y轴归 步距*i
+                //定位实现
+                //motion.Abs(1, 500, 500, 2, Para_List.Parameter.Work_X,100);//绝对定位至坐标系X为零
+                //motion.Inc(2, 500, 500, 2, -Para_List.Parameter.Gts_Calibration_Cell, 100);//循序渐加
+                //插补运动实现
+                GTS_Fun.Interpolation.Clear_FIFO();
+                GTS_Fun.Interpolation.Line_FIFO_Correct(0, i * Para_List.Parameter.Gts_Calibration_Cell);//将直线插补数据写入
+                GTS_Fun.Interpolation.Interpolation_Start();
+                GTS_Fun.Interpolation.Interpolation_Stop();
+                for (j = 0; j < Para_List.Parameter.Gts_Calibration_Col; j++)
+                {
+                    //清空Temp_Correct_Data
+                    Temp_Correct_Data.Empty();
+                    //定位X轴
+                    //定位实现
+                    //motion.Inc(1, 500, 500, 2, -Para_List.Parameter.Gts_Calibration_Cell, 100);
+                    //插补运动实现
+                    GTS_Fun.Interpolation.Clear_FIFO();
+                    GTS_Fun.Interpolation.Line_FIFO_Correct(j * Para_List.Parameter.Gts_Calibration_Cell, i * Para_List.Parameter.Gts_Calibration_Cell);//将直线插补数据写入
+                    GTS_Fun.Interpolation.Interpolation_Start();
+                    GTS_Fun.Interpolation.Interpolation_Stop();
+                    //调用相机，获取对比的坐标信息
+                    Common_Method.Delay_Time.Delay(200);//延时200ms
+                    //Main.T_Client
+                    Cam_New = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(1));//触发拍照 
+                    if ((Cam_New.X == 999) || (Cam_New.Y == 999))
+                    {
+                        MessageBox.Show("相机通讯数据等待，请检查！！！");
+                        return new List<Correct_Data>();
+                    }
+                    //数据处理
+                    if (j == 0)//X轴坐标归零
+                    {
+                        //计算差值
+                        Cam_Delta_X = Cam_New.X - 243 * Para_List.Parameter.Cam_Reference;
+                        Cam_Delta_Y = Cam_New.Y - 324 * Para_List.Parameter.Cam_Reference;
+                        //数据保存
+                        Temp_Correct_Data.Xo = j * Para_List.Parameter.Gts_Calibration_Cell + Cam_Delta_X;//相机实际X坐标
+                        Temp_Correct_Data.Yo = i * Para_List.Parameter.Gts_Calibration_Cell + Cam_Delta_Y;//相机实际Y坐标
+                        Temp_Correct_Data.Xm = j * Para_List.Parameter.Gts_Calibration_Cell;//平台电机实际X坐标
+                        Temp_Correct_Data.Ym = i * Para_List.Parameter.Gts_Calibration_Cell;//平台电机实际Y坐标
+                    }
+                    else
+                    {
+                        //计算差值
+                        Cam_Delta_X = Cam_New.X - Cam_Old.X;
+                        Cam_Delta_Y = Cam_New.Y - Cam_Old.Y;
+                        //数据保存
+                        Temp_Correct_Data.Xo = j * Para_List.Parameter.Gts_Calibration_Cell + Cam_Delta_X;//相机实际X坐标
+                        Temp_Correct_Data.Yo = i * Para_List.Parameter.Gts_Calibration_Cell + Cam_Delta_Y;//相机实际Y坐标
+                        Temp_Correct_Data.Xm = j * Para_List.Parameter.Gts_Calibration_Cell;//平台电机实际X坐标
+                        Temp_Correct_Data.Ym = i * Para_List.Parameter.Gts_Calibration_Cell;//平台电机实际Y坐标
+                    }
+
+                    //New变Old
+                    Cam_Old = new Vector(Cam_New);
+                    //添加进入List
+                    Result.Add(Temp_Correct_Data);
+
+                    //线程终止
+                    if (Exit_Flag)
+                    {
+                        Exit_Flag = false;
+                        Serialize_Data.Serialize_Correct_Data(Result, "Correct_Data_02.xml");
+                        return Result;
+                    }
+
+                }
+            }
+            //保存文件至Config
+            Serialize_Data.Serialize_Correct_Data(Result, "Correct_Data_02.xml");
+            MessageBox.Show("数据采集完成！！！");
+            return Result;
+        }
         private void Axis01_Home()
         {
             if (Prompt.Refresh.Axis01_EN)
@@ -435,6 +550,11 @@ namespace Laser_Build_1._0
                 Common_Method.Delay_Time.Delay(200);//延时200ms
                 //Main.T_Client
                 Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(1));//触发拍照 
+                if ((Cam.X == 999) || (Cam.Y == 999))
+                {
+                    MessageBox.Show("相机通讯数据等待，请检查！！！");
+                    return;
+                }
                 Cam = new Vector(Cam.X - 243 * Para_List.Parameter.Cam_Reference, Cam.Y - 324 * Para_List.Parameter.Cam_Reference);
                 //获取坐标系平台坐标
                 Coodinate_Point = new Vector(GTS_Fun.Interpolation.Get_Coordinate());
@@ -502,6 +622,11 @@ namespace Laser_Build_1._0
                 Common_Method.Delay_Time.Delay(200);//延时200ms
                 //Main.T_Client
                 Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(2));//触发拍照 
+                if ((Cam.X == 999) || (Cam.Y == 999))
+                {
+                    MessageBox.Show("相机通讯数据等待，请检查！！！");
+                    return;
+                }
                 //获取坐标系平台坐标
                 Coodinate_Point = new Vector(GTS_Fun.Interpolation.Get_Coordinate());
                 //计算偏移
@@ -529,6 +654,11 @@ namespace Laser_Build_1._0
                 Common_Method.Delay_Time.Delay(200);//延时200ms
                 //Main.T_Client
                 Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(2));//触发拍照 
+                if ((Cam.X == 999) || (Cam.Y == 999))
+                {
+                    MessageBox.Show("相机通讯数据等待，请检查！！！");
+                    return;
+                }
                 //获取坐标系平台坐标
                 Coodinate_Point = new Vector(GTS_Fun.Interpolation.Get_Coordinate());
                 //计算偏移
@@ -555,6 +685,11 @@ namespace Laser_Build_1._0
                 Common_Method.Delay_Time.Delay(200);//延时200ms
                 //Main.T_Client
                 Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(2));//触发拍照 
+                if ((Cam.X == 999) || (Cam.Y == 999))
+                {
+                    MessageBox.Show("相机通讯数据等待，请检查！！！");
+                    return;
+                }
                 //获取坐标系平台坐标
                 Coodinate_Point = new Vector(GTS_Fun.Interpolation.Get_Coordinate());
                 //计算偏移
@@ -616,6 +751,11 @@ namespace Laser_Build_1._0
                 Common_Method.Delay_Time.Delay(200);//延时200ms
                 //Main.T_Client
                 Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(2));//触发拍照 
+                if ((Cam.X == 999) || (Cam.Y == 999))
+                {
+                    MessageBox.Show("相机通讯数据等待，请检查！！！");
+                    return;
+                }
                 //获取坐标系平台坐标
                 Coodinate_Point = new Vector(GTS_Fun.Interpolation.Get_Coordinate());
                 //计算偏移

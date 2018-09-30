@@ -150,6 +150,12 @@ namespace Para_List
         //加工次数
         private static UInt16 gts_repeat;
         private static UInt16 rtc_repeat;
+        //激光发生器参数
+        private static decimal seed_current;
+        private static decimal amp1_current;
+        private static decimal amp2_current;
+        private static decimal prf;
+        private static decimal pec;
 
         public static decimal Gts_Vel_reference { get => gts_vel_reference; set => gts_vel_reference = value; }
         public static decimal Gts_Acc_reference { get => gts_acc_reference; set => gts_acc_reference = value; }
@@ -250,6 +256,11 @@ namespace Para_List
         public static Vector Rtc_Limit { get => rtc_limit; set => rtc_limit = value; }
         public static UInt16 Gts_Repeat { get => gts_repeat; set => gts_repeat = value; }
         public static UInt16 Rtc_Repeat { get => rtc_repeat; set => rtc_repeat = value; }
+        public static decimal Seed_Current { get => seed_current; set => seed_current = value; }
+        public static decimal Amp1_Current { get => amp1_current; set => amp1_current = value; }
+        public static decimal Amp2_Current { get => amp2_current; set => amp2_current = value; }
+        public static decimal PRF { get => prf; set => prf = value; }
+        public static decimal PEC { get => pec; set => pec = value; }
         //公开构造函数
         public Parameter() { }
     }
@@ -386,6 +397,12 @@ namespace Para_List
         //加工次数
         private UInt16 gts_repeat;
         private UInt16 rtc_repeat;
+        //激光发生器参数
+        private decimal seed_current;
+        private decimal amp1_current;
+        private decimal amp2_current;
+        private decimal prf;
+        private decimal pec;
 
         public decimal Gts_Vel_reference { get => gts_vel_reference; set => gts_vel_reference = value; }
         public decimal Gts_Acc_reference { get => gts_acc_reference; set => gts_acc_reference = value; }
@@ -485,6 +502,11 @@ namespace Para_List
         public Vector Rtc_Limit { get => rtc_limit; set => rtc_limit = value; }
         public UInt16 Gts_Repeat { get => gts_repeat; set => gts_repeat = value; }
         public UInt16 Rtc_Repeat { get => rtc_repeat; set => rtc_repeat = value; }
+        public decimal Seed_Current { get => seed_current; set => seed_current = value; }
+        public decimal Amp1_Current { get => amp1_current; set => amp1_current = value; }
+        public decimal Amp2_Current { get => amp2_current; set => amp2_current = value; }
+        public decimal PRF { get => prf; set => prf = value; }
+        public decimal PEC { get => pec; set => pec = value; }
         //构造函数
         public Parameter_RW() { }
     } 
@@ -596,7 +618,12 @@ namespace Para_List
                 Cutter_Type = Para_List.Parameter.Cutter_Type,
                 Rtc_Limit = Para_List.Parameter.Rtc_Limit,
                 Gts_Repeat = Para_List.Parameter.Gts_Repeat,
-                Rtc_Repeat = Para_List.Parameter.Rtc_Repeat
+                Rtc_Repeat = Para_List.Parameter.Rtc_Repeat,
+                Seed_Current = Para_List.Parameter.Seed_Current,
+                Amp1_Current = Para_List.Parameter.Amp1_Current,
+                Amp2_Current = Para_List.Parameter.Amp2_Current,
+                PRF = Para_List.Parameter.PRF,
+                PEC = Para_List.Parameter.PEC
             };
 
             //二进制 序列化
@@ -731,6 +758,11 @@ namespace Para_List
                     Para_List.Parameter.Rtc_Limit = parameter.Rtc_Limit;
                     Para_List.Parameter.Gts_Repeat = parameter.Gts_Repeat;
                     Para_List.Parameter.Rtc_Repeat = parameter.Rtc_Repeat;
+                    Para_List.Parameter.Seed_Current = parameter.Seed_Current;
+                    Para_List.Parameter.Amp1_Current = parameter.Amp1_Current;
+                    Para_List.Parameter.Amp2_Current = parameter.Amp2_Current;
+                    Para_List.Parameter.PRF = parameter.PRF;
+                    Para_List.Parameter.PEC = parameter.PEC;
                 }
             }
         }

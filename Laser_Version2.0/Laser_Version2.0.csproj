@@ -126,6 +126,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Basler_Net_Cam.cs" />
+    <Compile Include="Bit_Value.cs" />
     <Compile Include="Cam_pic\Basler_Camera.cs" />
     <Compile Include="CSV_RW.cs" />
     <Compile Include="Data\Correct_Data.cs" />
@@ -243,6 +244,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <EmbeddedResource Include="UI\Rtc_Handle.resx">
       <DependentUpon>Rtc_Handle.cs</DependentUpon>
@@ -292,6 +294,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="resource\genius.ico" />
+    <Content Include="resource\green.png" />
+    <Content Include="resource\red.png" />
     <Content Include="resource\running.ico" />
   </ItemGroup>
   <ItemGroup>

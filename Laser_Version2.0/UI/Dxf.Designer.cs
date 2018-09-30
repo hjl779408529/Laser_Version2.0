@@ -102,6 +102,8 @@
             this.Csv_Test = new System.Windows.Forms.Button();
             this.Correct_Rtc = new System.Windows.Forms.Button();
             this.Rtc_Affinity = new System.Windows.Forms.Button();
+            this.Barrel_Distortion = new System.Windows.Forms.Button();
+            this.Calibration_Target_RE = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // button2
@@ -479,7 +481,7 @@
             this.button16.Name = "button16";
             this.button16.Size = new System.Drawing.Size(154, 50);
             this.button16.TabIndex = 73;
-            this.button16.Text = "相机校准";
+            this.button16.Text = "标定板校准";
             this.button16.UseVisualStyleBackColor = true;
             this.button16.Click += new System.EventHandler(this.button16_Click);
             // 
@@ -490,7 +492,7 @@
             this.button17.Name = "button17";
             this.button17.Size = new System.Drawing.Size(154, 50);
             this.button17.TabIndex = 74;
-            this.button17.Text = "相机校准退出";
+            this.button17.Text = "标定板校准退出";
             this.button17.UseVisualStyleBackColor = true;
             this.button17.Click += new System.EventHandler(this.button17_Click);
             // 
@@ -530,7 +532,7 @@
             this.button20.Name = "button20";
             this.button20.Size = new System.Drawing.Size(154, 50);
             this.button20.TabIndex = 77;
-            this.button20.Text = "整合加工启动";
+            this.button20.Text = "无坐标补偿加工";
             this.button20.UseVisualStyleBackColor = true;
             this.button20.Click += new System.EventHandler(this.button20_Click);
             // 
@@ -806,7 +808,7 @@
             this.Correct_Rtc.Name = "Correct_Rtc";
             this.Correct_Rtc.Size = new System.Drawing.Size(154, 50);
             this.Correct_Rtc.TabIndex = 111;
-            this.Correct_Rtc.Text = "Rtc矫正加工";
+            this.Correct_Rtc.Text = "坐标补偿加工";
             this.Correct_Rtc.UseVisualStyleBackColor = true;
             this.Correct_Rtc.Click += new System.EventHandler(this.Correct_Rtc_Click);
             // 
@@ -821,11 +823,35 @@
             this.Rtc_Affinity.UseVisualStyleBackColor = true;
             this.Rtc_Affinity.Click += new System.EventHandler(this.Rtc_Affinity_Click);
             // 
+            // Barrel_Distortion
+            // 
+            this.Barrel_Distortion.Location = new System.Drawing.Point(542, 800);
+            this.Barrel_Distortion.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Barrel_Distortion.Name = "Barrel_Distortion";
+            this.Barrel_Distortion.Size = new System.Drawing.Size(154, 50);
+            this.Barrel_Distortion.TabIndex = 113;
+            this.Barrel_Distortion.Text = "桶形畸变加工";
+            this.Barrel_Distortion.UseVisualStyleBackColor = true;
+            this.Barrel_Distortion.Click += new System.EventHandler(this.Barrel_Distortion_Click);
+            // 
+            // Calibration_Target_RE
+            // 
+            this.Calibration_Target_RE.Location = new System.Drawing.Point(368, 800);
+            this.Calibration_Target_RE.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Calibration_Target_RE.Name = "Calibration_Target_RE";
+            this.Calibration_Target_RE.Size = new System.Drawing.Size(154, 50);
+            this.Calibration_Target_RE.TabIndex = 114;
+            this.Calibration_Target_RE.Text = "标定板二次校准";
+            this.Calibration_Target_RE.UseVisualStyleBackColor = true;
+            this.Calibration_Target_RE.Click += new System.EventHandler(this.Calibration_Target_RE_Click);
+            // 
             // Dxf
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1550, 860);
+            this.Controls.Add(this.Calibration_Target_RE);
+            this.Controls.Add(this.Barrel_Distortion);
             this.Controls.Add(this.Rtc_Affinity);
             this.Controls.Add(this.Correct_Rtc);
             this.Controls.Add(this.Csv_Test);
@@ -987,5 +1013,7 @@
         private System.Windows.Forms.Button Csv_Test;
         private System.Windows.Forms.Button Correct_Rtc;
         private System.Windows.Forms.Button Rtc_Affinity;
+        private System.Windows.Forms.Button Barrel_Distortion;
+        private System.Windows.Forms.Button Calibration_Target_RE;
     }
 }

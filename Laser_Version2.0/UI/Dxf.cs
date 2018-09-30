@@ -974,7 +974,7 @@ namespace Laser_Build_1._0
         {
             Calibration.Exit_Flag = true;
         }
-        //整合加工启动
+        //无坐标加工启动
         private void button20_Click(object sender, EventArgs e)
         {
             Thread Integrate_thread = new Thread(Integrated_Start);
@@ -1238,7 +1238,7 @@ namespace Laser_Build_1._0
             //CSV_RW.SaveCSV(CSV_RW.Correct_Data_DataTable(Serialize_Data.Reserialize_Correct_Data("Gts_Correct_Data.xml")), "Gts_Correct_Data");
 
         }
-        //RTC矫正加工
+        //坐标补偿加工
         private void Correct_Rtc_Click(object sender, EventArgs e)
         {
             Thread Integrated_Correct_thread = new Thread(Integrated_Correct_Start);
@@ -1272,6 +1272,27 @@ namespace Laser_Build_1._0
             //生成RTC仿射变换参数
             Rtc_Cal_Data_Resolve.Resolve(Serialize_Data.Reserialize_Correct_Data("Rtc_Correct_Data.xml"));
         }
+        //barreal_distortion 文件生成
+        private void Barrel_Distortion_Click(object sender, EventArgs e)
+        {
+            Thread Barrel_Distortion_Correct_thread = new Thread(Barrel_Distortion_Correct);
+            Barrel_Distortion_Correct_thread.Start();
+        }
+        private void Barrel_Distortion_Correct()
+        {
+            Integrated.Rts_Gts_Cal_Rtc(Rtc_List_Data);
+        }
+        //标定板二次校准
+        private void Calibration_Target_RE_Click(object sender, EventArgs e)
+        {
+            Thread Re_Correct_Data_thread = new Thread(Re_Correct_Data);
+            Re_Correct_Data_thread.Start();
+        }
+        private void Re_Correct_Data()
+        {
+            Calibration.Exit_Flag = false;
+            Calibration.Get_Datas_Correct();
+        }
 
         //Y坐标
         private void textBox22_TextChanged(object sender, EventArgs e)
@@ -1286,7 +1307,6 @@ namespace Laser_Build_1._0
                 Cor_y = tmp;
             });
         }
-
         //定位坐标点
         private void button21_Click(object sender, EventArgs e)
         {

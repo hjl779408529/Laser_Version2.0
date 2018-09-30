@@ -7,11 +7,13 @@ using System.Net.Sockets;
 using System.Windows.Forms;
 using System.Threading;
 using Prompt;
+using Laser_Version2._0;
+using System.Threading.Tasks;
+
 namespace Laser_Build_1._0
 {
     public class Tclient
     {
-
         public NetworkStream stream;
         public TcpClient clien = null;
         public int totalCount = 0;
@@ -25,7 +27,16 @@ namespace Laser_Build_1._0
         public ManualResetEvent connectDone = new ManualResetEvent(false);
         public Vector Receive_Cordinate = new Vector();//接收的数据 相机转换为坐标
         public bool Rec_Ok;//接收完成标志
-
+        //无参数 构造函数
+        public Tclient()
+        {
+            Rec_Ok = false;
+        }
+        //超时事件
+        private void Tcp_Rec_TimeOut()
+        {
+            MessageBox.Show("Tcp 数据接收超时！！！！");
+        }
         public void TCP_Start()
         {
             string ip = "127.0.0.1";
@@ -47,6 +58,7 @@ namespace Laser_Build_1._0
         }
         public void Tcp_Close()
         {
+            Rec_Ok = false;
             client.Close();
         }
         private void ClientAccpent(IAsyncResult ar)
@@ -145,17 +157,21 @@ namespace Laser_Build_1._0
         //获取校准值
         public Vector Get_Cam_Deviation(int order)
         {
-            Vector Result;
-            
+            Vector Result;            
             //发送指令
             Senddata(order);
             //等待完成
-            do
-            {
-
-            } while (!Rec_Ok);
+            Task.Factory.StartNew(() => { do { } while (!Rec_Ok); }).Wait(5 * 1000);//5 * 1000,该时间范围内：代码段完成 或 超出该时间范围 返回并继续向下执行
             //换算数据
-            Result = new Vector(Receive_Cordinate.X * Para_List.Parameter.Cam_Reference, Receive_Cordinate.Y * Para_List.Parameter.Cam_Reference);
+            if (Rec_Ok)
+            {
+                Result = new Vector(Receive_Cordinate.X * Para_List.Parameter.Cam_Reference, Receive_Cordinate.Y * Para_List.Parameter.Cam_Reference);
+            }
+            else
+            {
+                Result = new Vector(999, 999);//异常接收退出
+                Log.Commandhandler("相机数据获取超时！！！");
+            }            
             //返回数据
             return Result;
         }

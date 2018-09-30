@@ -534,6 +534,55 @@ namespace GTS_Fun
                 0
                 );
             Log.Commandhandler("Line_Interpolation--向缓存区写入一段直线插补数据", Gts_Return);
+            
+        }
+
+        public static void Line_FIFO_Correct(decimal x, decimal y) 
+        {
+            //临时定位变量
+            Int16 End_m, End_n;
+            //定义处理的变量
+            Vector Tmp_Point = new Vector();
+            decimal Tmp_End_X = 0.0m;
+            decimal Tmp_End_Y = 0.0m;
+            //获取矫正后的数据
+            if (Para_List.Parameter.Gts_Affinity_Type == 2)
+            {
+                Tmp_Point = new Vector(Gts_Cal_Data_Resolve.Get_Line_Fit_Coordinate(x, y, Fit_Matrices));
+                Tmp_End_X = Tmp_Point.X;
+                Tmp_End_Y = Tmp_Point.Y;
+            }
+            else
+            {
+                //数据矫正
+                //获取落点
+                End_m = Gts_Cal_Data_Resolve.Seek_X_Pos(x);
+                End_n = Gts_Cal_Data_Resolve.Seek_Y_Pos(y);
+                //计算最终数据
+                //终点计算
+                if (affinity_Matrices.Count > 1)
+                {
+                    Tmp_End_X = x * affinity_Matrices[End_n * Para_List.Parameter.Gts_Affinity_Col + End_m].Cos_Value + y * affinity_Matrices[End_n * Para_List.Parameter.Gts_Affinity_Col + End_m].Sin_Value + affinity_Matrices[End_n * Para_List.Parameter.Gts_Affinity_Col + End_m].Delta_X;
+                    Tmp_End_Y = y * affinity_Matrices[End_n * Para_List.Parameter.Gts_Affinity_Col + End_m].Cos_Value - x * affinity_Matrices[End_n * Para_List.Parameter.Gts_Affinity_Col + End_m].Sin_Value + affinity_Matrices[End_n * Para_List.Parameter.Gts_Affinity_Col + End_m].Delta_Y;
+
+                }
+                else if ((affinity_Matrices.Count > 0) && (affinity_Matrices.Count == 1))
+                {
+                    Tmp_End_X = x * affinity_Matrices[0].Cos_Value + y * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_X;
+                    Tmp_End_Y = y * affinity_Matrices[0].Cos_Value - x * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_Y;
+                }
+            }
+            //向缓存区写入一段插补数据.in
+            Gts_Return = MC.GT_LnXY(
+                1,//坐标系--1
+                Convert.ToInt32(-Tmp_End_X * Para_List.Parameter.Gts_Pos_reference),//插补X终点 [-1073741823,1073741823]
+                Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Gts_Pos_reference),//插补Y终点 [-1073741823,1073741823]
+                Convert.ToDouble(Para_List.Parameter.Line_synVel / Para_List.Parameter.Gts_Vel_reference),//插补合成速度  [0-32767]
+                Convert.ToDouble(Para_List.Parameter.Line_synAcc / Para_List.Parameter.Gts_Acc_reference),//插补合成加速度
+                Convert.ToDouble(Para_List.Parameter.Line_endVel / Para_List.Parameter.Gts_Vel_reference),//插补终点速度
+                0
+                );
+            Log.Commandhandler("Line_Interpolation--向缓存区写入一段直线插补数据", Gts_Return);
         }
 
         //圆心描述法 

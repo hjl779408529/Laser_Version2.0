@@ -50,7 +50,7 @@ namespace Communication.IO.Tools
         private ulong[] crctab = new ulong[256];
 
         // Enumeration used in the init function to specify which CRC algorithm to use
-        public enum CRCCode { CRC_CCITT, CRC16, CRC32 };
+        public enum CRCCode { CRC_CCITT, CRC16, CRC32 }; 
 
         public CRCTool()
         {
@@ -121,7 +121,21 @@ namespace Communication.IO.Tools
                 crcinit_nondirect = crc;
             }
         }
+        public uint Check_Sum(byte[] p)
+        {
+            uint[] tmp = new uint[p.Length];
+            uint Result = 0;
 
+            for (int i = 0; i < p.Length; i++)
+            {
+                tmp[i] = BitConverter.ToUInt16(new byte[] {p[i],0x00},0);
+            }
+            for (int i = 0; i < tmp.Length; i++)
+            {
+                Result = Result + tmp[i];
+            }
+            return Result;
+        }
 
         /// <summary>
         /// 4 ways to calculate the crc checksum. If you have to do a lot of encoding
