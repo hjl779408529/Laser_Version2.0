@@ -319,28 +319,44 @@ namespace Laser_Build_1._0
                 Temp_Data.Empty();
                 //后赋值
                 Temp_Data = O;
-                //sin取正  (当前坐标系采用) 已验证
-                //起点计算
-                Temp_Data.Start_x = O.Start_x * Mark_affinity_Matrices.Cos_Value + O.Start_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
-                Temp_Data.Start_y = O.Start_y * Mark_affinity_Matrices.Cos_Value - O.Start_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
-                //终点计算
-                Temp_Data.End_x = O.End_x * Mark_affinity_Matrices.Cos_Value + O.End_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
-                Temp_Data.End_y = O.End_y * Mark_affinity_Matrices.Cos_Value - O.End_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
-                //圆心计算
-                Temp_Data.Center_x = O.Center_x * Mark_affinity_Matrices.Cos_Value + O.Center_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
-                Temp_Data.Center_y = O.Center_y * Mark_affinity_Matrices.Cos_Value - O.Center_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
+                //加工起始位置选择
+                if (Para_List.Parameter.Calibration_Type == 0) //非Mark点矫正，从原点起始加工
+                {
+                    //sin取正  (当前坐标系采用) 已验证
+                    //起点计算
+                    Temp_Data.Start_x = O.Start_x - Para_List.Parameter.Rtc_Org.X;
+                    Temp_Data.Start_y = O.Start_y - Para_List.Parameter.Rtc_Org.Y;
+                    //终点计算
+                    Temp_Data.End_x = O.End_x - Para_List.Parameter.Rtc_Org.X;
+                    Temp_Data.End_y = O.End_y - Para_List.Parameter.Rtc_Org.Y;
+                    //圆心计算
+                    Temp_Data.Center_x = O.Center_x - Para_List.Parameter.Rtc_Org.X;
+                    Temp_Data.Center_y = O.Center_y - Para_List.Parameter.Rtc_Org.Y;
+                }
+                else//Mark点矫正，从矫正位置起始加工
+                {
+                    //sin取正  (当前坐标系采用) 已验证
+                    //起点计算
+                    Temp_Data.Start_x = O.Start_x * Mark_affinity_Matrices.Cos_Value + O.Start_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
+                    Temp_Data.Start_y = O.Start_y * Mark_affinity_Matrices.Cos_Value - O.Start_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
+                    //终点计算
+                    Temp_Data.End_x = O.End_x * Mark_affinity_Matrices.Cos_Value + O.End_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
+                    Temp_Data.End_y = O.End_y * Mark_affinity_Matrices.Cos_Value - O.End_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
+                    //圆心计算
+                    Temp_Data.Center_x = O.Center_x * Mark_affinity_Matrices.Cos_Value + O.Center_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
+                    Temp_Data.Center_y = O.Center_y * Mark_affinity_Matrices.Cos_Value - O.Center_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
 
-                ////sin取负 (当前坐标系不采用)
-                ////起点计算
-                //Temp_Data.Start_x = O.Start_x * Mark_affinity_Matrices.Cos_Value - O.Start_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
-                //Temp_Data.Start_y = O.Start_y * Mark_affinity_Matrices.Cos_Value + O.Start_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
-                ////终点计算
-                //Temp_Data.End_x = O.End_x * Mark_affinity_Matrices.Cos_Value - O.End_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
-                //Temp_Data.End_y = O.End_y * Mark_affinity_Matrices.Cos_Value + O.End_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
-                ////圆心计算
-                //Temp_Data.Center_x = O.Center_x * Mark_affinity_Matrices.Cos_Value - O.Center_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
-                //Temp_Data.Center_y = O.Center_y * Mark_affinity_Matrices.Cos_Value + O.Center_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
-
+                    ////sin取负 (当前坐标系不采用)
+                    ////起点计算
+                    //Temp_Data.Start_x = O.Start_x * Mark_affinity_Matrices.Cos_Value - O.Start_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
+                    //Temp_Data.Start_y = O.Start_y * Mark_affinity_Matrices.Cos_Value + O.Start_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
+                    ////终点计算
+                    //Temp_Data.End_x = O.End_x * Mark_affinity_Matrices.Cos_Value - O.End_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
+                    //Temp_Data.End_y = O.End_y * Mark_affinity_Matrices.Cos_Value + O.End_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
+                    ////圆心计算
+                    //Temp_Data.Center_x = O.Center_x * Mark_affinity_Matrices.Cos_Value - O.Center_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
+                    //Temp_Data.Center_y = O.Center_y * Mark_affinity_Matrices.Cos_Value + O.Center_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
+                }
                 //追加数据至Result
                 Result.Add(new Entity_Data(Temp_Data));
                 //清空Temp_Data
@@ -365,28 +381,44 @@ namespace Laser_Build_1._0
                     Temp_Data.Empty();
                     //后赋值
                     Temp_Data = O;
-                    //sin取正  (当前坐标系采用) 已验证
-                    //起点计算
-                    Temp_Data.Start_x = O.Start_x * Mark_affinity_Matrices.Cos_Value + O.Start_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
-                    Temp_Data.Start_y = O.Start_y * Mark_affinity_Matrices.Cos_Value - O.Start_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
-                    //终点计算
-                    Temp_Data.End_x = O.End_x * Mark_affinity_Matrices.Cos_Value + O.End_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
-                    Temp_Data.End_y = O.End_y * Mark_affinity_Matrices.Cos_Value - O.End_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
-                    //圆心计算
-                    Temp_Data.Center_x = O.Center_x * Mark_affinity_Matrices.Cos_Value + O.Center_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
-                    Temp_Data.Center_y = O.Center_y * Mark_affinity_Matrices.Cos_Value - O.Center_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
+                    //加工起始位置选择
+                    if (Para_List.Parameter.Calibration_Type==0) //非Mark点矫正，从原点起始加工
+                    {
+                        //sin取正  (当前坐标系采用) 已验证
+                        //起点计算
+                        Temp_Data.Start_x = O.Start_x - Para_List.Parameter.Rtc_Org.X;
+                        Temp_Data.Start_y = O.Start_y - Para_List.Parameter.Rtc_Org.Y;
+                        //终点计算
+                        Temp_Data.End_x = O.End_x - Para_List.Parameter.Rtc_Org.X;
+                        Temp_Data.End_y = O.End_y - Para_List.Parameter.Rtc_Org.Y;
+                        //圆心计算
+                        Temp_Data.Center_x = O.Center_x - Para_List.Parameter.Rtc_Org.X;
+                        Temp_Data.Center_y = O.Center_y - Para_List.Parameter.Rtc_Org.Y;
+                    }
+                    else //Mark点矫正，从矫正位置起始加工
+                    {
+                        //sin取正  (当前坐标系采用) 已验证
+                        //起点计算
+                        Temp_Data.Start_x = O.Start_x * Mark_affinity_Matrices.Cos_Value + O.Start_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
+                        Temp_Data.Start_y = O.Start_y * Mark_affinity_Matrices.Cos_Value - O.Start_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
+                        //终点计算
+                        Temp_Data.End_x = O.End_x * Mark_affinity_Matrices.Cos_Value + O.End_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
+                        Temp_Data.End_y = O.End_y * Mark_affinity_Matrices.Cos_Value - O.End_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
+                        //圆心计算
+                        Temp_Data.Center_x = O.Center_x * Mark_affinity_Matrices.Cos_Value + O.Center_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
+                        Temp_Data.Center_y = O.Center_y * Mark_affinity_Matrices.Cos_Value - O.Center_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
 
-                    ////sin取负 (当前坐标系不采用)
-                    ////起点计算
-                    //Temp_Data.Start_x = O.Start_x * Mark_affinity_Matrices.Cos_Value - O.Start_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
-                    //Temp_Data.Start_y = O.Start_y * Mark_affinity_Matrices.Cos_Value + O.Start_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
-                    ////终点计算
-                    //Temp_Data.End_x = O.End_x * Mark_affinity_Matrices.Cos_Value - O.End_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
-                    //Temp_Data.End_y = O.End_y * Mark_affinity_Matrices.Cos_Value + O.End_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
-                    ////圆心计算
-                    //Temp_Data.Center_x = O.Center_x * Mark_affinity_Matrices.Cos_Value - O.Center_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
-                    //Temp_Data.Center_y = O.Center_y * Mark_affinity_Matrices.Cos_Value + O.Center_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
-
+                        ////sin取负 (当前坐标系不采用)
+                        ////起点计算
+                        //Temp_Data.Start_x = O.Start_x * Mark_affinity_Matrices.Cos_Value - O.Start_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
+                        //Temp_Data.Start_y = O.Start_y * Mark_affinity_Matrices.Cos_Value + O.Start_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
+                        ////终点计算
+                        //Temp_Data.End_x = O.End_x * Mark_affinity_Matrices.Cos_Value - O.End_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
+                        //Temp_Data.End_y = O.End_y * Mark_affinity_Matrices.Cos_Value + O.End_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
+                        ////圆心计算
+                        //Temp_Data.Center_x = O.Center_x * Mark_affinity_Matrices.Cos_Value - O.Center_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
+                        //Temp_Data.Center_y = O.Center_y * Mark_affinity_Matrices.Cos_Value + O.Center_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
+                    }
                     //追加数据至Temp_List
                     Temp_List.Add(new Entity_Data(Temp_Data));
                     //清空Temp_Data
@@ -470,7 +502,6 @@ namespace Laser_Build_1._0
                 Temp_Data.Type = 1;//直线插补
                 Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
                 Temp_Data.Lift_flag = 1;//抬刀标志
-                Temp_Data.Repeat = 0;//重复次数
                 //强制约束接入点为直线
                 if (Arc_Line_Datas.Min(o => o.Type) == 1)
                 {
@@ -510,7 +541,6 @@ namespace Laser_Build_1._0
                         {
                             Temp_Data.Lift_flag = 0;//抬刀标志
                             Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
-                            Temp_Data.Repeat = 0;//重复次数
                             //插补起点坐标
                             Temp_Data.Start_x = Arc_Line_Datas[i].End_x;
                             Temp_Data.Start_y = Arc_Line_Datas[i].End_y;
@@ -556,7 +586,6 @@ namespace Laser_Build_1._0
                         {
                             Temp_Data.Lift_flag = 0;//抬刀标志
                             Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
-                            Temp_Data.Repeat = 0;//重复次数
                             //插补起点坐标
                             Temp_Data.Start_x = Arc_Line_Datas[i].Start_x;
                             Temp_Data.Start_y = Arc_Line_Datas[i].Start_y;
@@ -612,7 +641,6 @@ namespace Laser_Build_1._0
                         Temp_Data.Type = 1;//直线插补
                         Temp_Data.Lift_flag = 1;//抬刀标志
                         Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
-                        Temp_Data.Repeat = 0;//重复次数
                         //强制约束接入点为直线
                         if (Arc_Line_Datas.Min(o => o.Type) == 1)
                         {
@@ -681,7 +709,6 @@ namespace Laser_Build_1._0
                 Temp_Data.Type = 1;//直线插补
                 Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
                 Temp_Data.Lift_flag = 1;//抬刀标志
-                Temp_Data.Repeat = 0;//重复次数
                 Temp_Data.End_x = LWPolyline_Datas[0].Start_x;
                 Temp_Data.End_y = LWPolyline_Datas[0].Start_y;
 
@@ -707,8 +734,7 @@ namespace Laser_Build_1._0
 
                             Temp_Data.Lift_flag = 0;//抬刀标志
                             Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
-                            Temp_Data.Repeat = 0;//重复次数
-                                                 //插补起点
+                            //插补起点
                             Temp_Data.Start_x = LWPolyline_Datas[i].End_x;
                             Temp_Data.Start_y = LWPolyline_Datas[i].End_y;
                             //插补终点坐标
@@ -734,8 +760,7 @@ namespace Laser_Build_1._0
 
                             Temp_Data.Lift_flag = 0;//抬刀标志
                             Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
-                            Temp_Data.Repeat = 0;//重复次数
-                                                 //插补起点
+                            //插补起点
                             Temp_Data.Start_x = LWPolyline_Datas[i].Start_x;
                             Temp_Data.Start_y = LWPolyline_Datas[i].Start_y;
                             //插补终点坐标
@@ -771,7 +796,6 @@ namespace Laser_Build_1._0
                         Temp_Data.Type = 1;//直线插补
                         Temp_Data.Lift_flag = 1;//抬刀标志
                         Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
-                        Temp_Data.Repeat = 0;//重复次数
                         Temp_Data.End_x = LWPolyline_Datas[0].Start_x;
                         Temp_Data.End_y = LWPolyline_Datas[0].Start_y;
 
@@ -821,7 +845,6 @@ namespace Laser_Build_1._0
                 Temp_Data.Type = 1;//直线插补
                 Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
                 Temp_Data.Lift_flag = 1;//抬刀标志
-                Temp_Data.Repeat = 0;//重复次数
                 Temp_Data.End_x = LWPolyline_Datas[0][0].Start_x;
                 Temp_Data.End_y = LWPolyline_Datas[0][0].Start_y;
                 //整合数据生成代码
@@ -843,7 +866,6 @@ namespace Laser_Build_1._0
                             Temp_Data.Type = 1;//直线插补
                             Temp_Data.Lift_flag = 0;//抬刀标志
                             Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
-                            Temp_Data.Repeat = 0;//重复次数
                             Temp_Data.Start_x = LWPolyline_Datas[i][j].Start_x;
                             Temp_Data.Start_y = LWPolyline_Datas[i][j].Start_y;
                             Temp_Data.End_x = LWPolyline_Datas[i][j].End_x;
@@ -866,7 +888,6 @@ namespace Laser_Build_1._0
                             Temp_Data.Type = 1;//直线插补
                             Temp_Data.Lift_flag = 1;//抬刀标志
                             Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
-                            Temp_Data.Repeat = 0;//重复次数
                             Temp_Data.End_x = LWPolyline_Datas[0][0].Start_x;
                             Temp_Data.End_y = LWPolyline_Datas[0][0].Start_y;
                             //整合数据生成代码
@@ -896,7 +917,6 @@ namespace Laser_Build_1._0
             List<Interpolation_Data> Temp_List_Data = new List<Interpolation_Data>();
             Interpolation_Data Temp_Data = new Interpolation_Data();
             int i = 0;
-            int Num = 0;
             //初始清除
             Single_Data.Clear();
             Temp_List_Data.Clear();
@@ -911,7 +931,6 @@ namespace Laser_Build_1._0
                 Temp_Data.Type = 1;//直线插补
                 Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
                 Temp_Data.Lift_flag = 1;//抬刀标志
-                Temp_Data.Repeat = 0;//重复次数
                 Temp_Data.End_x = Circle_Datas[0].End_x;
                 Temp_Data.End_y = Circle_Datas[0].End_y; 
 
@@ -931,7 +950,6 @@ namespace Laser_Build_1._0
                         Temp_Data.Type = 3;//圆形插补
                         Temp_Data.Lift_flag = 0;//抬刀标志
                         Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
-                        Temp_Data.Repeat = 0;//重复次数
                         //圆形半径
                         Temp_Data.Circle_radius = Circle_Datas[i].Circle_radius;
                         //圆形起点坐标
@@ -966,7 +984,6 @@ namespace Laser_Build_1._0
                             Temp_Data.Type = 1;//直线插补
                             Temp_Data.Lift_flag = 1;//抬刀标志
                             Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
-                            Temp_Data.Repeat = 0;//重复次数
                             Temp_Data.End_x = Circle_Datas[0].End_x;
                             Temp_Data.End_y = Circle_Datas[0].End_y;
 
@@ -1315,25 +1332,37 @@ namespace Laser_Build_1._0
                         {
                             //获取中心
                             Temp_Data.Trail_Center = new Vector(In_Data[i][j].Center_x, In_Data[i][j].Center_y);
+                            //刀具补偿类型 0-不补偿、1-钻孔 -Radius、2-落料 +Radius
+                            decimal Radius = 0.0m;//定义刀具补偿半径
+                            if (Para_List.Parameter.Cutter_Type == 0)
+                            {
+                                Radius = 0.0m;
+                            }
+                            else if (Para_List.Parameter.Cutter_Type == 1)
+                            {
+                                Radius = -Para_List.Parameter.Cutter_Radius;
+                            }
+                            else if (Para_List.Parameter.Cutter_Type == 2)
+                            {
+                                Radius = Para_List.Parameter.Cutter_Radius;
+                            }
                             //整圆半径修正
-                            Temp_Data.Circle_radius = Temp_Data.Circle_radius + Para_List.Parameter.Cutter_Radius;
+                            Temp_Data.Circle_radius = Temp_Data.Circle_radius + Radius;
                             //整圆Center_Start 原点坐标与起点坐标的差值                          
                             if (Math.Abs(Temp_Data.End_x - In_Data[i][j].Circle_radius - In_Data[i][j].Center_x) <=Para_List.Parameter.Pos_Tolerance)
-                            {
-                                Temp_Data.End_x = In_Data[i][j].End_x + Para_List.Parameter.Cutter_Radius;
+                            {   
+                                Temp_Data.End_x = In_Data[i][j].End_x + Radius;
                                 Temp_Data.End_y = In_Data[i][j].End_y;
-                                Temp_Data.Center_Start_x = In_Data[i][j].Center_Start_x + Para_List.Parameter.Cutter_Radius;
+                                Temp_Data.Center_Start_x = In_Data[i][j].Center_Start_x + Radius;
                                 Temp_Data.Center_Start_y = In_Data[i][j].Center_Start_y;
                             }
                             else if (Math.Abs(Temp_Data.End_y - In_Data[i][j].Circle_radius - In_Data[i][j].Center_y) <= Para_List.Parameter.Pos_Tolerance)
                             {
                                 Temp_Data.End_x = In_Data[i][j].End_x;
-                                Temp_Data.End_y = In_Data[i][j].End_y + Para_List.Parameter.Cutter_Radius;
+                                Temp_Data.End_y = In_Data[i][j].End_y + Radius;
                                 Temp_Data.Center_Start_x = In_Data[i][j].Center_Start_x;
-                                Temp_Data.Center_Start_y = In_Data[i][j].Center_Start_y + Para_List.Parameter.Cutter_Radius;
+                                Temp_Data.Center_Start_y = In_Data[i][j].Center_Start_y + Radius;
                             }
-                            //直接替换数据
-                            //In_Data[i][j] = new Interpolation_Data(Temp_Data);
                             //追加数据
                             Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
                             //追加返回值
@@ -1525,7 +1554,6 @@ namespace Laser_Build_1._0
                                 Temp_Data.Type = 1;//直线插补
                                 Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
                                 Temp_Data.Lift_flag = 1;//抬刀标志
-                                Temp_Data.Repeat = 0;//重复次数
                                 Temp_Data.End_x = In_Data[i][j].End_x;
                                 Temp_Data.End_y = In_Data[i][j].End_y;
 
@@ -1672,7 +1700,6 @@ namespace Laser_Build_1._0
                                         Temp_Data.Type = 1;//直线插补
                                         Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
                                         Temp_Data.Lift_flag = 1;//抬刀标志
-                                        Temp_Data.Repeat = 0;//重复次数
                                         Temp_Data.End_x = In_Data[i][m].End_x;
                                         Temp_Data.End_y = In_Data[i][m].End_y;
 
@@ -1731,7 +1758,6 @@ namespace Laser_Build_1._0
                                             Temp_Data.Type = 1;//直线插补
                                             Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
                                             Temp_Data.Lift_flag = 1;//抬刀标志
-                                            Temp_Data.Repeat = 0;//重复次数
                                             Temp_Data.End_x = In_Data[i][m].End_x;
                                             Temp_Data.End_y = In_Data[i][m].End_y;
 
@@ -1957,7 +1983,6 @@ namespace Laser_Build_1._0
                                     Temp_Data.Type = 1;//直线插补
                                     Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
                                     Temp_Data.Lift_flag = 1;//抬刀标志
-                                    Temp_Data.Repeat = 0;//重复次数
                                     Temp_Data.End_x = In_Data[i][j].End_x;
                                     Temp_Data.End_y = In_Data[i][j].End_y;
 
@@ -2104,7 +2129,6 @@ namespace Laser_Build_1._0
                                             Temp_Data.Type = 1;//直线插补
                                             Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
                                             Temp_Data.Lift_flag = 1;//抬刀标志
-                                            Temp_Data.Repeat = 0;//重复次数
                                             Temp_Data.End_x = In_Data[i][m].End_x;
                                             Temp_Data.End_y = In_Data[i][m].End_y;
 
@@ -2163,7 +2187,6 @@ namespace Laser_Build_1._0
                                                 Temp_Data.Type = 1;//直线插补
                                                 Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
                                                 Temp_Data.Lift_flag = 1;//抬刀标志
-                                                Temp_Data.Repeat = 0;//重复次数
                                                 Temp_Data.End_x = In_Data[i][m].End_x;
                                                 Temp_Data.End_y = In_Data[i][m].End_y;
 
@@ -2474,7 +2497,7 @@ namespace Laser_Build_1._0
             decimal Radius = 0.0m;
             
             //钻孔、落料、无三种模式切换
-            //刀具补偿类型 0-不补偿、1-钻孔、2-落料
+            //刀具补偿类型 0-不补偿、1-钻孔 -Radius、2-落料 +Radius
             if (Para_List.Parameter.Cutter_Type==0)
             {
                 Radius = 0.0m;

@@ -78,7 +78,7 @@ namespace Laser_Build_1._0
             }
             catch (Exception ex)
             {
-                //SetText("连接发送错误" + ex.Message);
+                Prompt.Log.Info(ex.Message);
             }
 
         }
@@ -97,8 +97,7 @@ namespace Laser_Build_1._0
                 }
                 catch (Exception ex)
                 {
-
-                    //SetText(ex.Message);
+                    Prompt.Log.Info(ex.Message);
                 }
             }
         }

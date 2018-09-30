@@ -354,7 +354,7 @@ namespace Laser_Build_1._0
                     GTS_Fun.Interpolation.Interpolation_Start();
                     GTS_Fun.Interpolation.Interpolation_Stop();
                     //调用相机，获取对比的坐标信息
-                    Common_Method.Delay_Time.Delay(200);//延时200ms
+                    Thread.Sleep(200);//延时200ms
                     //Main.T_Client
                     Cam_New = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(1));//触发拍照 
                     if ((Cam_New.X==999) || (Cam_New.Y == 999))
@@ -396,6 +396,7 @@ namespace Laser_Build_1._0
                     {
                         Exit_Flag = false;
                         Serialize_Data.Serialize_Correct_Data(Result, "Correct_Data_01.xml");
+                        CSV_RW.SaveCSV(CSV_RW.Correct_Data_DataTable(Result), "Gts_Correct_Data_01");
                         return Result;
                     }
 
@@ -403,6 +404,7 @@ namespace Laser_Build_1._0
             }
             //保存文件至Config
             Serialize_Data.Serialize_Correct_Data(Result, "Correct_Data_01.xml");
+            CSV_RW.SaveCSV(CSV_RW.Correct_Data_DataTable(Result), "Gts_Correct_Data_01");
             MessageBox.Show("数据采集完成！！！");
             return Result;
         }
@@ -465,7 +467,7 @@ namespace Laser_Build_1._0
                     GTS_Fun.Interpolation.Interpolation_Start();
                     GTS_Fun.Interpolation.Interpolation_Stop();
                     //调用相机，获取对比的坐标信息
-                    Common_Method.Delay_Time.Delay(200);//延时200ms
+                    Thread.Sleep(200);//延时200ms
                     //Main.T_Client
                     Cam_New = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(1));//触发拍照 
                     if ((Cam_New.X == 999) || (Cam_New.Y == 999))
@@ -507,6 +509,7 @@ namespace Laser_Build_1._0
                     {
                         Exit_Flag = false;
                         Serialize_Data.Serialize_Correct_Data(Result, "Correct_Data_02.xml");
+                        CSV_RW.SaveCSV(CSV_RW.Correct_Data_DataTable(Result), "Gts_Correct_Data_02");
                         return Result;
                     }
 
@@ -514,6 +517,7 @@ namespace Laser_Build_1._0
             }
             //保存文件至Config
             Serialize_Data.Serialize_Correct_Data(Result, "Correct_Data_02.xml");
+            CSV_RW.SaveCSV(CSV_RW.Correct_Data_DataTable(Result), "Gts_Correct_Data_02");
             MessageBox.Show("数据采集完成！！！");
             return Result;
         }
@@ -547,7 +551,7 @@ namespace Laser_Build_1._0
             {   //定位到ORG原点
                 Mark(Para_List.Parameter.Cal_Org);
                 //调用相机，获取对比的坐标信息
-                Common_Method.Delay_Time.Delay(200);//延时200ms
+                Thread.Sleep(200);//延时200ms
                 //Main.T_Client
                 Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(1));//触发拍照 
                 if ((Cam.X == 999) || (Cam.Y == 999))
@@ -619,7 +623,7 @@ namespace Laser_Build_1._0
                 //定位到Mark1点
                 Mark(Para_List.Parameter.Mark1);
                 //调用相机，获取对比的坐标信息
-                Common_Method.Delay_Time.Delay(200);//延时200ms
+                Thread.Sleep(200);//延时200ms
                 //Main.T_Client
                 Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(2));//触发拍照 
                 if ((Cam.X == 999) || (Cam.Y == 999))
@@ -651,7 +655,7 @@ namespace Laser_Build_1._0
                 //定位到Mark1点
                 Mark(Para_List.Parameter.Mark2);
                 //调用相机，获取对比的坐标信息
-                Common_Method.Delay_Time.Delay(200);//延时200ms
+                Thread.Sleep(200);//延时200ms
                 //Main.T_Client
                 Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(2));//触发拍照 
                 if ((Cam.X == 999) || (Cam.Y == 999))
@@ -682,7 +686,7 @@ namespace Laser_Build_1._0
                 //定位到Mark1点
                 Mark(Para_List.Parameter.Mark3);
                 //调用相机，获取对比的坐标信息
-                Common_Method.Delay_Time.Delay(200);//延时200ms
+                Thread.Sleep(200);//延时200ms
                 //Main.T_Client
                 Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(2));//触发拍照 
                 if ((Cam.X == 999) || (Cam.Y == 999))
@@ -748,7 +752,7 @@ namespace Laser_Build_1._0
                 //定位到ORG矫正点
                 Mark(new Vector(Para_List.Parameter.Rtc_Org.X + 100, Para_List.Parameter.Rtc_Org.Y + 100));
                 //调用相机，获取对比的坐标信息
-                Common_Method.Delay_Time.Delay(200);//延时200ms
+                Thread.Sleep(200);//延时200ms
                 //Main.T_Client
                 Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(2));//触发拍照 
                 if ((Cam.X == 999) || (Cam.Y == 999))

@@ -104,6 +104,12 @@
             this.Rtc_Affinity = new System.Windows.Forms.Button();
             this.Barrel_Distortion = new System.Windows.Forms.Button();
             this.Calibration_Target_RE = new System.Windows.Forms.Button();
+            this.Cutter_Comp = new System.Windows.Forms.ComboBox();
+            this.Cutter_R = new System.Windows.Forms.Label();
+            this.Cutter_Radius = new System.Windows.Forms.TextBox();
+            this.Start_Pos_Sel = new System.Windows.Forms.ComboBox();
+            this.Go_Cal_Point = new System.Windows.Forms.Button();
+            this.label26 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // button2
@@ -770,7 +776,7 @@
             // 
             // Cutter_Compensation
             // 
-            this.Cutter_Compensation.Location = new System.Drawing.Point(732, 800);
+            this.Cutter_Compensation.Location = new System.Drawing.Point(1287, 720);
             this.Cutter_Compensation.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Cutter_Compensation.Name = "Cutter_Compensation";
             this.Cutter_Compensation.Size = new System.Drawing.Size(154, 50);
@@ -845,11 +851,80 @@
             this.Calibration_Target_RE.UseVisualStyleBackColor = true;
             this.Calibration_Target_RE.Click += new System.EventHandler(this.Calibration_Target_RE_Click);
             // 
+            // Cutter_Comp
+            // 
+            this.Cutter_Comp.FormattingEnabled = true;
+            this.Cutter_Comp.Items.AddRange(new object[] {
+            "不补偿",
+            "钻孔",
+            "落料"});
+            this.Cutter_Comp.Location = new System.Drawing.Point(1394, 248);
+            this.Cutter_Comp.Name = "Cutter_Comp";
+            this.Cutter_Comp.Size = new System.Drawing.Size(121, 26);
+            this.Cutter_Comp.TabIndex = 115;
+            this.Cutter_Comp.SelectedIndexChanged += new System.EventHandler(this.Cutter_Comp_SelectedIndexChanged);
+            // 
+            // Cutter_R
+            // 
+            this.Cutter_R.AutoSize = true;
+            this.Cutter_R.Location = new System.Drawing.Point(1396, 173);
+            this.Cutter_R.Name = "Cutter_R";
+            this.Cutter_R.Size = new System.Drawing.Size(116, 18);
+            this.Cutter_R.TabIndex = 117;
+            this.Cutter_R.Text = "刀具半径 /mm\r\n";
+            // 
+            // Cutter_Radius
+            // 
+            this.Cutter_Radius.Location = new System.Drawing.Point(1394, 206);
+            this.Cutter_Radius.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Cutter_Radius.Name = "Cutter_Radius";
+            this.Cutter_Radius.Size = new System.Drawing.Size(121, 28);
+            this.Cutter_Radius.TabIndex = 116;
+            this.Cutter_Radius.TextChanged += new System.EventHandler(this.Cutter_Radius_TextChanged);
+            // 
+            // Start_Pos_Sel
+            // 
+            this.Start_Pos_Sel.FormattingEnabled = true;
+            this.Start_Pos_Sel.Items.AddRange(new object[] {
+            "原点起始",
+            "Mark矫正"});
+            this.Start_Pos_Sel.Location = new System.Drawing.Point(1394, 109);
+            this.Start_Pos_Sel.Name = "Start_Pos_Sel";
+            this.Start_Pos_Sel.Size = new System.Drawing.Size(121, 26);
+            this.Start_Pos_Sel.TabIndex = 118;
+            this.Start_Pos_Sel.SelectedIndexChanged += new System.EventHandler(this.Start_Pos_Sel_SelectedIndexChanged);
+            // 
+            // Go_Cal_Point
+            // 
+            this.Go_Cal_Point.Location = new System.Drawing.Point(732, 800);
+            this.Go_Cal_Point.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Go_Cal_Point.Name = "Go_Cal_Point";
+            this.Go_Cal_Point.Size = new System.Drawing.Size(154, 50);
+            this.Go_Cal_Point.TabIndex = 119;
+            this.Go_Cal_Point.Text = "定位矫正坐标";
+            this.Go_Cal_Point.UseVisualStyleBackColor = true;
+            this.Go_Cal_Point.Click += new System.EventHandler(this.Go_Cal_Point_Click);
+            // 
+            // label26
+            // 
+            this.label26.AutoSize = true;
+            this.label26.Location = new System.Drawing.Point(1396, 76);
+            this.label26.Name = "label26";
+            this.label26.Size = new System.Drawing.Size(116, 18);
+            this.label26.TabIndex = 120;
+            this.label26.Text = "起始位置选择";
+            // 
             // Dxf
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1550, 860);
+            this.Controls.Add(this.label26);
+            this.Controls.Add(this.Go_Cal_Point);
+            this.Controls.Add(this.Start_Pos_Sel);
+            this.Controls.Add(this.Cutter_R);
+            this.Controls.Add(this.Cutter_Radius);
+            this.Controls.Add(this.Cutter_Comp);
             this.Controls.Add(this.Calibration_Target_RE);
             this.Controls.Add(this.Barrel_Distortion);
             this.Controls.Add(this.Rtc_Affinity);
@@ -1015,5 +1090,11 @@
         private System.Windows.Forms.Button Rtc_Affinity;
         private System.Windows.Forms.Button Barrel_Distortion;
         private System.Windows.Forms.Button Calibration_Target_RE;
+        private System.Windows.Forms.ComboBox Cutter_Comp;
+        private System.Windows.Forms.Label Cutter_R;
+        private System.Windows.Forms.TextBox Cutter_Radius;
+        private System.Windows.Forms.ComboBox Start_Pos_Sel;
+        private System.Windows.Forms.Button Go_Cal_Point;
+        private System.Windows.Forms.Label label26;
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
@@ -109,7 +110,7 @@ namespace GTS_Fun
             Log.Commandhandler("Motion--停止轴运动", Gts_Return);
 
             //延时一段时间，等待电机稳定
-            Common_Method.Delay_Time.Delay(200);//200ms
+            Thread.Sleep(200);//200ms
 
             //触发回零
             //启动Home捕捉
@@ -205,7 +206,7 @@ namespace GTS_Fun
             Log.Commandhandler("Motion--停止轴运动", Gts_Return);
 
             //延时一段时间，等待电机稳定
-            Common_Method.Delay_Time.Delay(200);//200ms
+            Thread.Sleep(200);//200ms
             //位置清零            
             Gts_Return = MC.GT_ZeroPos(Axis, 1);
             Log.Commandhandler("Axis_Home----GT_ZeroPos", Gts_Return);
@@ -865,34 +866,85 @@ namespace GTS_Fun
             Line_FIFO(Tmp_X, Tmp_Y);//将直线插补数据写入
             //将前瞻数据压入控制器
             Gts_Return = MC.GT_CrdData(1, Crd_IntPtr, 0);
-            Log.Commandhandler("Line_Interpolation--将前瞻数据压入控制器", Gts_Return);          
+            Log.Commandhandler("Line_Interpolation--将前瞻数据压入控制器", Gts_Return);
 #endif
+#if DEBUG
+            string sdatetime = DateTime.Now.ToString("D");
+            string delimiter = ",";
+            string strHeader = "";
+            //保存的位置和文件名称
+            string File_Path = @"./\Config/" + "Gts_Ready " + sdatetime + ".csv";
+            strHeader += "原X坐标,原Y坐标,补偿后X坐标,补偿后Y坐标,补偿前后X差值,补偿前后Y差值,取值坐标X位置,取值坐标Y位置";
+            bool isExit = File.Exists(File_Path);
+            StreamWriter sw = new StreamWriter(File_Path, true, Encoding.GetEncoding("gb2312"));
+            if (!isExit)
+            {
+                sw.WriteLine(strHeader);
+            }
+            //output rows data
+            string strRowValue = "";
+            strRowValue += x + delimiter
+                            + y + delimiter
+                            + Tmp_X + delimiter
+                            + Tmp_Y + delimiter
+                            + (Tmp_X - x) + delimiter
+                            + (Tmp_Y - y) + delimiter
+                            + Tmp_m + delimiter
+                            + Tmp_n + delimiter;
+            sw.WriteLine(strRowValue);
+            sw.Close();
+#endif
+        }
+        public static void Gts_Ready_Test(decimal x, decimal y) 
+        {
 
-            //string sdatetime = DateTime.Now.ToString("D");
-            //string delimiter = ",";
-            //string strHeader = "";
-            ////保存的位置和文件名称
-            //string File_Path = @"./\Config/" + "Gts_Ready "+ sdatetime + ".csv";
-            //strHeader += "原X坐标,原Y坐标,补偿后X坐标,补偿后Y坐标,补偿前后X差值,补偿前后Y差值,取值坐标X位置,取值坐标Y位置";
-            //bool isExit = File.Exists(File_Path);
-            //StreamWriter sw = new StreamWriter(File_Path, true, Encoding.GetEncoding("gb2312"));
-            //if (!isExit)
-            //{
-            //    sw.WriteLine(strHeader);
-            //}
-            ////output rows data
-            //string strRowValue = "";
-            //strRowValue += x + delimiter
-            //                + y + delimiter
-            //                + Tmp_X + delimiter
-            //                + Tmp_Y + delimiter
-            //                + (Tmp_X - x) + delimiter
-            //                + (Tmp_Y - y) + delimiter
-            //                + Tmp_m + delimiter
-            //                + Tmp_n + delimiter;
-            //sw.WriteLine(strRowValue);
-            //sw.Close();
-            
+            //数据矫正
+            //临时定位变量
+            Int16 Tmp_m, Tmp_n;
+            Vector Tmp_Point = new Vector();
+            //获取落点
+            Tmp_m = Gts_Cal_Data_Resolve.Seek_X_Pos(x);
+            Tmp_n = Gts_Cal_Data_Resolve.Seek_Y_Pos(y);
+            //定义处理的变量
+            decimal Tmp_X = 0.0m;
+            decimal Tmp_Y = 0.0m;
+            if (Para_List.Parameter.Gts_Affinity_Type == 2)
+            {
+                Tmp_Point = new Vector(Gts_Cal_Data_Resolve.Get_Line_Fit_Coordinate(x, y, Fit_Matrices));
+                Tmp_X = Tmp_Point.X;
+                Tmp_Y = Tmp_Point.Y;
+            }
+            else
+            {
+                //终点计算
+                if (affinity_Matrices.Count > 1)
+                {
+                    Tmp_X = x * affinity_Matrices[Tmp_n * Para_List.Parameter.Gts_Affinity_Col + Tmp_m].Cos_Value + y * affinity_Matrices[Tmp_n * Para_List.Parameter.Gts_Affinity_Col + Tmp_m].Sin_Value + affinity_Matrices[Tmp_n * Para_List.Parameter.Gts_Affinity_Col + Tmp_m].Delta_X;
+                    Tmp_Y = y * affinity_Matrices[Tmp_n * Para_List.Parameter.Gts_Affinity_Col + Tmp_m].Cos_Value - x * affinity_Matrices[Tmp_n * Para_List.Parameter.Gts_Affinity_Col + Tmp_m].Sin_Value + affinity_Matrices[Tmp_n * Para_List.Parameter.Gts_Affinity_Col + Tmp_m].Delta_Y;
+
+                }
+                else if ((affinity_Matrices.Count > 0) && (affinity_Matrices.Count == 1))
+                {
+                    Tmp_X = x * affinity_Matrices[0].Cos_Value + y * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_X;
+                    Tmp_Y = y * affinity_Matrices[0].Cos_Value - x * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_Y;
+                }
+            }
+            Log.Info(string.Format("原坐标：X-{0}，Y-{1}，矫正后坐标：X-{2}，Y-{3}",x,y, Tmp_X, Tmp_Y));
+
+#if !DEBUG
+            //清除FIFO 0
+            Clear_FIFO();
+            //初始化FIFO 0前瞻模块
+            Gts_Return = MC.GT_InitLookAhead(1, 0, Convert.ToDouble(Para_List.Parameter.LookAhead_EvenTime), Convert.ToDouble(Para_List.Parameter.LookAhead_MaxAcc), 4096, ref crdData[0]);
+            Log.Commandhandler("Line_Interpolation--初始化FIFO 0前瞻模块", Gts_Return);
+            //直线插补定位
+            Line_FIFO(Tmp_X, Tmp_Y);//将直线插补数据写入
+            //将前瞻数据压入控制器
+            Gts_Return = MC.GT_CrdData(1, Crd_IntPtr, 0);
+            Log.Commandhandler("Line_Interpolation--将前瞻数据压入控制器", Gts_Return);
+#endif
+            //启动定位
+            Interpolation_Start();
 
         }
         //XY平台运动到指定点位

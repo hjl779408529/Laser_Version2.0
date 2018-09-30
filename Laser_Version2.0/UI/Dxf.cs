@@ -47,9 +47,6 @@ namespace Laser_Build_1._0
         }
 
         Display_Dxf display_dxf;//dxf文件显示
-
-        //定义图像中心点
-        decimal Pic_Center_x, Pic_Center_y;
         //定义文件名 
         string Dxf_filename = "sample.dxf";
        
@@ -126,6 +123,14 @@ namespace Laser_Build_1._0
             //坐标系定位坐标
             textBox23.Text = Convert.ToString(200);
             textBox22.Text = Convert.ToString(330);
+
+            //刀具半径
+            Cutter_Radius.Text = Para_List.Parameter.Cutter_Radius.ToString();
+            //刀具补偿类型
+            Cutter_Comp.SelectedIndex = Para_List.Parameter.Cutter_Type;
+            //选择起始加工位置
+            Start_Pos_Sel.SelectedIndex = Para_List.Parameter.Calibration_Type;
+
         }
         //线程函数
         private void Refresh_Timer_Elapsed_Thread(object sender, ElapsedEventArgs e)
@@ -202,8 +207,7 @@ namespace Laser_Build_1._0
         }
         private void Dxf_Open()
         {
-            int i = 0, j = 0;//循环数据使用
-            int Num = 0;//用于数据记录
+            int i = 0;//循环数据使用
 
             //检查文件是否存在
             FileInfo fileInfo = new FileInfo(Dxf_filename);
@@ -316,6 +320,9 @@ namespace Laser_Build_1._0
             Concat_List_Data.AddRange(LwPolyline_List_Data);
             Concat_List_Data.AddRange(Circle_List_Data);
 
+            //刀具补偿
+            Concat_List_Data = new List<List<Interpolation_Data>>(Data_Cal.Cutter_Compensation(Concat_List_Data));
+
             //for (i = 0; i < Concat_List_Data.Count; i++)
             //{
             //    richTextBox1.AppendText("序号：" + i + "\r\n");
@@ -387,12 +394,8 @@ namespace Laser_Build_1._0
                 //数据处理
                 Temp_interpolation_Data.Empty();
                 Temp_interpolation_Data = In_Data[i];
-                //Temp_interpolation_Data.End_x =-( (In_Data[i].End_x - Pic_Center_x) * Cos_Arc - (In_Data[i].End_y - Pic_Center_y) * Sin_Arc + Pic_Center_x + Para_List.Parameter.Delta_X);//相对于Pic_Center_x的坐标-
-                //Temp_interpolation_Data.End_y =-( (In_Data[i].End_y - Pic_Center_y) * Cos_Arc + (In_Data[i].End_x - Pic_Center_x) * Sin_Arc + Pic_Center_x + Para_List.Parameter.Delta_Y);//相对于Pic_Center_y的坐标-
-                //Temp_interpolation_Data.Center_Start_x =- (In_Data[i].Center_Start_x * Cos_Arc - In_Data[i].Center_Start_y * Sin_Arc);
-                //Temp_interpolation_Data.Center_Start_y =- (In_Data[i].Center_Start_y * Cos_Arc + In_Data[i].Center_Start_x * Sin_Arc);
-                Temp_interpolation_Data.End_x = ((In_Data[i].End_x - Pic_Center_x) * Cos_Arc - (In_Data[i].End_y - Pic_Center_y) * Sin_Arc + Pic_Center_x + Para_List.Parameter.Delta.X);//相对于Pic_Center_x的坐标-
-                Temp_interpolation_Data.End_y = ((In_Data[i].End_y - Pic_Center_y) * Cos_Arc + (In_Data[i].End_x - Pic_Center_x) * Sin_Arc + Pic_Center_x + Para_List.Parameter.Delta.Y);//相对于Pic_Center_y的坐标-
+                Temp_interpolation_Data.End_x = (In_Data[i].End_x * Cos_Arc - In_Data[i].End_y * Sin_Arc  + Para_List.Parameter.Delta.X);//相对于Pic_Center_x的坐标-
+                Temp_interpolation_Data.End_y = (In_Data[i].End_y * Cos_Arc + In_Data[i].End_x * Sin_Arc + Para_List.Parameter.Delta.Y);//相对于Pic_Center_y的坐标-
                 Temp_interpolation_Data.Center_Start_x = (In_Data[i].Center_Start_x * Cos_Arc - In_Data[i].Center_Start_y * Sin_Arc);
                 Temp_interpolation_Data.Center_Start_y = (In_Data[i].Center_Start_y * Cos_Arc + In_Data[i].Center_Start_x * Sin_Arc);
 
@@ -419,12 +422,8 @@ namespace Laser_Build_1._0
                     //数据处理
                     Temp_interpolation_Data.Empty();                    
                     Temp_interpolation_Data = In_Data[i][j];
-                    //Temp_interpolation_Data.End_x = -((In_Data[i][j].End_x - Pic_Center_x) * Cos_Arc - (In_Data[i][j].End_y - Pic_Center_y) * Sin_Arc + Pic_Center_x + Para_List.Parameter.Delta_X);//相对于Pic_Center_x的坐标-
-                    //Temp_interpolation_Data.End_y = -((In_Data[i][j].End_y - Pic_Center_y) * Cos_Arc + (In_Data[i][j].End_x - Pic_Center_x) * Sin_Arc + Pic_Center_x + Para_List.Parameter.Delta_Y);//相对于Pic_Center_y的坐标-
-                    //Temp_interpolation_Data.Center_Start_x = -(In_Data[i][j].Center_Start_x * Cos_Arc - In_Data[i][j].Center_Start_y * Sin_Arc);
-                    //Temp_interpolation_Data.Center_Start_y = -(In_Data[i][j].Center_Start_y * Cos_Arc + In_Data[i][j].Center_Start_x * Sin_Arc);
-                    Temp_interpolation_Data.End_x = ((In_Data[i][j].End_x - Pic_Center_x) * Cos_Arc - (In_Data[i][j].End_y - Pic_Center_y) * Sin_Arc + Pic_Center_x + Para_List.Parameter.Delta.X);//相对于Pic_Center_x的坐标-
-                    Temp_interpolation_Data.End_y = ((In_Data[i][j].End_y - Pic_Center_y) * Cos_Arc + (In_Data[i][j].End_x - Pic_Center_x) * Sin_Arc + Pic_Center_x + Para_List.Parameter.Delta.Y);//相对于Pic_Center_y的坐标-
+                    Temp_interpolation_Data.End_x = (In_Data[i][j].End_x * Cos_Arc - In_Data[i][j].End_y * Sin_Arc + Para_List.Parameter.Delta.X);//相对于Pic_Center_x的坐标-
+                    Temp_interpolation_Data.End_y = (In_Data[i][j].End_y * Cos_Arc + In_Data[i][j].End_x * Sin_Arc + Para_List.Parameter.Delta.Y);//相对于Pic_Center_y的坐标-
                     Temp_interpolation_Data.Center_Start_x = (In_Data[i][j].Center_Start_x * Cos_Arc - In_Data[i][j].Center_Start_y * Sin_Arc);
                     Temp_interpolation_Data.Center_Start_y = (In_Data[i][j].Center_Start_y * Cos_Arc + In_Data[i][j].Center_Start_x * Sin_Arc);
                     Temp_interpolation_List_Data.Add(new Interpolation_Data(Temp_interpolation_Data));
@@ -1196,7 +1195,7 @@ namespace Laser_Build_1._0
             {
                 for (int j = 0; j < Concat_List_Data[i].Count; j++)
                 {
-                    richTextBox1.AppendText("未刀具补偿 序号：" + j + "  Type：" + Concat_List_Data[i][j].Type + "  起点X：" + Concat_List_Data[i][j].Start_x + "  起点Y：：" + Concat_List_Data[i][j].Start_y + "  终点X：" + Concat_List_Data[i][j].End_x + "  终点Y：" + Concat_List_Data[i][j].End_y + "\r\n");
+                    richTextBox1.AppendText("未刀具补偿 序号：" + j + "  Type：" + Concat_List_Data[i][j].Type + "  起点X：" + Concat_List_Data[i][j].Start_x + "  起点Y：：" + Concat_List_Data[i][j].Start_y + "  终点X：" + Concat_List_Data[i][j].End_x + "  终点Y：" + Concat_List_Data[i][j].End_y + "  半径Radius：" + Concat_List_Data[i][j].Circle_radius + "\r\n");
                 }
             }
             Concat_List_Data = new List<List<Interpolation_Data>>(Data_Cal.Cutter_Compensation(Concat_List_Data));            
@@ -1204,7 +1203,7 @@ namespace Laser_Build_1._0
             {
                 for (int j = 0; j < Concat_List_Data[i].Count; j++)
                 {
-                    richTextBox1.AppendText("已刀具补偿 序号：" + j + "  Type：" + Concat_List_Data[i][j].Type + "  起点X：" + Concat_List_Data[i][j].Start_x + "  起点Y：：" + Concat_List_Data[i][j].Start_y + "  终点X：" + Concat_List_Data[i][j].End_x + "  终点Y：" + Concat_List_Data[i][j].End_y + "\r\n");
+                    richTextBox1.AppendText("已刀具补偿 序号：" + j + "  Type：" + Concat_List_Data[i][j].Type + "  起点X：" + Concat_List_Data[i][j].Start_x + "  起点Y：：" + Concat_List_Data[i][j].Start_y + "  终点X：" + Concat_List_Data[i][j].End_x + "  终点Y：" + Concat_List_Data[i][j].End_y + "  半径Radius：" + Concat_List_Data[i][j].Circle_radius + "\r\n");
                 }
             }
 
@@ -1307,6 +1306,35 @@ namespace Laser_Build_1._0
                 Cor_y = tmp;
             });
         }
+        //刀具半径
+        private void Cutter_Radius_TextChanged(object sender, EventArgs e)
+        {
+            this.Invoke((EventHandler)delegate
+            {
+                if (!decimal.TryParse(Cutter_Radius.Text, out decimal tmp))
+                {
+                    MessageBox.Show("请正确输入数字");
+                    return;
+                }
+                Para_List.Parameter.Cutter_Radius = tmp;
+            });
+        }
+        //刀具补偿类型
+        private void Cutter_Comp_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Para_List.Parameter.Cutter_Type = (short)Cutter_Comp.SelectedIndex;
+        }
+        //定位矫正坐标点
+        private void Go_Cal_Point_Click(object sender, EventArgs e)
+        {
+            GTS_Fun.Interpolation.Gts_Ready_Test(Cor_x, Cor_y);
+        }
+
+        private void Start_Pos_Sel_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Para_List.Parameter.Calibration_Type = (UInt16)Start_Pos_Sel.SelectedIndex;
+        }
+
         //定位坐标点
         private void button21_Click(object sender, EventArgs e)
         {

@@ -156,6 +156,8 @@ namespace Para_List
         private static decimal amp2_current;
         private static decimal prf;
         private static decimal pec;
+        //Mark矫正 与 不矫正
+        private static UInt16 calibration_type; 
 
         public static decimal Gts_Vel_reference { get => gts_vel_reference; set => gts_vel_reference = value; }
         public static decimal Gts_Acc_reference { get => gts_acc_reference; set => gts_acc_reference = value; }
@@ -261,6 +263,7 @@ namespace Para_List
         public static decimal Amp2_Current { get => amp2_current; set => amp2_current = value; }
         public static decimal PRF { get => prf; set => prf = value; }
         public static decimal PEC { get => pec; set => pec = value; }
+        public static UInt16 Calibration_Type { get => calibration_type; set => calibration_type = value; }
         //公开构造函数
         public Parameter() { }
     }
@@ -403,7 +406,8 @@ namespace Para_List
         private decimal amp2_current;
         private decimal prf;
         private decimal pec;
-
+        //Mark矫正 与 不矫正
+        private UInt16 calibration_type; //0--无Mark矫正，1--Mark矫正
         public decimal Gts_Vel_reference { get => gts_vel_reference; set => gts_vel_reference = value; }
         public decimal Gts_Acc_reference { get => gts_acc_reference; set => gts_acc_reference = value; }
         public decimal Gts_Pos_reference { get => gts_pos_reference; set => gts_pos_reference = value; }
@@ -507,6 +511,7 @@ namespace Para_List
         public decimal Amp2_Current { get => amp2_current; set => amp2_current = value; }
         public decimal PRF { get => prf; set => prf = value; }
         public decimal PEC { get => pec; set => pec = value; }
+        public UInt16 Calibration_Type { get => calibration_type; set => calibration_type = value; }
         //构造函数
         public Parameter_RW() { }
     } 
@@ -623,7 +628,8 @@ namespace Para_List
                 Amp1_Current = Para_List.Parameter.Amp1_Current,
                 Amp2_Current = Para_List.Parameter.Amp2_Current,
                 PRF = Para_List.Parameter.PRF,
-                PEC = Para_List.Parameter.PEC
+                PEC = Para_List.Parameter.PEC,
+                Calibration_Type = Para_List.Parameter.Calibration_Type
             };
 
             //二进制 序列化
@@ -763,6 +769,7 @@ namespace Para_List
                     Para_List.Parameter.Amp2_Current = parameter.Amp2_Current;
                     Para_List.Parameter.PRF = parameter.PRF;
                     Para_List.Parameter.PEC = parameter.PEC;
+                    Para_List.Parameter.Calibration_Type = parameter.Calibration_Type;
                 }
             }
         }

@@ -114,7 +114,6 @@ public struct Interpolation_Data
     public short Type;//插补代号：1-直线插补，2-圆弧插补（圆心描述），3-圆弧插补（半径描述，不可描述整圆）
     public short Lift_flag;//抬刀标志：0-抬刀，等待刀具抬起标志；1-刀具下刀切割标志
     public short Work;//工作区域选择，10-GTS，20-RTC
-    public short Repeat;//重复加工次数
     public decimal Start_x;//插补起点X坐标 保留参数
     public decimal Start_y;//插补起点Y坐标 保留参数
     public decimal End_x;//插补终点X坐标
@@ -136,7 +135,6 @@ public struct Interpolation_Data
         this.Type = Ini.Type;//插补代号：1-直线插补，2-圆弧插补（圆心描述），3-圆弧插补（半径描述，不可描述整圆）
         this.Lift_flag = Ini.Lift_flag;//抬刀标志：0-抬刀，等待刀具抬起标志；1-刀具下刀切割标志
         this.Work = Ini.Work;//工作区域选择，10-GTS，20-RTC
-        this.Repeat = Ini.Repeat;//重复加工次数
         this.Start_x = Ini.Start_x;//插补起点X坐标 保留参数
         this.Start_y = Ini.Start_y;//插补起点Y坐标 保留参数
         this.End_x = Ini.End_x;//插补终点X坐标
@@ -160,7 +158,6 @@ public struct Interpolation_Data
         Type = 0;//插补代号：1-直线插补，2-圆弧插补（圆心描述），3-圆弧插补（半径描述，不可描述整圆）
         Lift_flag = 0;//抬刀标志：0-抬刀，等待刀具抬起标志；1-刀具下刀切割标志
         Work=0;//工作区域选择，10-GTS，20-RTC
-        Repeat = 0;//重复加工次数
         Start_x = 0m;//插补起点X坐标
         Start_y = 0m;//插补起点Y坐标
         End_x = 0m;//插补终点X坐标
@@ -307,6 +304,8 @@ public struct Affinity_Rate
         this.angle = 0;
     }
 }
+//类比 Thread.Sleep(200);
+//尽量简化程序 使用现成的工具或轮子
 namespace Common_Method
 {
     class Delay_Time

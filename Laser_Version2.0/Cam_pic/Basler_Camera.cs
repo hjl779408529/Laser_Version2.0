@@ -29,9 +29,6 @@ namespace Laser_Build_1._0
 
         //定义拍摄完成标志
         private bool Flag = false;
-        //定义输出值
-        public decimal Cam_X;//计算的图像输出X坐标
-        public decimal Cam_Y;//计算的图像输出Y坐标
         Mat Img;        
         //构造函数
         public Basler_Camera()
