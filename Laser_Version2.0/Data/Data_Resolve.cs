@@ -64,7 +64,35 @@ namespace Laser_Build_1._0
 
             //返回读取结果
             return Result;
-        }        
+        }
+        /**
+         * 将一个list均分成n个list
+         * @param source
+         * @return
+         */
+        public List<List<T>> AverageAssign<T>(List<T> source, int n)
+        {
+            List<List<T>> result = new List<List<T>>();
+            int remaider = source.Count % n;  //(先计算出余数)
+            int number = source.Count / n;  //然后是商
+            int offset = 0;//偏移量
+            for (int i = 0; i < n; i++)
+            {
+                List<T> value = null;
+                if (remaider > 0)
+                {
+                    value =new List<T>(source.Skip(i * number + offset).Take(number + 1).ToList());
+                    remaider--;
+                    offset++;
+                }
+                else
+                {
+                    value = new List<T>(source.Skip(i * number + offset).Take(number).ToList()); 
+                }
+                result.Add(new List<T>(value));
+            }
+            return result;
+        }
         //处理Dxf得到圆弧和线段数据
         public List<Entity_Data> Resolve_Arc_Line(DxfDocument dxf)
         {
@@ -103,13 +131,13 @@ namespace Laser_Build_1._0
                     //提交进入Arc_Data
                     Result.Add(new Entity_Data(Temp_Entity_Data));
                     Temp_Entity_Data.Empty();
-                }
+                 }
             }
             //直线数据读取
             for (i = 0; i < dxf.Lines.Count; i++)
             {
                 if (dxf.Lines[i].Layer.Name == "Laser")
-                {
+                {                    
                     Temp_Entity_Data.Type = 1;
                     //起点计算
                     Temp_Entity_Data.Start_x = Convert.ToDecimal(dxf.Lines[i].StartPoint.X);
@@ -122,6 +150,111 @@ namespace Laser_Build_1._0
                     Result.Add(new Entity_Data(Temp_Entity_Data));
                     Temp_Entity_Data.Empty();
                 }
+            }
+            //返回结果
+            return Result;
+        }
+        //处理Dxf得到圆弧和线段数据
+        public List<Entity_Data> Resolve_Arc_Line_ex(DxfDocument dxf) 
+        {
+            //最终结果
+            List<Entity_Data> Result = new List<Entity_Data>();
+            //分段数据
+            int Num = 0;
+            //提取圆弧数据
+            if (dxf.Arcs.Count >=500)
+            {
+                Num = 10;
+            }
+            else
+            {
+                Num = 1;
+            }
+            //拆分数据
+            List<List<Arc>> Dxf_Arc =new List<List<Arc>>(AverageAssign<Arc>(new List<Arc>(dxf.Arcs),Num));
+            //建立圆弧拆分数据并行处理数据结果
+            List<Entity_Data>[] Arc_Result = new List<Entity_Data>[Num];
+            //圆弧数据提取
+            Parallel.For(0, Dxf_Arc.Count, Arc_i => {
+                Arc_Result[Arc_i] = new List<Entity_Data>();
+                for (int i = 0; i < Dxf_Arc[Arc_i].Count; i++)
+                {
+                    if (Dxf_Arc[Arc_i][i].Layer.Name == "Laser")
+                    {
+                        Entity_Data Temp_Entity_Data = new Entity_Data();
+                        Temp_Entity_Data.Type = 2;//圆弧
+                        //起点计算
+                        Temp_Entity_Data.Start_x = Convert.ToDecimal(Dxf_Arc[Arc_i][i].StartPoint.X);
+                        Temp_Entity_Data.Start_y = Convert.ToDecimal(Dxf_Arc[Arc_i][i].StartPoint.Y);
+                        //终点计算
+                        Temp_Entity_Data.End_x = Convert.ToDecimal(Dxf_Arc[Arc_i][i].EndPoint.X);
+                        Temp_Entity_Data.End_y = Convert.ToDecimal(Dxf_Arc[Arc_i][i].EndPoint.Y);
+                        //起始和终止角度提取
+                        Temp_Entity_Data.Cir_Start_Angle = Convert.ToDecimal(Dxf_Arc[Arc_i][i].StartAngle);
+                        if (Temp_Entity_Data.Cir_Start_Angle >= 359.99m)
+                        {
+                            Temp_Entity_Data.Cir_Start_Angle = 0.0m;
+                        }
+                        Temp_Entity_Data.Cir_End_Angle = Convert.ToDecimal(Dxf_Arc[Arc_i][i].EndAngle);
+                        if (Temp_Entity_Data.Cir_End_Angle <= 0.01m)
+                        {
+                            Temp_Entity_Data.Cir_End_Angle = 360.0m;
+                        }
+                        //圆心计算
+                        Temp_Entity_Data.Center_x = Convert.ToDecimal(Dxf_Arc[Arc_i][i].Center.X);
+                        Temp_Entity_Data.Center_y = Convert.ToDecimal(Dxf_Arc[Arc_i][i].Center.Y);
+                        Temp_Entity_Data.Circle_radius = Convert.ToDecimal(Dxf_Arc[Arc_i][i].Radius);
+                        //提交进入Arc_Data
+                        Arc_Result[Arc_i].Add(new Entity_Data(Temp_Entity_Data));
+
+                    }
+                }
+
+            });
+            //追加圆弧数据到Result
+            for (int Arc_j=0;Arc_j<Num;Arc_j++)
+            {
+                Result.AddRange(Arc_Result[Arc_j]);
+            }
+
+            //提取直线数据
+            if (dxf.Lines.Count >= 500)
+            {
+                Num = 10;
+            }
+            else
+            {
+                Num = 1;
+            }
+            //拆分数据
+            List<List<Line>> Dxf_Line = new List<List<Line>>(AverageAssign<Line>(new List<Line>(dxf.Lines), Num));
+            //建立直线拆分数据并行处理数据结果
+            List<Entity_Data>[] Line_Result = new List<Entity_Data>[Num];
+            //直线数据提取
+            Parallel.For(0, Dxf_Line.Count, Line_i => {
+                Line_Result[Line_i] = new List<Entity_Data>();
+                for (int i = 0; i < Dxf_Line[Line_i].Count; i++)
+                {
+                    if (Dxf_Line[Line_i][i].Layer.Name == "Laser")
+                    {
+                        Entity_Data Temp_Entity_Data = new Entity_Data();
+                        Temp_Entity_Data.Type = 1;//直线
+                        //起点计算
+                        Temp_Entity_Data.Start_x = Convert.ToDecimal(Dxf_Line[Line_i][i].StartPoint.X);
+                        Temp_Entity_Data.Start_y = Convert.ToDecimal(Dxf_Line[Line_i][i].StartPoint.Y);
+                        //终点计算
+                        Temp_Entity_Data.End_x = Convert.ToDecimal(Dxf_Line[Line_i][i].EndPoint.X);
+                        Temp_Entity_Data.End_y = Convert.ToDecimal(Dxf_Line[Line_i][i].EndPoint.Y);
+                        //提交进入Line_Data
+                        Line_Result[Line_i].Add(new Entity_Data(Temp_Entity_Data));
+                    }
+                }
+
+            });
+            //追加直线数据到Result
+            for (int Line_j = 0; Line_j < Num; Line_j++)
+            {
+                Result.AddRange(Line_Result[Line_j]);
             }
             //返回结果
             return Result;
@@ -477,8 +610,242 @@ namespace Laser_Build_1._0
         }
 
         /***************************************************轨迹生成***************************************************************/
-        //数据处理 生成Arc_Line整合数据  振镜和平台联合加工
         public List<List<Interpolation_Data>> Integrate_Arc_Line(List<Entity_Data> Arc_Line_Datas)
+        {
+            //排序
+            Arc_Line_Datas = Arc_Line_Datas.OrderBy(a => a.Start_x).ThenBy(a =>a.Start_y).ToList();
+            //结果变量
+            List<List<Interpolation_Data>> Result = new List<List<Interpolation_Data>>();
+            List<Interpolation_Data> Single_Data = new List<Interpolation_Data>(); //辅助运算 用途:提取顺序的衔接和处理
+            //临时变量
+            List<Interpolation_Data> Temp_List_Data = new List<Interpolation_Data>();
+            Interpolation_Data Temp_Data = new Interpolation_Data();
+            int i = 0;
+            int Num = 0;
+            int Del_Num_01 = 0;
+            bool Del_Flag_01 = false;
+            int Del_Num_02 = 0;
+            bool Del_Flag_02 = false;
+            //初始清除
+            Single_Data.Clear();
+            Temp_List_Data.Clear();
+            Temp_Data.Empty();
+
+            //处理Line_Arc生成加工数据 初始数据  属于切入加工起点，故强制使用
+            //直线插补走刀
+            //强制生成独立的 List<Interpolation_Data>，并将其写入独立运行数据块 List<List<Interpolation_Data>>
+            if (Arc_Line_Datas.Count > 0)
+            {
+                //选择任意切入点
+                Temp_Data.Type = 1;//直线插补
+                Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
+                Temp_Data.Lift_flag = 1;//抬刀标志
+                //强制约束接入点为直线
+                if (Arc_Line_Datas.Min(o => o.Type) == 1)
+                {
+                    Parallel.For(0, Arc_Line_Datas.Count,(Index,Sta)=> 
+                    {
+                        if (Arc_Line_Datas[Index].Type == 1)
+                        {
+                            Temp_Data.End_x = Arc_Line_Datas[Index].Start_x;
+                            Temp_Data.End_y = Arc_Line_Datas[Index].Start_y;
+                            Sta.Stop();
+                        }
+                    });
+                }
+                else
+                {
+                    Temp_Data.End_x = Arc_Line_Datas[0].Start_x;
+                    Temp_Data.End_y = Arc_Line_Datas[0].Start_y;
+                }
+
+                //提交进入Arc_Data
+                Single_Data.Add(new Interpolation_Data(Temp_Data));
+                //整合数据生成代码
+                Temp_List_Data.Add(new Interpolation_Data(Temp_Data));//追加数据
+                Result.Add(new List<Interpolation_Data>(Temp_List_Data));//追加数据
+
+                //清空数据
+                Temp_Data.Empty();
+                Temp_List_Data.Clear();
+
+                //整理数据
+                do
+                {
+                    Num = Arc_Line_Datas.Count;//记录当前Arc_Line_Datas.Count,用于判断数据是否处理完或封闭寻找结束
+                    Del_Num_01 = 0;
+                    Del_Flag_01 = false;
+                    Del_Num_02 = 0;
+                    Del_Flag_02 = false;
+                    Parallel.For(0, Arc_Line_Datas.Count, (Pal_i, Pal_Sta) =>
+                    {
+                        if (Differ_Err(Single_Data[Single_Data.Count - 1].End_x, Single_Data[Single_Data.Count - 1].End_y, Arc_Line_Datas[Pal_i].End_x, Arc_Line_Datas[Pal_i].End_y))//当前插补终点是 数据处理终点 同CAD文件规定方向相反
+                        {                            
+                            Del_Num_01 = Pal_i;
+                            Del_Flag_01 = true;
+                            Pal_Sta.Stop();
+                        }
+                        else if (Differ_Err(Single_Data[Single_Data.Count - 1].End_x, Single_Data[Single_Data.Count - 1].End_y, Arc_Line_Datas[Pal_i].Start_x, Arc_Line_Datas[Pal_i].Start_y)) //当前插补终点是 数据处理起点 同CAD文件规定方向相同
+                        {                            
+                            Del_Num_02 = Pal_i;
+                            Del_Flag_02 = true;
+                            Pal_Sta.Stop();
+                        }
+                    });
+                    //数据处理
+                    if (Del_Flag_01)
+                    {
+                        Temp_Data.Lift_flag = 0;//抬刀标志
+                        Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
+                                            //插补起点坐标
+                        Temp_Data.Start_x = Arc_Line_Datas[Del_Num_01].End_x;
+                        Temp_Data.Start_y = Arc_Line_Datas[Del_Num_01].End_y;
+                        //插补终点坐标
+                        Temp_Data.End_x = Arc_Line_Datas[Del_Num_01].Start_x;
+                        Temp_Data.End_y = Arc_Line_Datas[Del_Num_01].Start_y;
+
+                        if (Arc_Line_Datas[Del_Num_01].Type == 1)//直线
+                        {
+                            Temp_Data.Type = 1;//直线插补
+                        }
+                        else if (Arc_Line_Datas[Del_Num_01].Type == 2)//圆弧
+                        {
+                            Temp_Data.Type = 2;//圆弧插补
+                                               //圆弧插补 圆心坐标 减去 插补起点坐标
+                            Temp_Data.Center_Start_x = Temp_Data.Center_x - Temp_Data.Start_x;
+                            Temp_Data.Center_Start_y = Temp_Data.Center_y - Temp_Data.Start_y;
+                            //计算圆弧角度
+                            Temp_Data.Angle = Arc_Line_Datas[Del_Num_01].Cir_End_Angle - Arc_Line_Datas[Del_Num_01].Cir_Start_Angle;
+                            //圆弧方向
+                            Temp_Data.Circle_dir = 0;
+                            //圆弧圆心
+                            Temp_Data.Center_x = Arc_Line_Datas[Del_Num_01].Center_x;
+                            Temp_Data.Center_y = Arc_Line_Datas[Del_Num_01].Center_y;
+                            //圆弧半径
+                            Temp_Data.Circle_radius = Arc_Line_Datas[Del_Num_01].Circle_radius;
+                        }
+
+                        //提交进入Arc_Data
+                        Single_Data.Add(new Interpolation_Data(Temp_Data));
+
+                        //整合数据生成代码
+                        Temp_List_Data.Add(new Interpolation_Data(Temp_Data));//追加数据
+
+                        //清空数据
+                        Temp_Data.Empty();
+                        //删除数据
+                        Arc_Line_Datas.RemoveAt(Del_Num_01);
+                        //清除标志
+                        Del_Num_01 = 0;
+                        Del_Flag_01 = false;
+                        Del_Num_02 = 0;
+                        Del_Flag_02 = false;
+                    }
+                    else if (!Del_Flag_01 && Del_Flag_02)
+                    {
+                        Temp_Data.Lift_flag = 0;//抬刀标志
+                        Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
+                                            //插补起点坐标
+                        Temp_Data.Start_x = Arc_Line_Datas[Del_Num_02].Start_x;
+                        Temp_Data.Start_y = Arc_Line_Datas[Del_Num_02].Start_y;
+                        //插补终点坐标
+                        Temp_Data.End_x = Arc_Line_Datas[Del_Num_02].End_x;
+                        Temp_Data.End_y = Arc_Line_Datas[Del_Num_02].End_y;
+
+                        if (Arc_Line_Datas[Del_Num_02].Type == 1)//直线
+                        {
+                            Temp_Data.Type = 1;//直线插补 
+                        }
+                        else if (Arc_Line_Datas[Del_Num_02].Type == 2)//圆弧
+                        {
+                            Temp_Data.Type = 2;//圆弧插补
+                                               //圆弧插补 圆心坐标 减去 插补起点坐标
+                            Temp_Data.Center_Start_x = Temp_Data.Center_x - Temp_Data.Start_x;
+                            Temp_Data.Center_Start_y = Temp_Data.Center_y - Temp_Data.Start_y;
+                            //计算圆弧角度
+                            Temp_Data.Angle = Arc_Line_Datas[Del_Num_02].Cir_Start_Angle - Arc_Line_Datas[Del_Num_02].Cir_End_Angle;
+                            //圆弧方向
+                            Temp_Data.Circle_dir = 1;
+                            //圆弧圆心
+                            Temp_Data.Center_x = Arc_Line_Datas[Del_Num_02].Center_x;
+                            Temp_Data.Center_y = Arc_Line_Datas[Del_Num_02].Center_y;
+                            //圆弧半径
+                            Temp_Data.Circle_radius = Arc_Line_Datas[Del_Num_02].Circle_radius;
+                        }
+                        //提交进入Arc_Data
+                        Single_Data.Add(new Interpolation_Data(Temp_Data));
+                        //整合数据生成代码
+                        Temp_List_Data.Add(new Interpolation_Data(Temp_Data));//追加数据                                                                              
+                        Temp_Data.Empty();//清空数据
+
+                        //删除数据
+                        Arc_Line_Datas.RemoveAt(Del_Num_02);
+                        //清除标志
+                        Del_Num_01 = 0;
+                        Del_Flag_01 = false;
+                        Del_Num_02 = 0;
+                        Del_Flag_02 = false;
+                    }
+
+                    //寻找结束点失败，意味着重新开始新的 线段或圆弧
+                    if ((Arc_Line_Datas.Count != 0) && (Num != 0) && (Num == Arc_Line_Datas.Count))
+                    {
+                        //整合数据生成代码 当前结束的封闭图形加工数据
+                        Result.Add(new List<Interpolation_Data>(Temp_List_Data));//追加数据
+                        //清空数据
+                        Temp_Data.Empty();
+                        Temp_List_Data.Clear();
+
+                        //跳刀直接使用直线插补走刀
+                        //插补进入新的目标起点
+                        Temp_Data.Type = 1;//直线插补
+                        Temp_Data.Lift_flag = 1;//抬刀标志
+                        Temp_Data.Work = 10;//10-Gts加工，20-Rtc加工
+                        //强制约束接入点为直线
+                        if (Arc_Line_Datas.Min(o => o.Type) == 1)
+                        {
+                            Parallel.For(0, Arc_Line_Datas.Count, (Index, Sta) =>
+                            {
+                                if (Arc_Line_Datas[Index].Type == 1)
+                                {
+                                    Temp_Data.End_x = Arc_Line_Datas[Index].Start_x;
+                                    Temp_Data.End_y = Arc_Line_Datas[Index].Start_y;
+                                    Sta.Stop();
+                                }
+                            });
+                        }
+                        else
+                        {
+                            Temp_Data.End_x = Arc_Line_Datas[0].Start_x;
+                            Temp_Data.End_y = Arc_Line_Datas[0].Start_y;
+                        }
+
+                        //提交进入Arc_Data
+                        Single_Data.Add(new Interpolation_Data(Temp_Data));
+
+                        //整合数据生成代码
+                        Temp_List_Data.Add(new Interpolation_Data(Temp_Data));//追加数据
+                        Result.Add(new List<Interpolation_Data>(Temp_List_Data));//追加数据
+
+                        //清空数据
+                        Temp_Data.Empty();
+                        Temp_List_Data.Clear();
+                    }
+                    else if ((Arc_Line_Datas.Count == 0) && (Num == 1))
+                    {
+                        //整合数据生成代码 当前结束的封闭图形加工数据
+                        Result.Add(new List<Interpolation_Data>(Temp_List_Data));//追加数据
+                        //清空数据
+                        Temp_List_Data.Clear();
+                    }
+
+                } while (Arc_Line_Datas.Count > 0);//实体Line_Arc数据未清空完
+            }
+            //返回结果
+            return Result;
+        }
+        //数据处理 生成Arc_Line整合数据  振镜和平台联合加工
+        public List<List<Interpolation_Data>> Integrate_Arc_Line_es(List<Entity_Data> Arc_Line_Datas)
         {
             //结果变量
             List<List<Interpolation_Data>> Result = new List<List<Interpolation_Data>>();
@@ -2856,7 +3223,27 @@ namespace Laser_Build_1._0
         //坐标误差容许判断
         private bool Differ_Err(decimal x1, decimal y1, decimal x2, decimal y2)
         {
-            if ((decimal)Math.Sqrt((double)((x1 - x2) * (x1 - x2)) + (double)((y1 - y2) * (y1 - y2))) <= Para_List.Parameter.Pos_Tolerance)                
+            if (Math.Sqrt((double)((x1 - x2) * (x1 - x2)) + (double)((y1 - y2) * (y1 - y2))) <= (double)Para_List.Parameter.Pos_Tolerance)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+            //if ((x1 == x2) && (y1 == y2))
+            //{
+            //    return true;
+            //}
+            //else
+            //{
+            //    return false;
+            //}
+        }
+        //坐标误差容许判断
+        private bool Differ_Err(Vector Point1, Vector Point2)
+        {
+            if ((Point1.X == Point2.X) && (Point1.Y == Point2.Y))
             {
                 return true;
             }

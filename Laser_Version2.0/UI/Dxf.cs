@@ -131,6 +131,10 @@ namespace Laser_Build_1._0
             //选择起始加工位置
             Start_Pos_Sel.SelectedIndex = Para_List.Parameter.Calibration_Type;
 
+            //加工重复次数
+            Rtc_Repeat_Num.Text = Para_List.Parameter.Rtc_Repeat.ToString();
+            Gts_Repeat_Num.Text = Para_List.Parameter.Gts_Repeat.ToString();
+
         }
         //线程函数
         private void Refresh_Timer_Elapsed_Thread(object sender, ElapsedEventArgs e)
@@ -244,58 +248,56 @@ namespace Laser_Build_1._0
             }
 
             // the dxf has been properly loaded, let's show some information about it
-            richTextBox1.AppendText("FILE NAME:" + Dxf_filename + "\r\n");
-            richTextBox1.AppendText("FILE VERSION: " + dxf.DrawingVariables.AcadVer + "\r\n");
-            richTextBox1.AppendText("FILE COMMENTS: " + dxf.Comments.Count + "\r\n");
-            foreach (var o in dxf.Comments)//遍历DXF中的Comments
-            {
-                richTextBox1.AppendText(o + "\r\n");
-            }
+            //richTextBox1.AppendText("FILE NAME:" + Dxf_filename + "\r\n");
+            //richTextBox1.AppendText("FILE VERSION: " + dxf.DrawingVariables.AcadVer + "\r\n");
+            //richTextBox1.AppendText("FILE COMMENTS: " + dxf.Comments.Count + "\r\n");
+            //foreach (var o in dxf.Comments)//遍历DXF中的Comments
+            //{
+            //    richTextBox1.AppendText(o + "\r\n");
+            //}
 
             // the entities lists contain the geometry that has a graphical representation in the drawing across all layouts,
             // to get the entities that belongs to a specific layout you can get the references through the Layouts.GetReferences(name)
             // or check the EntityObject.Owner.Record.Layout property
-            richTextBox1.AppendText(EntityType.Arc + "--圆弧--count: " + dxf.Arcs.Count + "\r\n");//圆弧
-            richTextBox1.AppendText(EntityType.AttributeDefinition + "--count: " + dxf.AttributeDefinitions.Count + "\r\n");
-            richTextBox1.AppendText(EntityType.Circle + "--圆--count: " + dxf.Circles.Count + "\r\n");//圆
-            richTextBox1.AppendText(EntityType.Ellipse + "--count: " + dxf.Ellipses.Count + "\r\n");
-            richTextBox1.AppendText(EntityType.Face3D + "--count: " + dxf.Faces3d.Count + "\r\n");
-            richTextBox1.AppendText(EntityType.Hatch + "--count: " + dxf.Hatches.Count + "\r\n");
-            richTextBox1.AppendText(EntityType.Image + "--count: " + dxf.Images.Count + "\r\n");
-            richTextBox1.AppendText(EntityType.Insert + "--count: " + dxf.Inserts.Count + "\r\n");
-            richTextBox1.AppendText(EntityType.Leader + "--count: " + dxf.Leaders.Count + "\r\n");
-            richTextBox1.AppendText(EntityType.LightWeightPolyline + "--多边形--count: " + dxf.LwPolylines.Count + "\r\n");//多边形
-            richTextBox1.AppendText(EntityType.Line + "--直线--count: " + dxf.Lines.Count + "\r\n");//直线
-            richTextBox1.AppendText(EntityType.Mesh + "--count: " + dxf.Meshes.Count + "\r\n");
-            richTextBox1.AppendText(EntityType.MLine + "--count: " + dxf.MLines.Count + "\r\n");
-            richTextBox1.AppendText(EntityType.MText + "--count: " + dxf.MTexts.Count + "\r\n");
-            richTextBox1.AppendText(EntityType.Point + "--count: " + dxf.Points.Count + "\r\n");
-            richTextBox1.AppendText(EntityType.PolyfaceMesh + "--count: " + dxf.PolyfaceMeshes.Count + "\r\n");
-            richTextBox1.AppendText(EntityType.Polyline + "--count: " + dxf.Polylines.Count + "\r\n");
-            richTextBox1.AppendText(EntityType.Solid + "--count: " + dxf.Solids.Count + "\r\n");
-            richTextBox1.AppendText(EntityType.Spline + "--count: " + dxf.Splines.Count + "\r\n");
-            richTextBox1.AppendText(EntityType.Text + "--count: " + dxf.Texts.Count + "\r\n");
-            richTextBox1.AppendText(EntityType.Ray + "--count: " + dxf.Rays.Count + "\r\n");
-            richTextBox1.AppendText(EntityType.Underlay + "--count: " + dxf.Underlays.Count + "\r\n");
-            richTextBox1.AppendText(EntityType.Viewport + "--count: " + dxf.Viewports.Count + "\r\n");
-            richTextBox1.AppendText(EntityType.Wipeout + "--count: " + dxf.Wipeouts.Count + "\r\n");
-            richTextBox1.AppendText(EntityType.XLine + "--count: " + dxf.XLines.Count + "\r\n");
-
-
-            //图层
-            richTextBox1.AppendText( "图层--count: " + dxf.Layers.Count + "\r\n");//图层
-            foreach (var o in dxf.Layers)
-            {
-                richTextBox1.AppendText("图层Name: " + o.Name + "\r\n");//图层名称       
-            };            
-
+            //richTextBox1.AppendText(EntityType.Arc + "--圆弧--count: " + dxf.Arcs.Count + "\r\n");//圆弧
+            //richTextBox1.AppendText(EntityType.AttributeDefinition + "--count: " + dxf.AttributeDefinitions.Count + "\r\n");
+            //richTextBox1.AppendText(EntityType.Circle + "--圆--count: " + dxf.Circles.Count + "\r\n");//圆
+            //richTextBox1.AppendText(EntityType.Ellipse + "--count: " + dxf.Ellipses.Count + "\r\n");
+            //richTextBox1.AppendText(EntityType.Face3D + "--count: " + dxf.Faces3d.Count + "\r\n");
+            //richTextBox1.AppendText(EntityType.Hatch + "--count: " + dxf.Hatches.Count + "\r\n");
+            //richTextBox1.AppendText(EntityType.Image + "--count: " + dxf.Images.Count + "\r\n");
+            //richTextBox1.AppendText(EntityType.Insert + "--count: " + dxf.Inserts.Count + "\r\n");
+            //richTextBox1.AppendText(EntityType.Leader + "--count: " + dxf.Leaders.Count + "\r\n");
+            //richTextBox1.AppendText(EntityType.LightWeightPolyline + "--多边形--count: " + dxf.LwPolylines.Count + "\r\n");//多边形
+            //richTextBox1.AppendText(EntityType.Line + "--直线--count: " + dxf.Lines.Count + "\r\n");//直线
+            //richTextBox1.AppendText(EntityType.Mesh + "--count: " + dxf.Meshes.Count + "\r\n");
+            //richTextBox1.AppendText(EntityType.MLine + "--count: " + dxf.MLines.Count + "\r\n");
+            //richTextBox1.AppendText(EntityType.MText + "--count: " + dxf.MTexts.Count + "\r\n");
+            //richTextBox1.AppendText(EntityType.Point + "--count: " + dxf.Points.Count + "\r\n");
+            //richTextBox1.AppendText(EntityType.PolyfaceMesh + "--count: " + dxf.PolyfaceMeshes.Count + "\r\n");
+            //richTextBox1.AppendText(EntityType.Polyline + "--count: " + dxf.Polylines.Count + "\r\n");
+            //richTextBox1.AppendText(EntityType.Solid + "--count: " + dxf.Solids.Count + "\r\n");
+            //richTextBox1.AppendText(EntityType.Spline + "--count: " + dxf.Splines.Count + "\r\n");
+            //richTextBox1.AppendText(EntityType.Text + "--count: " + dxf.Texts.Count + "\r\n");
+            //richTextBox1.AppendText(EntityType.Ray + "--count: " + dxf.Rays.Count + "\r\n");
+            //richTextBox1.AppendText(EntityType.Underlay + "--count: " + dxf.Underlays.Count + "\r\n");
+            //richTextBox1.AppendText(EntityType.Viewport + "--count: " + dxf.Viewports.Count + "\r\n");
+            //richTextBox1.AppendText(EntityType.Wipeout + "--count: " + dxf.Wipeouts.Count + "\r\n");
+            //richTextBox1.AppendText(EntityType.XLine + "--count: " + dxf.XLines.Count + "\r\n");
+            ////图层
+            //richTextBox1.AppendText( "图层--count: " + dxf.Layers.Count + "\r\n");//图层
+            //foreach (var o in dxf.Layers)
+            //{
+            //    richTextBox1.AppendText("图层Name: " + o.Name + "\r\n");//图层名称       
+            //};            
+            richTextBox1.AppendText(Cal_Elapse_Time.Get_Current_Time(2) + "  数据提取中！！！！" + "\r\n");
             //建立临时数据存储组 和数据矫正
             List<Entity_Data> Arc_Line_Entity_Data = new List<Entity_Data>(Data_Cal.Calibration_Entity(Data_Cal.Resolve_Arc_Line(dxf), Para_List.Parameter.Trans_Affinity));//提取圆弧直线数据
             List<Entity_Data> Circle_Entity_Data = new List<Entity_Data>(Data_Cal.Calibration_Entity(Data_Cal.Resolve_Circle(dxf), Para_List.Parameter.Trans_Affinity));//提取圆数据
             //List<Entity_Data> LwPolylines_Entity_Data = new List<Entity_Data>(Data_Cal.Calibration_Entity(Data_Cal.Resolve_LightWeightPolyline(dxf), Para_List.Parameter.Trans_Affinity)); //提取多边形数据            
             List < List <Entity_Data> >  LwPolylines_Entity_Data = new List<List<Entity_Data>> (Data_Cal.Calibration_List_Entity(Data_Cal.Resolve_LWPolyline(dxf), Para_List.Parameter.Trans_Affinity)); //提取多边形数据            
             Mark_Circle_Entity_Data = new List<Entity_Data>(Data_Cal.Resolve_Mark_Point(dxf));//提取Mark点数据
-
+            richTextBox1.AppendText(Cal_Elapse_Time.Get_Current_Time(2) + "  数据提取完成！！！！" + "\r\n");
             ////建立临时
             //List<Interpolation_Data> temp_intepolation_Dat = new List<Interpolation_Data>();
             //for (j = 0; j < Arc_Line_Entity_Data.Count; j++)
@@ -303,11 +305,11 @@ namespace Laser_Build_1._0
             //    richTextBox1.AppendText("未矫正 序号：" + j + "  Type：" + Arc_Line_Entity_Data[j].Type + "  起点X：" + Arc_Line_Entity_Data[j].Start_x + "  起点Y：：" + Arc_Line_Entity_Data[j].Start_y + "  终点X：" + Arc_Line_Entity_Data[j].End_x + "  终点Y：" + Arc_Line_Entity_Data[j].End_y + "\r\n");
             //}
             //圆弧直线数据矫正
-            //for (j = 0; j < Arc_Line_Entity_Data.Count; j++)
+            //for (int j = 0; j < Arc_Line_Entity_Data.Count; j++)
             //{
             //    richTextBox1.AppendText("已矫正 序号：" + j + "  Type：" + Arc_Line_Entity_Data[j].Type + "  起点X：" + Arc_Line_Entity_Data[j].Start_x + "  起点Y：：" + Arc_Line_Entity_Data[j].Start_y + "  终点X：" + Arc_Line_Entity_Data[j].End_x + "  终点Y：" + Arc_Line_Entity_Data[j].End_y + "\r\n");
             //}
-
+            richTextBox1.AppendText(Cal_Elapse_Time.Get_Current_Time(2) + "  轨迹数据生成中！！！！" + "\r\n");
             //直线圆弧数据转换为  轨迹加工数据
             Arc_Line_List_Data = new List<List<Interpolation_Data>>(Data_Cal.Integrate_Arc_Line(Arc_Line_Entity_Data));
             //多边形转换为  轨迹加工数据
@@ -321,7 +323,7 @@ namespace Laser_Build_1._0
             Concat_List_Data.AddRange(Circle_List_Data);
 
             //刀具补偿
-            Concat_List_Data = new List<List<Interpolation_Data>>(Data_Cal.Cutter_Compensation(Concat_List_Data));
+            //Concat_List_Data = new List<List<Interpolation_Data>>(Data_Cal.Cutter_Compensation(Concat_List_Data));
 
             //for (i = 0; i < Concat_List_Data.Count; i++)
             //{
@@ -333,7 +335,7 @@ namespace Laser_Build_1._0
             //}
 
             //调试信息
-            richTextBox1.AppendText("数据提取完成！！！！" + "\r\n");
+            richTextBox1.AppendText(Cal_Elapse_Time.Get_Current_Time(2) + "  轨迹数据生成完成！！！！" + "\r\n");
             richTextBox1.AppendText("----------------------------------" + "\r\n");
             richTextBox1.AppendText("直线和圆弧 数据计数：" + Arc_Line_List_Data.Count + "\r\n");
             richTextBox1.AppendText("多边形插补 数据计数：" + LwPolyline_List_Data.Count + "\r\n");
@@ -1013,6 +1015,7 @@ namespace Laser_Build_1._0
             //测试RTC和GTS数据拆分
             Rtc_List_Data.Clear();
             Data_Resolve Test = new Data_Resolve();
+            //long el_ms = Cal_Elapse_Time.Elapse_ms(delegate() { Test.Separate_Rtc_Gts_Limit(Concat_List_Data).ForEach(m => Rtc_List_Data.Add(m)); });
             Test.Separate_Rtc_Gts_Limit(Concat_List_Data).ForEach(m => Rtc_List_Data.Add(m));
             //Rtc_List_Data = new List<List<Interpolation_Data>>(Compensation_Integrate(Concat_List_Data));
             //输出
@@ -1023,6 +1026,7 @@ namespace Laser_Build_1._0
             //        richTextBox1.AppendText("Type：" + Compensation_Concat_List_Data[i][j].Type + "  加工类型Work：" + Compensation_Concat_List_Data[i][j].Work + "  加工起点 Start_x：" + Compensation_Concat_List_Data[i][j].Start_x + "  加工起点 Start_y：" + Compensation_Concat_List_Data[i][j].Start_y + "  加工终点 End_x：" + Compensation_Concat_List_Data[i][j].End_x + "  加工终点 End_y：" + Compensation_Concat_List_Data[i][j].End_y + "  圆心X：" + Compensation_Concat_List_Data[i][j].Center_x + "  圆心Y：" + Compensation_Concat_List_Data[i][j].Center_y + "\r\n");
             //    }
             //}
+            //richTextBox1.AppendText("耗时" + el_ms + "\r\n");
             richTextBox1.AppendText("RTC和GTS数据拆分完成！！！！" + "\r\n");
             richTextBox1.AppendText("RTC和GTS数据拆分后数据数量：" + Rtc_List_Data.Count + "\r\n");
             //for (int i = 0; i < Rtc_List_Data.Count; i++)
@@ -1333,6 +1337,32 @@ namespace Laser_Build_1._0
         private void Start_Pos_Sel_SelectedIndexChanged(object sender, EventArgs e)
         {
             Para_List.Parameter.Calibration_Type = (UInt16)Start_Pos_Sel.SelectedIndex;
+        }
+        //RTC加工重复次数
+        private void Rtc_Repeat_Num_TextChanged(object sender, EventArgs e)
+        {
+            this.Invoke((EventHandler)delegate
+            {
+                if (!ushort.TryParse(Rtc_Repeat_Num.Text, out ushort tmp))
+                {
+                    MessageBox.Show("请正确输入数字");
+                    return;
+                }
+                Para_List.Parameter.Rtc_Repeat = tmp;
+            });
+        }
+        //GTS加工重复次数
+        private void Gts_Repeat_Num_TextChanged(object sender, EventArgs e)
+        {
+            this.Invoke((EventHandler)delegate
+            {
+                if (!ushort.TryParse(Gts_Repeat_Num.Text, out ushort tmp))
+                {
+                    MessageBox.Show("请正确输入数字");
+                    return;
+                }
+                Para_List.Parameter.Gts_Repeat = tmp;
+            });
         }
 
         //定位坐标点

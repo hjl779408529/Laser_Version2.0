@@ -40,7 +40,7 @@ namespace Laser_Build_1._0
             //Gts_Fun.Interpolation_Stop();
 
             //临时变量
-            int i = 0, j = 0;
+            int i = 0, j = 0,repeat = 0;
             //数据处理
             for (i = 0; i < List_Datas.Count; i++)//外层数据
             {
@@ -61,16 +61,24 @@ namespace Laser_Build_1._0
                             RTC_Fun.Motion.Close_Laser();
                             //定位到零点
                             RTC_Fun.Motion.Home();
-                            //Gts移动到启动位置 上一list数据的结尾数据或本次的结尾或本次序号0的start;待测试
-                            GTS_Fun.Interpolation.Gts_Ready(List_Datas[i][0].Start_x, List_Datas[i][0].Start_y);
-                            //打开激光
-                            RTC_Fun.Motion.Open_Laser();
-
-                            //启动Gts运动
-                            GTS_Fun.Interpolation.Integrate(List_Datas[i]);
-
-                            //关闭激光
-                            RTC_Fun.Motion.Close_Laser();
+                            //重复加工
+                            for (repeat = 0; repeat < Para_List.Parameter.Gts_Repeat; repeat++)
+                            {
+                                //Gts移动到启动位置 上一list数据的结尾数据或本次的结尾或本次序号0的start;待测试
+                                GTS_Fun.Interpolation.Gts_Ready(List_Datas[i][0].Start_x, List_Datas[i][0].Start_y);
+                                //打开激光
+                                RTC_Fun.Motion.Open_Laser();
+                                //启动Gts运动
+                                GTS_Fun.Interpolation.Integrate(List_Datas[i]);
+                                //关闭激光
+                                RTC_Fun.Motion.Close_Laser();
+                                //退出执行
+                                if (Exit_Flag)
+                                {
+                                    Exit_Flag = false;
+                                    return;
+                                }
+                            }                               
 
                         }
                     }
@@ -89,9 +97,18 @@ namespace Laser_Build_1._0
                             RTC_Fun.Motion.Close_Laser();
                             //Gts移动到准备位置 本次开头
                             GTS_Fun.Interpolation.Gts_Ready(List_Datas[i][0].Gts_x, List_Datas[i][0].Gts_y);
-                            //启动加工
-                            RTC_Fun.Motion.Draw(List_Datas[i], 1);
-
+                            //重复加工
+                            for (repeat = 0; repeat < Para_List.Parameter.Rtc_Repeat; repeat++)
+                            {                                
+                                //启动加工
+                                RTC_Fun.Motion.Draw(List_Datas[i], 1);
+                                //退出执行
+                                if (Exit_Flag)
+                                {
+                                    Exit_Flag = false;
+                                    return;
+                                }
+                            }
                             //关闭激光
                             RTC_Fun.Motion.Close_Laser();
 
@@ -107,7 +124,7 @@ namespace Laser_Build_1._0
                 }
             }
         }
-        //该函数，利用传入的数据，将RTC和GTS数据配合，进行裁切 带入RTC校准
+        //该函数，利用传入的数据，将RTC和GTS数据配合，进行裁切 带入RTC与Gts校准
         public static void Rts_Gts_Correct(List<List<Interpolation_Data>> List_Datas)
         {
             //初始振镜回Home
@@ -150,7 +167,7 @@ namespace Laser_Build_1._0
                             RTC_Fun.Motion.Open_Laser();
 #endif
                             //启动Gts运动
-                            GTS_Fun.Interpolation.Integrate(List_Datas[i]);
+                            GTS_Fun.Interpolation.Integrate_Correct(List_Datas[i]);
 #if !DEBUG
                             //关闭激光
                             RTC_Fun.Motion.Close_Laser();
@@ -201,7 +218,7 @@ namespace Laser_Build_1._0
             RTC_Fun.Motion.Home();
         }
 
-        //该函数，利用传入的数据，将RTC和GTS数据配合，进行裁切  主要生成RTC校准坐标
+        //该函数，利用传入的数据，将RTC和GTS数据配合，进行裁切  主要生成RTC校准坐标 用于生RTC板卡校准文件
         public static void Rts_Gts_Cal_Rtc(List<List<Interpolation_Data>> List_Datas) 
         {
             //初始振镜回Home

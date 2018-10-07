@@ -84,6 +84,9 @@
     <Reference Include="Emgu.CV.World">
       <HintPath>C:\Emgu\emgucv-windesktop 3.4.1.2976\bin\Emgu.CV.World.dll</HintPath>
     </Reference>
+    <Reference Include="Gvs.Controls.Numeric">
+      <HintPath>dll\Gvs.Controls.Numeric.dll</HintPath>
+    </Reference>
     <Reference Include="log4net">
       <HintPath>dll\log4net.dll</HintPath>
     </Reference>
@@ -95,6 +98,9 @@
     </Reference>
     <Reference Include="Microsoft.QualityTools.Testing.Fakes, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="MoneyBox">
+      <HintPath>dll\MoneyBox.dll</HintPath>
     </Reference>
     <Reference Include="netDxf">
       <HintPath>dll\netDxf.dll</HintPath>
@@ -127,6 +133,7 @@
   <ItemGroup>
     <Compile Include="Basler_Net_Cam.cs" />
     <Compile Include="Bit_Value.cs" />
+    <Compile Include="Cal_Elapse_Time.cs" />
     <Compile Include="Cam_pic\Basler_Camera.cs" />
     <Compile Include="CSV_RW.cs" />
     <Compile Include="Data\Correct_Data.cs" />

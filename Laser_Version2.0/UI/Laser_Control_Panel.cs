@@ -45,7 +45,7 @@ namespace Laser_Version2._0
             //初始化通讯端口列表
             Com_List.Items.AddRange(Initialization.Initial.Com_Comunication.PortName.ToArray());
             //初始化默认的Com端口
-            Com_List.SelectedIndex = Para_List.Parameter.Com_No;
+            if (Initialization.Initial.Com_Comunication.PortName.Count>=1) Com_List.SelectedIndex = Para_List.Parameter.Com_No;
             //状态刷新
             if (Initial.Com_Comunication.ComDevice.IsOpen == false)
             {
