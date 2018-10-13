@@ -30,7 +30,10 @@
         {
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.Disconnect_Tcp = new System.Windows.Forms.Button();
+            this.Re_Connect = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
+            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.button4 = new System.Windows.Forms.Button();
             this.label20 = new System.Windows.Forms.Label();
             this.textBox18 = new System.Windows.Forms.TextBox();
@@ -38,6 +41,10 @@
             this.textBox19 = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.button6 = new System.Windows.Forms.Button();
+            this.Set_txt_markY4 = new System.Windows.Forms.TextBox();
+            this.Set_txt_markX4 = new System.Windows.Forms.TextBox();
+            this.label8 = new System.Windows.Forms.Label();
             this.button3 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
@@ -54,12 +61,10 @@
             this.Set_txt_markY1 = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.Set_txt_valueK = new System.Windows.Forms.TextBox();
-            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
-            this.Re_Connect = new System.Windows.Forms.Button();
-            this.Disconnect_Tcp = new System.Windows.Forms.Button();
+            this.Re_Cali_Mark = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
-            this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -90,25 +95,70 @@
             this.groupBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.groupBox1.Size = new System.Drawing.Size(650, 593);
+            this.groupBox1.Size = new System.Drawing.Size(650, 673);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "系统参数";
             // 
+            // Disconnect_Tcp
+            // 
+            this.Disconnect_Tcp.Location = new System.Drawing.Point(385, 598);
+            this.Disconnect_Tcp.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.Disconnect_Tcp.Name = "Disconnect_Tcp";
+            this.Disconnect_Tcp.Size = new System.Drawing.Size(109, 52);
+            this.Disconnect_Tcp.TabIndex = 100;
+            this.Disconnect_Tcp.Text = "断开相机";
+            this.Disconnect_Tcp.UseVisualStyleBackColor = true;
+            this.Disconnect_Tcp.Click += new System.EventHandler(this.Disconnect_Tcp_Click);
+            // 
+            // Re_Connect
+            // 
+            this.Re_Connect.Location = new System.Drawing.Point(252, 598);
+            this.Re_Connect.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.Re_Connect.Name = "Re_Connect";
+            this.Re_Connect.Size = new System.Drawing.Size(109, 52);
+            this.Re_Connect.TabIndex = 99;
+            this.Re_Connect.Text = "重连相机";
+            this.Re_Connect.UseVisualStyleBackColor = true;
+            this.Re_Connect.Click += new System.EventHandler(this.Re_Connect_Click);
+            // 
             // button5
             // 
-            this.button5.Location = new System.Drawing.Point(473, 527);
+            this.button5.Location = new System.Drawing.Point(518, 598);
             this.button5.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(139, 52);
+            this.button5.Size = new System.Drawing.Size(109, 52);
             this.button5.TabIndex = 8;
             this.button5.Text = "触发拍照";
             this.button5.UseVisualStyleBackColor = true;
             this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
+            // numericUpDown1
+            // 
+            this.numericUpDown1.Location = new System.Drawing.Point(548, 542);
+            this.numericUpDown1.Maximum = new decimal(new int[] {
+            2,
+            0,
+            0,
+            0});
+            this.numericUpDown1.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numericUpDown1.Name = "numericUpDown1";
+            this.numericUpDown1.Size = new System.Drawing.Size(48, 28);
+            this.numericUpDown1.TabIndex = 98;
+            this.numericUpDown1.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numericUpDown1.ValueChanged += new System.EventHandler(this.numericUpDown1_ValueChanged);
+            // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(264, 467);
+            this.button4.Location = new System.Drawing.Point(276, 530);
             this.button4.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(195, 52);
@@ -120,7 +170,7 @@
             // label20
             // 
             this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(20, 501);
+            this.label20.Location = new System.Drawing.Point(25, 590);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(206, 18);
             this.label20.TabIndex = 97;
@@ -128,7 +178,7 @@
             // 
             // textBox18
             // 
-            this.textBox18.Location = new System.Drawing.Point(48, 535);
+            this.textBox18.Location = new System.Drawing.Point(53, 624);
             this.textBox18.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBox18.Name = "textBox18";
             this.textBox18.Size = new System.Drawing.Size(150, 28);
@@ -138,7 +188,7 @@
             // label21
             // 
             this.label21.AutoSize = true;
-            this.label21.Location = new System.Drawing.Point(20, 421);
+            this.label21.Location = new System.Drawing.Point(25, 510);
             this.label21.Name = "label21";
             this.label21.Size = new System.Drawing.Size(206, 18);
             this.label21.TabIndex = 95;
@@ -146,7 +196,7 @@
             // 
             // textBox19
             // 
-            this.textBox19.Location = new System.Drawing.Point(48, 456);
+            this.textBox19.Location = new System.Drawing.Point(53, 545);
             this.textBox19.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBox19.Name = "textBox19";
             this.textBox19.Size = new System.Drawing.Size(150, 28);
@@ -164,6 +214,11 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.Re_Cali_Mark);
+            this.groupBox2.Controls.Add(this.button6);
+            this.groupBox2.Controls.Add(this.Set_txt_markY4);
+            this.groupBox2.Controls.Add(this.Set_txt_markX4);
+            this.groupBox2.Controls.Add(this.label8);
             this.groupBox2.Controls.Add(this.button3);
             this.groupBox2.Controls.Add(this.button2);
             this.groupBox2.Controls.Add(this.button1);
@@ -183,9 +238,47 @@
             this.groupBox2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.groupBox2.Size = new System.Drawing.Size(650, 303);
+            this.groupBox2.Size = new System.Drawing.Size(650, 373);
             this.groupBox2.TabIndex = 4;
             this.groupBox2.TabStop = false;
+            // 
+            // button6
+            // 
+            this.button6.Location = new System.Drawing.Point(545, 229);
+            this.button6.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.button6.Name = "button6";
+            this.button6.Size = new System.Drawing.Size(91, 28);
+            this.button6.TabIndex = 11;
+            this.button6.Text = "定位";
+            this.button6.UseVisualStyleBackColor = true;
+            this.button6.Click += new System.EventHandler(this.button6_Click);
+            // 
+            // Set_txt_markY4
+            // 
+            this.Set_txt_markY4.Location = new System.Drawing.Point(367, 229);
+            this.Set_txt_markY4.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.Set_txt_markY4.Name = "Set_txt_markY4";
+            this.Set_txt_markY4.Size = new System.Drawing.Size(148, 28);
+            this.Set_txt_markY4.TabIndex = 9;
+            this.Set_txt_markY4.TextChanged += new System.EventHandler(this.Set_txt_markY4_TextChanged);
+            // 
+            // Set_txt_markX4
+            // 
+            this.Set_txt_markX4.Location = new System.Drawing.Point(169, 229);
+            this.Set_txt_markX4.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.Set_txt_markX4.Name = "Set_txt_markX4";
+            this.Set_txt_markX4.Size = new System.Drawing.Size(148, 28);
+            this.Set_txt_markX4.TabIndex = 10;
+            this.Set_txt_markX4.TextChanged += new System.EventHandler(this.Set_txt_markX4_TextChanged);
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(15, 235);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(152, 18);
+            this.label8.TabIndex = 8;
+            this.label8.Text = "Mark 点4（右下）";
             // 
             // button3
             // 
@@ -222,7 +315,7 @@
             // 
             // Set_Btn_Mark1
             // 
-            this.Set_Btn_Mark1.Location = new System.Drawing.Point(245, 229);
+            this.Set_Btn_Mark1.Location = new System.Drawing.Point(53, 301);
             this.Set_Btn_Mark1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Set_Btn_Mark1.Name = "Set_Btn_Mark1";
             this.Set_Btn_Mark1.Size = new System.Drawing.Size(195, 52);
@@ -339,56 +432,22 @@
             this.Set_txt_valueK.TabIndex = 1;
             this.Set_txt_valueK.TextChanged += new System.EventHandler(this.Set_txt_valueK_TextChanged);
             // 
-            // numericUpDown1
+            // Re_Cali_Mark
             // 
-            this.numericUpDown1.Location = new System.Drawing.Point(518, 421);
-            this.numericUpDown1.Maximum = new decimal(new int[] {
-            2,
-            0,
-            0,
-            0});
-            this.numericUpDown1.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(48, 28);
-            this.numericUpDown1.TabIndex = 98;
-            this.numericUpDown1.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.numericUpDown1.ValueChanged += new System.EventHandler(this.numericUpDown1_ValueChanged);
-            // 
-            // Re_Connect
-            // 
-            this.Re_Connect.Location = new System.Drawing.Point(473, 467);
-            this.Re_Connect.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.Re_Connect.Name = "Re_Connect";
-            this.Re_Connect.Size = new System.Drawing.Size(139, 52);
-            this.Re_Connect.TabIndex = 99;
-            this.Re_Connect.Text = "重连相机";
-            this.Re_Connect.UseVisualStyleBackColor = true;
-            this.Re_Connect.Click += new System.EventHandler(this.Re_Connect_Click);
-            // 
-            // Disconnect_Tcp
-            // 
-            this.Disconnect_Tcp.Location = new System.Drawing.Point(320, 527);
-            this.Disconnect_Tcp.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.Disconnect_Tcp.Name = "Disconnect_Tcp";
-            this.Disconnect_Tcp.Size = new System.Drawing.Size(139, 52);
-            this.Disconnect_Tcp.TabIndex = 100;
-            this.Disconnect_Tcp.Text = "断开相机";
-            this.Disconnect_Tcp.UseVisualStyleBackColor = true;
-            this.Disconnect_Tcp.Click += new System.EventHandler(this.Disconnect_Tcp_Click);
+            this.Re_Cali_Mark.Location = new System.Drawing.Point(401, 301);
+            this.Re_Cali_Mark.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.Re_Cali_Mark.Name = "Re_Cali_Mark";
+            this.Re_Cali_Mark.Size = new System.Drawing.Size(195, 52);
+            this.Re_Cali_Mark.TabIndex = 12;
+            this.Re_Cali_Mark.Text = "二次矫正Mark坐标";
+            this.Re_Cali_Mark.UseVisualStyleBackColor = true;
+            this.Re_Cali_Mark.Click += new System.EventHandler(this.Re_Cali_Mark_Click);
             // 
             // ParameterSet
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(694, 624);
+            this.ClientSize = new System.Drawing.Size(694, 723);
             this.Controls.Add(this.groupBox1);
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "ParameterSet";
@@ -396,9 +455,9 @@
             this.Load += new System.EventHandler(this.ParameterSet_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -434,5 +493,10 @@
         private System.Windows.Forms.NumericUpDown numericUpDown1;
         private System.Windows.Forms.Button Re_Connect;
         private System.Windows.Forms.Button Disconnect_Tcp;
+        private System.Windows.Forms.Button button6;
+        private System.Windows.Forms.TextBox Set_txt_markY4;
+        private System.Windows.Forms.TextBox Set_txt_markX4;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Button Re_Cali_Mark;
     }
 }

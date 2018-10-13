@@ -82,24 +82,34 @@ namespace Laser_Build_1._0
     public struct Affinity_Matrix
     {
         //私有属性 
-        private decimal cos_value, sin_value;//cos_value, sin_value--仿射变换角度值 
-        private decimal delta_x, delta_y;//delta_x, delta_y--x、y坐标偏移值
-
+        private decimal stretch_x, distortion_x, delta_x;
+        private decimal stretch_y, distortion_y, delta_y;
         //共有属性
-        public decimal Cos_Value{
-            get { return cos_value; }
-            set { cos_value = value; }
-        }
-        public decimal Sin_Value
+        public decimal Stretch_X
         {
-            get { return sin_value; }
-            set { sin_value = value; }
+            get { return stretch_x; }
+            set { stretch_x = value; }
+        }
+        public decimal Distortion_X
+        {
+            get { return distortion_x; }
+            set { distortion_x = value; }
         }
 
         public decimal Delta_X
         {
             get { return delta_x; }
             set { delta_x = value; }
+        }
+        public decimal Stretch_Y
+        {
+            get { return stretch_y; }
+            set { stretch_y = value; }
+        }
+        public decimal Distortion_Y
+        {
+            get { return distortion_y; }
+            set { distortion_y = value; }
         }
         public decimal Delta_Y
         {
@@ -108,26 +118,32 @@ namespace Laser_Build_1._0
         }
         //公开构造函数        
         //有参数
-        public Affinity_Matrix(decimal cos_value,decimal sin_value, decimal delta_x,decimal delta_y)
+        public Affinity_Matrix(decimal stretch_x, decimal distortion_x, decimal delta_x, decimal stretch_y, decimal distortion_y, decimal delta_y)
         {
-            this.cos_value = cos_value;
-            this.sin_value = sin_value;
+            this.stretch_x = stretch_x;
+            this.distortion_x = distortion_x;
+            this.stretch_y = stretch_y;
+            this.distortion_y = distortion_y;
             this.delta_x = delta_x;
             this.delta_y = delta_y;
         }
         public Affinity_Matrix(Affinity_Matrix Ini)
         {
-            this.cos_value = Ini.Cos_Value;
-            this.sin_value = Ini.Sin_Value;
+            this.stretch_x = Ini.Stretch_X;
+            this.distortion_x = Ini.Distortion_X;
             this.delta_x = Ini.Delta_X;
+            this.stretch_y = Ini.Stretch_Y;
+            this.distortion_y = Ini.Distortion_Y;
             this.delta_y = Ini.Delta_Y;
         }
         //清空
         public void Empty()
         {
-            this.cos_value = 0;
-            this.sin_value = 0;
+            this.stretch_x = 0;
+            this.distortion_x = 0;
             this.delta_x = 0;
+            this.stretch_y = 0;
+            this.distortion_y = 0;
             this.delta_y = 0;
         }
     }
@@ -248,6 +264,7 @@ namespace Laser_Build_1._0
             get { return delta_y; }
             set { delta_y = value; }
         }
+       
         //公开构造函数        
         //有参数
         public Double_Fit_Data(decimal k_x1, decimal k_x2, decimal k_x3, decimal k_x4, decimal delta_x, decimal k_y1, decimal k_y2, decimal k_y3, decimal k_y4, decimal delta_y)
@@ -306,16 +323,7 @@ namespace Laser_Build_1._0
             Vector Cam_New=new Vector();
             decimal Cam_Delta_X = 0, Cam_Delta_Y = 0;
             int i = 0, j = 0;
-
-            ////两轴回零
-            //Thread Axis01_home_thread = new Thread(this.Axis01_Home);
-            //Thread Axis02_home_thread = new Thread(this.Axis02_Home);
-            //Axis01_home_thread.Start();
-            //Axis02_home_thread.Start();
-            ////等待线程结束
-            //Axis01_home_thread.Join();
-            //Axis02_home_thread.Join();
-
+            Vector Cal_Actual_Point = new Vector();
             //建立直角坐标系
             GTS_Fun.Interpolation.Coordination(Para_List.Parameter.Work.X, Para_List.Parameter.Work.Y);
             //定位到加工坐标原点
@@ -324,18 +332,10 @@ namespace Laser_Build_1._0
             GTS_Fun.Interpolation.Interpolation_Start();
             //停止坐标系运动
             GTS_Fun.Interpolation.Interpolation_Stop();
-            
-            //1轴-x轴，2轴-y轴，X轴归零，y轴归 步距*i
-            //motion.Abs(1, Convert.ToDouble(500 / Para_List.Parameter.Acc_reference), Convert.ToDouble(500 / Para_List.Parameter.Acc_reference), 2, Convert.ToInt32(Para_List.Parameter.Work_X), Convert.ToDouble(100 / Para_List.Parameter.Vel_reference));//绝对定位至坐标系X为零
-            //motion.Abs(2, Convert.ToDouble(500 / Para_List.Parameter.Acc_reference), Convert.ToDouble(500 / Para_List.Parameter.Acc_reference), 2, Convert.ToInt32(Para_List.Parameter.Work_Y), Convert.ToDouble(100 / Para_List.Parameter.Vel_reference));//绝对定位至坐标系Y为零
-
             //2.5mm步距进行数据提取和整合，使用INC指令
             for (i = 0; i < Para_List.Parameter.Gts_Calibration_Row; i++)
             {
                 //1轴-x轴，2轴-y轴，X轴归零，y轴归 步距*i
-                //定位实现
-                //motion.Abs(1, 500, 500, 2, Para_List.Parameter.Work_X,100);//绝对定位至坐标系X为零
-                //motion.Inc(2, 500, 500, 2, -Para_List.Parameter.Gts_Calibration_Cell, 100);//循序渐加
                 //插补运动实现
                 GTS_Fun.Interpolation.Clear_FIFO();
                 GTS_Fun.Interpolation.Line_FIFO(0, i * Para_List.Parameter.Gts_Calibration_Cell);//将直线插补数据写入
@@ -345,16 +345,13 @@ namespace Laser_Build_1._0
                 {
                     //清空Temp_Correct_Data
                     Temp_Correct_Data.Empty();
-                    //定位X轴
-                    //定位实现
-                    //motion.Inc(1, 500, 500, 2, -Para_List.Parameter.Gts_Calibration_Cell, 100);
                     //插补运动实现
                     GTS_Fun.Interpolation.Clear_FIFO();
                     GTS_Fun.Interpolation.Line_FIFO(j * Para_List.Parameter.Gts_Calibration_Cell, i * Para_List.Parameter.Gts_Calibration_Cell);//将直线插补数据写入
                     GTS_Fun.Interpolation.Interpolation_Start();
                     GTS_Fun.Interpolation.Interpolation_Stop();
                     //调用相机，获取对比的坐标信息
-                    Thread.Sleep(200);//延时200ms
+                    Thread.Sleep(50);//延时30ms
                     //Main.T_Client
                     Cam_New = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(1));//触发拍照 
                     if ((Cam_New.X==999) || (Cam_New.Y == 999))
@@ -368,24 +365,20 @@ namespace Laser_Build_1._0
                         //计算差值
                         Cam_Delta_X = Cam_New.X - 243 * Para_List.Parameter.Cam_Reference;
                         Cam_Delta_Y = Cam_New.Y - 324 * Para_List.Parameter.Cam_Reference;
-                        //数据保存
-                        Temp_Correct_Data.Xo = j * Para_List.Parameter.Gts_Calibration_Cell + Cam_Delta_X;//相机实际X坐标
-                        Temp_Correct_Data.Yo = i * Para_List.Parameter.Gts_Calibration_Cell + Cam_Delta_Y;//相机实际Y坐标
-                        Temp_Correct_Data.Xm = j * Para_List.Parameter.Gts_Calibration_Cell;//平台电机实际X坐标
-                        Temp_Correct_Data.Ym = i * Para_List.Parameter.Gts_Calibration_Cell;//平台电机实际Y坐标
                     }
                     else
                     {
                         //计算差值
                         Cam_Delta_X = Cam_New.X - Cam_Old.X;
-                        Cam_Delta_Y = Cam_New.Y - Cam_Old.Y;
-                        //数据保存
-                        Temp_Correct_Data.Xo = j * Para_List.Parameter.Gts_Calibration_Cell + Cam_Delta_X;//相机实际X坐标
-                        Temp_Correct_Data.Yo = i * Para_List.Parameter.Gts_Calibration_Cell + Cam_Delta_Y;//相机实际Y坐标
-                        Temp_Correct_Data.Xm = j * Para_List.Parameter.Gts_Calibration_Cell;//平台电机实际X坐标
-                        Temp_Correct_Data.Ym = i * Para_List.Parameter.Gts_Calibration_Cell;//平台电机实际Y坐标
+                        Cam_Delta_Y = Cam_New.Y - Cam_Old.Y;                        
                     }
-
+                    //仿射矫正坐标
+                    Cal_Actual_Point = Get_Cal_Actual_Point(new Vector(j * Para_List.Parameter.Gts_Calibration_Cell, i * Para_List.Parameter.Gts_Calibration_Cell));//初始化坐标
+                    //数据保存
+                    Temp_Correct_Data.Xo = Cal_Actual_Point.X + Cam_Delta_X;//相机实际X坐标
+                    Temp_Correct_Data.Yo = Cal_Actual_Point.Y + Cam_Delta_Y;//相机实际Y坐标
+                    Temp_Correct_Data.Xm = j * Para_List.Parameter.Gts_Calibration_Cell;//平台电机实际X坐标
+                    Temp_Correct_Data.Ym = i * Para_List.Parameter.Gts_Calibration_Cell;//平台电机实际Y坐标
                     //New变Old
                     Cam_Old =new Vector(Cam_New);
                     //添加进入List
@@ -419,15 +412,7 @@ namespace Laser_Build_1._0
             Vector Cam_New = new Vector();
             decimal Cam_Delta_X = 0, Cam_Delta_Y = 0;
             int i = 0, j = 0;
-
-            ////两轴回零
-            //Thread Axis01_home_thread = new Thread(this.Axis01_Home);
-            //Thread Axis02_home_thread = new Thread(this.Axis02_Home);
-            //Axis01_home_thread.Start();
-            //Axis02_home_thread.Start();
-            ////等待线程结束
-            //Axis01_home_thread.Join();
-            //Axis02_home_thread.Join();
+            Vector Cal_Actual_Point = new Vector();
 
             //建立直角坐标系
             GTS_Fun.Interpolation.Coordination(Para_List.Parameter.Work.X, Para_List.Parameter.Work.Y);
@@ -437,18 +422,10 @@ namespace Laser_Build_1._0
             GTS_Fun.Interpolation.Interpolation_Start();
             //停止坐标系运动
             GTS_Fun.Interpolation.Interpolation_Stop();
-
-            //1轴-x轴，2轴-y轴，X轴归零，y轴归 步距*i
-            //motion.Abs(1, Convert.ToDouble(500 / Para_List.Parameter.Acc_reference), Convert.ToDouble(500 / Para_List.Parameter.Acc_reference), 2, Convert.ToInt32(Para_List.Parameter.Work_X), Convert.ToDouble(100 / Para_List.Parameter.Vel_reference));//绝对定位至坐标系X为零
-            //motion.Abs(2, Convert.ToDouble(500 / Para_List.Parameter.Acc_reference), Convert.ToDouble(500 / Para_List.Parameter.Acc_reference), 2, Convert.ToInt32(Para_List.Parameter.Work_Y), Convert.ToDouble(100 / Para_List.Parameter.Vel_reference));//绝对定位至坐标系Y为零
-
             //2.5mm步距进行数据提取和整合，使用INC指令
-            for (i = 0; i < Para_List.Parameter.Gts_Calibration_Row; i++)
+            for (i = 135; i < Para_List.Parameter.Gts_Calibration_Row; i++)
             {
                 //1轴-x轴，2轴-y轴，X轴归零，y轴归 步距*i
-                //定位实现
-                //motion.Abs(1, 500, 500, 2, Para_List.Parameter.Work_X,100);//绝对定位至坐标系X为零
-                //motion.Inc(2, 500, 500, 2, -Para_List.Parameter.Gts_Calibration_Cell, 100);//循序渐加
                 //插补运动实现
                 GTS_Fun.Interpolation.Clear_FIFO();
                 GTS_Fun.Interpolation.Line_FIFO_Correct(0, i * Para_List.Parameter.Gts_Calibration_Cell);//将直线插补数据写入
@@ -459,15 +436,14 @@ namespace Laser_Build_1._0
                     //清空Temp_Correct_Data
                     Temp_Correct_Data.Empty();
                     //定位X轴
-                    //定位实现
-                    //motion.Inc(1, 500, 500, 2, -Para_List.Parameter.Gts_Calibration_Cell, 100);
                     //插补运动实现
                     GTS_Fun.Interpolation.Clear_FIFO();
                     GTS_Fun.Interpolation.Line_FIFO_Correct(j * Para_List.Parameter.Gts_Calibration_Cell, i * Para_List.Parameter.Gts_Calibration_Cell);//将直线插补数据写入
                     GTS_Fun.Interpolation.Interpolation_Start();
                     GTS_Fun.Interpolation.Interpolation_Stop();
+#if !DEBUG
                     //调用相机，获取对比的坐标信息
-                    Thread.Sleep(200);//延时200ms
+                    Thread.Sleep(50);//延时200ms
                     //Main.T_Client
                     Cam_New = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(1));//触发拍照 
                     if ((Cam_New.X == 999) || (Cam_New.Y == 999))
@@ -481,29 +457,27 @@ namespace Laser_Build_1._0
                         //计算差值
                         Cam_Delta_X = Cam_New.X - 243 * Para_List.Parameter.Cam_Reference;
                         Cam_Delta_Y = Cam_New.Y - 324 * Para_List.Parameter.Cam_Reference;
-                        //数据保存
-                        Temp_Correct_Data.Xo = j * Para_List.Parameter.Gts_Calibration_Cell + Cam_Delta_X;//相机实际X坐标
-                        Temp_Correct_Data.Yo = i * Para_List.Parameter.Gts_Calibration_Cell + Cam_Delta_Y;//相机实际Y坐标
-                        Temp_Correct_Data.Xm = j * Para_List.Parameter.Gts_Calibration_Cell;//平台电机实际X坐标
-                        Temp_Correct_Data.Ym = i * Para_List.Parameter.Gts_Calibration_Cell;//平台电机实际Y坐标
                     }
                     else
                     {
                         //计算差值
                         Cam_Delta_X = Cam_New.X - Cam_Old.X;
-                        Cam_Delta_Y = Cam_New.Y - Cam_Old.Y;
-                        //数据保存
-                        Temp_Correct_Data.Xo = j * Para_List.Parameter.Gts_Calibration_Cell + Cam_Delta_X;//相机实际X坐标
-                        Temp_Correct_Data.Yo = i * Para_List.Parameter.Gts_Calibration_Cell + Cam_Delta_Y;//相机实际Y坐标
-                        Temp_Correct_Data.Xm = j * Para_List.Parameter.Gts_Calibration_Cell;//平台电机实际X坐标
-                        Temp_Correct_Data.Ym = i * Para_List.Parameter.Gts_Calibration_Cell;//平台电机实际Y坐标
+                        Cam_Delta_Y = Cam_New.Y - Cam_Old.Y;                        
                     }
-
+                    //仿射矫正坐标
+                    Cal_Actual_Point = Get_Cal_Actual_Point(new Vector(j * Para_List.Parameter.Gts_Calibration_Cell, i * Para_List.Parameter.Gts_Calibration_Cell));//初始化坐标
+                    //数据保存
+                    Temp_Correct_Data.Xo = Cal_Actual_Point.X + Cam_Delta_X;//相机实际X坐标
+                    Temp_Correct_Data.Yo = Cal_Actual_Point.Y + Cam_Delta_Y;//相机实际Y坐标
+                    //Temp_Correct_Data.Xo = j * Para_List.Parameter.Gts_Calibration_Cell + Cam_Delta_X;//相机实际X坐标
+                    //Temp_Correct_Data.Yo = i * Para_List.Parameter.Gts_Calibration_Cell + Cam_Delta_Y;//相机实际Y坐标
+                    Temp_Correct_Data.Xm = j * Para_List.Parameter.Gts_Calibration_Cell;//平台电机实际X坐标
+                    Temp_Correct_Data.Ym = i * Para_List.Parameter.Gts_Calibration_Cell;//平台电机实际Y坐标
                     //New变Old
                     Cam_Old = new Vector(Cam_New);
                     //添加进入List
                     Result.Add(Temp_Correct_Data);
-
+#endif
                     //线程终止
                     if (Exit_Flag)
                     {
@@ -512,7 +486,6 @@ namespace Laser_Build_1._0
                         CSV_RW.SaveCSV(CSV_RW.Correct_Data_DataTable(Result), "Gts_Correct_Data_02");
                         return Result;
                     }
-
                 }
             }
             //保存文件至Config
@@ -548,8 +521,17 @@ namespace Laser_Build_1._0
 
             //矫正原点
             do
-            {   //定位到ORG原点
-                Mark(Para_List.Parameter.Cal_Org);
+            {
+                if (Counting == 0)
+                {
+                    //定位到ORG原点
+                    Mark(new Vector(0, 0));
+                }
+                else
+                {
+                    //定位到矫正坐标
+                    Mark(Para_List.Parameter.Cal_Org);
+                }
                 //调用相机，获取对比的坐标信息
                 Thread.Sleep(200);//延时200ms
                 //Main.T_Client
@@ -561,7 +543,7 @@ namespace Laser_Build_1._0
                 }
                 Cam = new Vector(Cam.X - 243 * Para_List.Parameter.Cam_Reference, Cam.Y - 324 * Para_List.Parameter.Cam_Reference);
                 //获取坐标系平台坐标
-                Coodinate_Point = new Vector(GTS_Fun.Interpolation.Get_Coordinate());
+                Coodinate_Point = new Vector(GTS_Fun.Interpolation.Get_Coordinate(0));
                 //计算偏移
                 Tem_Mark = new Vector(Coodinate_Point.X + Cam.X, Coodinate_Point.Y + Cam.Y);
                 //反馈回RTC_ORG数据
@@ -574,150 +556,233 @@ namespace Laser_Build_1._0
                     MessageBox.Show("校准失败");
                     return;
                 }
-            } while (!Differ_Deviation(Cam));
+            } while (!Differ_Deviation(Cam,Para_List.Parameter.Pos_Tolerance));
             Para_List.Parameter.Work = new Vector(Para_List.Parameter.Work.X - Para_List.Parameter.Cal_Org.X, Para_List.Parameter.Work.Y - Para_List.Parameter.Cal_Org.Y);
             //数据矫正完成
         }
-        //矫正Mark坐标
-        public static void Calibrate_Mark()
+        //计算标定板仿射变换参数
+        public static Affinity_Matrix Cal_Calibration_Affinity_Matrix()
         {
             //建立变量
-            Vector Cam=new Vector();
+            Affinity_Matrix Result = new Affinity_Matrix();
+            //定义仿射变换数组 
+            Mat mat = new Mat(new Size(3, 2), Emgu.CV.CvEnum.DepthType.Cv32F, 1); //2行 3列 的矩阵
+            //定义点位数组
+            PointF[] srcTri = new PointF[3];//标准数据
+            PointF[] dstTri = new PointF[3];//差异化数据 
+            double[] temp_array;
+            //定位点位计算标定板偏差
+            Vector[] Cali_Mark_Src = new Vector[3] { new Vector(0, 0), new Vector(350, 0), new Vector(350, 350) };
+            Vector[] Cali_Mark_Dst = new Vector[3] { new Vector(0, 0), new Vector(350, 0), new Vector(350, 350) };
+            //中间变量
+            int Counting = 0;
+            Vector Cam = new Vector();
+            Vector Coodinate_Point = new Vector();
+            Vector Tem_Mark = new Vector();
+            //标定板数据计算
+            //矫正 标定板数据实际点位1           
+            Counting = 0;
+            do
+            {
+                //定位到标定板数据实际点位1
+                Mark(Cali_Mark_Dst[0]);
+                //调用相机，获取对比的坐标信息
+                Thread.Sleep(200);//延时200ms
+                Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(1));//触发拍照 
+                if ((Cam.X == 999) || (Cam.Y == 999))
+                {
+                    MessageBox.Show("相机通讯数据等待，请检查！！！");
+                    return Result;
+                }
+                //获取坐标系平台坐标
+                Coodinate_Point = new Vector(GTS_Fun.Interpolation.Get_Coordinate(0));
+                //计算偏移
+                Tem_Mark = new Vector(Coodinate_Point.X + Cam.X - 243 * Para_List.Parameter.Cam_Reference, Coodinate_Point.Y + Cam.Y - 324 * Para_List.Parameter.Cam_Reference);
+                //反馈回标定板数据实际点位1
+                Cali_Mark_Dst[0] = new Vector(Tem_Mark);
+                //自增
+                Counting++;
+                //跳出
+                if (Counting >= 20)
+                {
+                    MessageBox.Show("标定板数据实际点位1 寻找失败");
+                    return Result;
+                }
+            } while (!Differ_Deviation(new Vector(Cam.X - 243 * Para_List.Parameter.Cam_Reference, Cam.Y - 324 * Para_List.Parameter.Cam_Reference), Para_List.Parameter.Pos_Tolerance));
+
+
+            //矫正 标定板数据实际点位2           
+            Counting = 0;
+            do
+            {
+                //定位到标定板数据实际点位2
+                Mark(Cali_Mark_Dst[1]);
+                //调用相机，获取对比的坐标信息
+                Thread.Sleep(200);//延时200ms
+                Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(1));//触发拍照 
+                if ((Cam.X == 999) || (Cam.Y == 999))
+                {
+                    MessageBox.Show("相机通讯数据等待，请检查！！！");
+                    return Result;
+                }
+                //获取坐标系平台坐标
+                Coodinate_Point = new Vector(GTS_Fun.Interpolation.Get_Coordinate(0));
+                //计算偏移
+                Tem_Mark = new Vector(Coodinate_Point.X + Cam.X - 243 * Para_List.Parameter.Cam_Reference, Coodinate_Point.Y + Cam.Y - 324 * Para_List.Parameter.Cam_Reference);
+                //反馈回标定板数据实际点位2
+                Cali_Mark_Dst[1] = new Vector(Tem_Mark);
+                //自增
+                Counting++;
+                //跳出
+                if (Counting >= 20)
+                {
+                    MessageBox.Show("标定板数据实际点位2 寻找失败");
+                    return Result;
+                }
+            } while (!Differ_Deviation(new Vector(Cam.X - 243 * Para_List.Parameter.Cam_Reference, Cam.Y - 324 * Para_List.Parameter.Cam_Reference), Para_List.Parameter.Pos_Tolerance));
+
+            //矫正 标定板数据实际点位3          
+            Counting = 0;
+            do
+            {
+                //定位到标定板数据实际点位3
+                Mark(Cali_Mark_Dst[2]);
+                //调用相机，获取对比的坐标信息
+                Thread.Sleep(200);//延时200ms
+                Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(1));//触发拍照 
+                if ((Cam.X == 999) || (Cam.Y == 999))
+                {
+                    MessageBox.Show("相机通讯数据等待，请检查！！！");
+                    return Result;
+                }
+                //获取坐标系平台坐标
+                Coodinate_Point = new Vector(GTS_Fun.Interpolation.Get_Coordinate(0));
+                //计算偏移
+                Tem_Mark = new Vector(Coodinate_Point.X + Cam.X - 243 * Para_List.Parameter.Cam_Reference, Coodinate_Point.Y + Cam.Y - 324 * Para_List.Parameter.Cam_Reference);
+                //反馈回标定板数据实际点位3
+                Cali_Mark_Dst[2] = new Vector(Tem_Mark);
+                //自增
+                Counting++;
+                //跳出
+                if (Counting >= 20)
+                {
+                    MessageBox.Show("标定板数据实际点位3 寻找失败");
+                    return Result;
+                }
+            } while (!Differ_Deviation(new Vector(Cam.X - 243 * Para_List.Parameter.Cam_Reference, Cam.Y - 324 * Para_List.Parameter.Cam_Reference), Para_List.Parameter.Pos_Tolerance));
+
+            //数据提取
+            //标准数据
+            srcTri[0] = new PointF((float)(Cali_Mark_Src[0].X), (float)(Cali_Mark_Src[0].Y));
+            srcTri[1] = new PointF((float)(Cali_Mark_Src[1].X), (float)(Cali_Mark_Src[1].Y));
+            srcTri[2] = new PointF((float)(Cali_Mark_Src[2].X), (float)(Cali_Mark_Src[2].Y));
+            //仿射数据
+            dstTri[0] = new PointF((float)(Cali_Mark_Dst[0].X), (float)(Cali_Mark_Dst[0].Y));
+            dstTri[1] = new PointF((float)(Cali_Mark_Dst[1].X), (float)(Cali_Mark_Dst[1].Y));
+            dstTri[2] = new PointF((float)(Cali_Mark_Dst[2].X), (float)(Cali_Mark_Dst[2].Y));
+            //计算仿射变换矩阵
+            mat = CvInvoke.GetAffineTransform(srcTri, dstTri);
+            //提取矩阵数据
+            temp_array = mat.GetDoubleArray();
+            //获取仿射变换参数
+            Result = Gts_Cal_Data_Resolve.Array_To_Affinity(temp_array);
+            Para_List.Parameter.Cal_Trans_Affinity = new Affinity_Matrix(Result);
+            //追加进入仿射变换List
+            return Result;
+        }
+        //计算标定板仿射变换后坐标值
+        public static Vector Get_Cal_Actual_Point(Vector src)
+        {
+            return new Vector(src.X * Para_List.Parameter.Cal_Trans_Affinity.Stretch_X + src.Y * Para_List.Parameter.Cal_Trans_Affinity.Distortion_X + Para_List.Parameter.Cal_Trans_Affinity.Delta_X, src.Y * Para_List.Parameter.Cal_Trans_Affinity.Stretch_Y + src.X * Para_List.Parameter.Cal_Trans_Affinity.Distortion_Y + Para_List.Parameter.Cal_Trans_Affinity.Delta_Y);
+        }
+        /// <summary>
+        /// 矫正Mark坐标
+        ///
+        /// </summary>
+        /// <param name="type"></param>
+        /// type - 0 初次校准
+        /// type - 1 re_cal
+        public static void Calibrate_Mark(int type)
+        {
+            //建立变量
+            Vector Cam = new Vector();
             Vector Coodinate_Point;
             Vector Tem_Mark;
+            Vector Mark4_dif;
             UInt16 Counting;
-            ////两轴回零
-            //Thread Axis01_home_thread = new Thread(this.Axis01_Home);
-            //Thread Axis02_home_thread = new Thread(this.Axis02_Home);
-            //Axis01_home_thread.Start();
-            //Axis02_home_thread.Start();
-            ////等待线程结束
-            //Axis01_home_thread.Join();
-            //Axis02_home_thread.Join();
-
-            ////建立直角坐标系
-            //interpolation.Coordination(Para_List.Parameter.Work_X, Para_List.Parameter.Work_Y);
-
-            ////测试程序
-            ////定位到Mark1点
-            //Mark(Para_List.Parameter.Mark3);
-            ////调用相机，获取对比的坐标信息
-            //Common_Method.Delay_Time.Delay(200);//延时200ms
-            ////Main.T_Client
-            //Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(2));//触发拍照 
-            ////获取坐标系平台坐标
-            //Coodinate_Point = new Vector(interpolation.Get_Coordinate());
-            ////计算偏移
-            //Tem_Mark = new Vector(Coodinate_Point.X + Cam.X, Coodinate_Point.Y + Cam.Y);
-            ////反馈回Mark点
-            //Para_List.Parameter.Mark3 = new Vector(Tem_Mark);
-            ////定位到Mark1点
-            //Mark(Para_List.Parameter.Mark3);
-
-            
-            
-            //矫正Mark1           
-            Counting = 0;
-            do
+            List<Vector> Mark_Datas = new List<Vector>();
+            //abstract Mark Point
+            if (type == 0)
             {
-                //定位到Mark1点
-                Mark(Para_List.Parameter.Mark1);
-                //调用相机，获取对比的坐标信息
-                Thread.Sleep(200);//延时200ms
-                //Main.T_Client
-                Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(2));//触发拍照 
-                if ((Cam.X == 999) || (Cam.Y == 999))
-                {
-                    MessageBox.Show("相机通讯数据等待，请检查！！！");
-                    return;
-                }
-                //获取坐标系平台坐标
-                Coodinate_Point = new Vector(GTS_Fun.Interpolation.Get_Coordinate());
-                //计算偏移
-                Tem_Mark = new Vector(Coodinate_Point.X + Cam.X, Coodinate_Point.Y + Cam.Y);
-                //反馈回Mark点
-                Para_List.Parameter.Mark1 = new Vector(Tem_Mark);
-                //自增
-                Counting++;
-                //跳出
-                if (Counting >= 20)
-                {
-                    MessageBox.Show("Mark1 寻找失败");
-                    return;
-                }
-            } while (!Differ_Deviation(Cam));
-
-
-            //矫正Mark2           
-            Counting = 0;
-            do
+                Mark_Datas.Add(new Vector(Para_List.Parameter.Mark1));
+                Mark_Datas.Add(new Vector(Para_List.Parameter.Mark2));
+                Mark_Datas.Add(new Vector(Para_List.Parameter.Mark3));
+                Mark_Datas.Add(new Vector(Para_List.Parameter.Mark4));
+            }
+            else
             {
-                //定位到Mark1点
-                Mark(Para_List.Parameter.Mark2);
-                //调用相机，获取对比的坐标信息
-                Thread.Sleep(200);//延时200ms
-                //Main.T_Client
-                Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(2));//触发拍照 
-                if ((Cam.X == 999) || (Cam.Y == 999))
-                {
-                    MessageBox.Show("相机通讯数据等待，请检查！！！");
-                    return;
-                }
-                //获取坐标系平台坐标
-                Coodinate_Point = new Vector(GTS_Fun.Interpolation.Get_Coordinate());
-                //计算偏移
-                Tem_Mark = new Vector(Coodinate_Point.X + Cam.X, Coodinate_Point.Y + Cam.Y);
-                //反馈回Mark点
-                Para_List.Parameter.Mark2 = new Vector(Tem_Mark);
-                //自增
-                Counting++;
-                //跳出
-                if (Counting >= 20)
-                {
-                    MessageBox.Show("Mark2 寻找失败");
-                    return;
-                }
-            } while (!Differ_Deviation(Cam));
-
-            //矫正Mark3          
-            Counting = 0;
-            do
+                Mark_Datas.Add(new Vector(Gts_Cal_Data_Resolve.Get_Aff_After(Para_List.Parameter.Mark_Dxf1, Para_List.Parameter.Trans_Affinity)));
+                Mark_Datas.Add(new Vector(Gts_Cal_Data_Resolve.Get_Aff_After(Para_List.Parameter.Mark_Dxf2, Para_List.Parameter.Trans_Affinity)));
+                Mark_Datas.Add(new Vector(Gts_Cal_Data_Resolve.Get_Aff_After(Para_List.Parameter.Mark_Dxf3, Para_List.Parameter.Trans_Affinity)));
+                Mark_Datas.Add(new Vector(Gts_Cal_Data_Resolve.Get_Aff_After(Para_List.Parameter.Mark_Dxf4, Para_List.Parameter.Trans_Affinity)));
+            }            
+            //process the mark point
+            for (int i=0;i< Mark_Datas.Count;i++)
             {
-                //定位到Mark1点
-                Mark(Para_List.Parameter.Mark3);
-                //调用相机，获取对比的坐标信息
-                Thread.Sleep(200);//延时200ms
-                //Main.T_Client
-                Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(2));//触发拍照 
-                if ((Cam.X == 999) || (Cam.Y == 999))
+                //矫正Mark           
+                Counting = 0;
+                do
                 {
-                    MessageBox.Show("相机通讯数据等待，请检查！！！");
-                    return;
-                }
-                //获取坐标系平台坐标
-                Coodinate_Point = new Vector(GTS_Fun.Interpolation.Get_Coordinate());
-                //计算偏移
-                Tem_Mark = new Vector(Coodinate_Point.X + Cam.X, Coodinate_Point.Y + Cam.Y);
-                //反馈回Mark点
-                Para_List.Parameter.Mark3 = new Vector(Tem_Mark);
-                //自增
-                Counting++;
-                //跳出
-                if (Counting >= 20)
-                {
-                    MessageBox.Show("Mark3 寻找失败");
-                    return;
-                }
-            } while (!Differ_Deviation(Cam));
+                    //定位到Mark点
+                    Mark(Mark_Datas[i]);
+                    //调用相机，获取对比的坐标信息
+                    Thread.Sleep(200);//延时200ms
+                    Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(2));//触发拍照 
+                    if ((Cam.X == 999) || (Cam.Y == 999))
+                    {
+                        MessageBox.Show("相机通讯数据等待，请检查！！！");
+                        return;
+                    }
+                    //获取坐标系平台坐标
+                    Coodinate_Point = new Vector(GTS_Fun.Interpolation.Get_Coordinate(0));
+                    //计算偏移
+                    Tem_Mark = new Vector(Coodinate_Point.X + Cam.X, Coodinate_Point.Y + Cam.Y);
+                    //反馈回Mark点
+                    Mark_Datas[i] = new Vector(Tem_Mark);
+                    //自增
+                    Counting++;
+                    //跳出
+                    if (Counting >= 20)
+                    {
+                        MessageBox.Show(string.Format("Mark{0} 寻找失败!!!",i+1));
+                        return;
+                    }
+                } while (!Differ_Deviation(Cam, Para_List.Parameter.Pos_Tolerance));
+            }
+            //cal Affinity matrics data 
+            Para_List.Parameter.Trans_Affinity =new Affinity_Matrix(Gts_Cal_Data_Resolve.Cal_Affinity(Mark_Datas));
 
-            //计算仿射变换参数
-            Para_List.Parameter.Trans_Affinity =new Affinity_Matrix(Gts_Cal_Data_Resolve.Cal_Affinity()); 
+            //difference mark4 
+            Tem_Mark = Gts_Cal_Data_Resolve.Get_Aff_After(Para_List.Parameter.Mark_Dxf4, Para_List.Parameter.Trans_Affinity);
+            //caluate difference between theory mark4 and actual mark4
+            Mark4_dif = new Vector(Tem_Mark - Mark_Datas[3]);
+            //output result
+            if (Differ_Deviation(Mark4_dif, Para_List.Parameter.Mark_Reference))
+            {
+                Prompt.Log.Info(String.Format("Mark4 验证OK！！！，X坐标偏差：{0}，Y坐标偏差：{1}", Mark4_dif.X, Mark4_dif.Y));
+                MessageBox.Show(String.Format("Mark4 验证OK！！！，X坐标偏差：{0}，Y坐标偏差：{1}", Mark4_dif.X, Mark4_dif.Y));
+            }
+            else
+            {
+                Prompt.Log.Info(String.Format("Mark4 验证NG！！！，X坐标偏差：{0}，Y坐标偏差：{1}", Mark4_dif.X, Mark4_dif.Y));
+                MessageBox.Show(String.Format("Mark4 验证NG！！！，X坐标偏差：{0}，Y坐标偏差：{1}", Mark4_dif.X, Mark4_dif.Y));
+            }
 
         }
         //判别误差范围之内
-        public static bool Differ_Deviation(Vector Indata)
+        public static bool Differ_Deviation(Vector Indata,decimal reference)
         {
-            if ((Math.Abs(Indata.X)<=Para_List.Parameter.Pos_Tolerance) && (Math.Abs(Indata.Y) <= Para_List.Parameter.Pos_Tolerance))
+            if ((Math.Abs(Indata.X)<= reference) && (Math.Abs(Indata.Y) <= reference))
             {
                 return true;
             }
@@ -761,17 +826,16 @@ namespace Laser_Build_1._0
                     return;
                 }
                 //获取坐标系平台坐标
-                Coodinate_Point = new Vector(GTS_Fun.Interpolation.Get_Coordinate());
+                Coodinate_Point = new Vector(GTS_Fun.Interpolation.Get_Coordinate(0));
                 //计算偏移
                 Tem_Mark = new Vector(Coodinate_Point.X + Cam.X - 100, Coodinate_Point.Y + Cam.Y - 100);
                 //反馈回RTC_ORG数据
                 Para_List.Parameter.Rtc_Org = new Vector(Tem_Mark);
                 //自增
                 Counting++;
-            } while (!Differ_Deviation(Cam) && (Counting <= 10));
+            } while (!Differ_Deviation(Cam, Para_List.Parameter.Pos_Tolerance) && (Counting <= 10));
             //数据矫正完成
-        }
-        
+        }        
         //定位mark点
         public static void Mark(Vector point)
         {
@@ -855,71 +919,17 @@ namespace Laser_Build_1._0
     }
     //GTS校准数据处理
     class Gts_Cal_Data_Resolve
-    {
-        //0829保存数据到 .CSV
-        private static void Save_Csv(Correct_Data resultdata, String newdataX, String newdataY) //type:0:分组，1：qa
-        {
-            string sdatetime = DateTime.Now.ToString("D");
-            string filePath = "";
-            string delimiter = ",";
-            string strHeader = "";
-
-            filePath = @"E:\\laser_data\\标定数据\\" + sdatetime + ".csv";
-            strHeader += "相机实际X坐标,相机实际Y坐标,平台电机实际X坐标,平台电机实际Y坐标,相机X坐标,相机Y坐标";
-
-            bool isExit = File.Exists(filePath);
-            StreamWriter sw = new StreamWriter(filePath, true, Encoding.GetEncoding("gb2312"));
-            if (!isExit)
-            {
-                sw.WriteLine(strHeader);
-            }
-            //output rows data
-            string strRowValue = "";
-            strRowValue += resultdata.Xo + delimiter
-                         + resultdata.Yo + delimiter
-                         + resultdata.Xm + delimiter
-                         + resultdata.Ym + delimiter
-                         + newdataX + delimiter
-                         + newdataY;
-            sw.WriteLine(strRowValue);
-            sw.Close();
-        }
-        //8.28
-        //dxf 仿射变换 求DX，DY，Dct(sin \cos)
-        public static Affinity_Matrix Resolve_DxfToM(PointF[] srcTri, PointF[] dstTri)//标准数据 //差异化数据
-        {
-            //建立变量
-            Affinity_Matrix Temp_Affinity_Matrix = new Affinity_Matrix();
-            //定义仿射变换数组 
-            Mat mat = new Mat(new Size(3, 2), Emgu.CV.CvEnum.DepthType.Cv32F, 1); //2行 3列 的矩阵
-
-            double[] temp_array;
-            //序列化
-            Serialize_Data Save_Data = new Serialize_Data();
-
-            //计算仿射变换矩阵
-            mat = CvInvoke.GetAffineTransform(srcTri, dstTri);
-            //提取矩阵数据
-            temp_array = mat.GetDoubleArray();
-            //获取仿射变换参数
-            Temp_Affinity_Matrix.Cos_Value = Convert.ToDecimal(temp_array[0]);//余弦值
-            Temp_Affinity_Matrix.Sin_Value = Convert.ToDecimal(temp_array[1]);//正弦值
-            Temp_Affinity_Matrix.Delta_X = Convert.ToDecimal(temp_array[2]);//x方向偏移
-            Temp_Affinity_Matrix.Delta_Y = Convert.ToDecimal(temp_array[5]);//y方向偏移
-            //追加进入仿射变换List
-            //保存为文件
-            Save_Data.Serialize_Affinity_Matrix_dxf(Temp_Affinity_Matrix, "Affinity_Matrix_DxfToM.txt");
-            return Temp_Affinity_Matrix;
-        }
+    {       
         //处理相机与轴的数据，生成仿射变换数组，并保存进入文件
         public static List<Affinity_Matrix> Resolve(List<Correct_Data> correct_Datas)
         {
-
             //建立变量
             List<Affinity_Matrix> Result = new List<Affinity_Matrix>();
             Affinity_Matrix Temp_Affinity_Matrix = new Affinity_Matrix();
-            List<Double_Fit_Data> Line_Fit_Data = new List<Double_Fit_Data>();
-            Double_Fit_Data Temp_Fit_Data = new Double_Fit_Data();
+            List<Double_Fit_Data> Line_Fit_Data_AM = new List<Double_Fit_Data>();
+            Double_Fit_Data Temp_Fit_Data_AM = new Double_Fit_Data();
+            List<Double_Fit_Data> Line_Fit_Data_MA = new List<Double_Fit_Data>();
+            Double_Fit_Data Temp_Fit_Data_MA = new Double_Fit_Data();
             Int16 i, j;
             //定义仿射变换数组 
             Mat mat = new Mat(new Size(3, 2), Emgu.CV.CvEnum.DepthType.Cv32F, 1); //2行 3列 的矩阵
@@ -955,66 +965,216 @@ namespace Laser_Build_1._0
                 }
                 else if (Para_List.Parameter.Gts_Affinity_Type == 2)//线性拟合
                 {
-                    //初始化数据
-                    double[] src_x = new double[Para_List.Parameter.Gts_Calibration_Col];
-                    double[] dst_x = new double[Para_List.Parameter.Gts_Calibration_Col];
-                    Tuple<double, double> R_X = new Tuple<double, double>(0, 0);
-                    double[] src_y = new double[Para_List.Parameter.Gts_Calibration_Row];
-                    double[] dst_y = new double[Para_List.Parameter.Gts_Calibration_Row];
-                    Tuple<double, double> R_Y = new Tuple<double, double>(0, 0); 
+                    //初始化数据 M_A
+                    double[] src_x_MA = new double[Para_List.Parameter.Gts_Calibration_Col];
+                    double[] dst_x_MA = new double[Para_List.Parameter.Gts_Calibration_Col];
+                    Tuple<double, double> R_X_MA = new Tuple<double, double>(0, 0);
+                    double[] src_y_MA = new double[Para_List.Parameter.Gts_Calibration_Row];
+                    double[] dst_y_MA = new double[Para_List.Parameter.Gts_Calibration_Row];
+                    Tuple<double, double> R_Y_MA = new Tuple<double, double>(0, 0);
+                    //初始化数据 A_M
+                    double[] src_x_AM = new double[Para_List.Parameter.Gts_Calibration_Col];
+                    double[] dst_x_AM = new double[Para_List.Parameter.Gts_Calibration_Col];
+                    Tuple<double, double> R_X_AM = new Tuple<double, double>(0, 0);
+                    double[] src_y_AM = new double[Para_List.Parameter.Gts_Calibration_Row];
+                    double[] dst_y_AM = new double[Para_List.Parameter.Gts_Calibration_Row];
+                    Tuple<double, double> R_Y_AM = new Tuple<double, double>(0, 0);                    
                     //拟合数据
                     for (i = 0; i < Para_List.Parameter.Gts_Calibration_Col; i++)
                     {
                         for (j = 0; j < Para_List.Parameter.Gts_Calibration_Row; j++)
                         {
-                            //提取X轴拟合数据
-                            src_x[j] = (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Xo);
-                            dst_x[j] = (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Xm);
+                            //提取X轴拟合数据 M_A
+                            src_x_MA[j] = (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Xm);
+                            dst_x_MA[j] = (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Xo);
                             //提取Y轴拟合数据
-                            src_y[j] = (float)(correct_Datas[i + j * Para_List.Parameter.Gts_Calibration_Col].Yo);
-                            dst_y[j] = (float)(correct_Datas[i + j * Para_List.Parameter.Gts_Calibration_Col].Ym);
-                            
+                            src_y_MA[j] = (float)(correct_Datas[i + j * Para_List.Parameter.Gts_Calibration_Col].Ym);
+                            dst_y_MA[j] = (float)(correct_Datas[i + j * Para_List.Parameter.Gts_Calibration_Col].Yo);
+
+                            //提取X轴拟合数据 A_M
+                            src_x_AM[j] = (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Xo);
+                            dst_x_AM[j] = (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Xm);
+                            //提取Y轴拟合数据
+                            src_y_AM[j] = (float)(correct_Datas[i + j * Para_List.Parameter.Gts_Calibration_Col].Yo);
+                            dst_y_AM[j] = (float)(correct_Datas[i + j * Para_List.Parameter.Gts_Calibration_Col].Ym);
                         }
                         //高阶曲线拟合
-                        if (Line_Re >= 2)
+                        if (Line_Re == 4)
                         {
-                            double[] Res_x = Fit.Polynomial(src_x, dst_x, Line_Re);
-                            double[] Res_y = Fit.Polynomial(src_y, dst_y, Line_Re);
-                            //提取拟合直线数据
-                            Temp_Fit_Data = new Double_Fit_Data
+                            double[] Res_x_MA = Fit.Polynomial(src_x_MA, dst_x_MA, Line_Re);
+                            double[] Res_y_MA = Fit.Polynomial(src_y_MA, dst_y_MA, Line_Re);
+                            double[] Res_x_AM = Fit.Polynomial(src_y_AM, dst_x_AM, Line_Re);
+                            double[] Res_y_AM = Fit.Polynomial(src_x_AM, dst_y_AM, Line_Re);
+                            //提取拟合直线数据 AM
+                            Temp_Fit_Data_AM = new Double_Fit_Data
                             {
-                                K_X4 = (decimal)Res_x[4],
-                                K_X3 = (decimal)Res_x[3],
-                                K_X2 = (decimal)Res_x[2],
-                                K_X1 = (decimal)Res_x[1],
-                                Delta_X = (decimal)Res_x[0],
-                                K_Y4 = (decimal)Res_y[4],
-                                K_Y3 = (decimal)Res_y[3],
-                                K_Y2 = (decimal)Res_y[2],
-                                K_Y1 = (decimal)Res_y[1],
-                                Delta_Y = (decimal)Res_y[0]
+                                K_X4 = (decimal)Res_x_AM[4],
+                                K_X3 = (decimal)Res_x_AM[3],
+                                K_X2 = (decimal)Res_x_AM[2],
+                                K_X1 = (decimal)Res_x_AM[1],
+                                Delta_X = (decimal)Res_x_AM[0],
+                                K_Y4 = (decimal)Res_y_AM[4],
+                                K_Y3 = (decimal)Res_y_AM[3],
+                                K_Y2 = (decimal)Res_y_AM[2],
+                                K_Y1 = (decimal)Res_y_AM[1],
+                                Delta_Y = (decimal)Res_y_AM[0]
+                            };
+                            //提取拟合直线数据 MA
+                            Temp_Fit_Data_MA = new Double_Fit_Data
+                            {
+                                K_X4 = (decimal)Res_x_MA[4],
+                                K_X3 = (decimal)Res_x_MA[3],
+                                K_X2 = (decimal)Res_x_MA[2],
+                                K_X1 = (decimal)Res_x_MA[1],
+                                Delta_X = (decimal)Res_x_MA[0],
+                                K_Y4 = (decimal)Res_y_MA[4],
+                                K_Y3 = (decimal)Res_y_MA[3],
+                                K_Y2 = (decimal)Res_y_MA[2],
+                                K_Y1 = (decimal)Res_y_MA[1],
+                                Delta_Y = (decimal)Res_y_MA[0]
+                            };
+                        }
+                        else if (Line_Re == 3)
+                        {
+                            double[] Res_x_MA = Fit.Polynomial(src_x_MA, dst_x_MA, Line_Re);
+                            double[] Res_y_MA = Fit.Polynomial(src_y_MA, dst_y_MA, Line_Re);
+                            double[] Res_x_AM = Fit.Polynomial(src_y_AM, dst_x_AM, Line_Re);
+                            double[] Res_y_AM = Fit.Polynomial(src_x_AM, dst_y_AM, Line_Re);
+                            //提取拟合直线数据 AM
+                            Temp_Fit_Data_AM = new Double_Fit_Data
+                            {
+                                K_X4 = 0,
+                                K_X3 = (decimal)Res_x_AM[3],
+                                K_X2 = (decimal)Res_x_AM[2],
+                                K_X1 = (decimal)Res_x_AM[1],
+                                Delta_X = (decimal)Res_x_AM[0],
+                                K_Y4 = (decimal)Res_y_AM[4],
+                                K_Y3 = (decimal)Res_y_AM[3],
+                                K_Y2 = (decimal)Res_y_AM[2],
+                                K_Y1 = (decimal)Res_y_AM[1],
+                                Delta_Y = (decimal)Res_y_AM[0]
+                            };
+                            //提取拟合直线数据 MA
+                            Temp_Fit_Data_MA = new Double_Fit_Data
+                            {
+                                K_X4 = 0,
+                                K_X3 = (decimal)Res_x_MA[3],
+                                K_X2 = (decimal)Res_x_MA[2],
+                                K_X1 = (decimal)Res_x_MA[1],
+                                Delta_X = (decimal)Res_x_MA[0],
+                                K_Y4 = 0,
+                                K_Y3 = (decimal)Res_y_MA[3],
+                                K_Y2 = (decimal)Res_y_MA[2],
+                                K_Y1 = (decimal)Res_y_MA[1],
+                                Delta_Y = (decimal)Res_y_MA[0]
+                            };
+                        }
+                        else if (Line_Re == 2)
+                        {
+                            double[] Res_x_MA = Fit.Polynomial(src_x_MA, dst_x_MA, Line_Re);
+                            double[] Res_y_MA = Fit.Polynomial(src_y_MA, dst_y_MA, Line_Re);
+                            double[] Res_x_AM = Fit.Polynomial(src_y_AM, dst_x_AM, Line_Re);
+                            double[] Res_y_AM = Fit.Polynomial(src_x_AM, dst_y_AM, Line_Re);
+                            //提取拟合直线数据 AM
+                            Temp_Fit_Data_AM = new Double_Fit_Data
+                            {
+                                K_X4 = 0,
+                                K_X3 = 0,
+                                K_X2 = (decimal)Res_x_AM[2],
+                                K_X1 = (decimal)Res_x_AM[1],
+                                Delta_X = (decimal)Res_x_AM[0],
+                                K_Y4 = 0,
+                                K_Y3 = 0,
+                                K_Y2 = (decimal)Res_y_AM[2],
+                                K_Y1 = (decimal)Res_y_AM[1],
+                                Delta_Y = (decimal)Res_y_AM[0]
+                            };
+                            //提取拟合直线数据 MA
+                            Temp_Fit_Data_MA = new Double_Fit_Data
+                            {
+                                K_X4 = 0,
+                                K_X3 = 0,
+                                K_X2 = (decimal)Res_x_MA[2],
+                                K_X1 = (decimal)Res_x_MA[1],
+                                Delta_X = (decimal)Res_x_MA[0],
+                                K_Y4 = 0,
+                                K_Y3 = 0,
+                                K_Y2 = (decimal)Res_y_MA[2],
+                                K_Y1 = (decimal)Res_y_MA[1],
+                                Delta_Y = (decimal)Res_y_MA[0]
+                            };
+                        }
+                        else if (Line_Re == 1)
+                        {
+                            double[] Res_x_MA = Fit.Polynomial(src_x_MA, dst_x_MA, Line_Re);
+                            double[] Res_y_MA = Fit.Polynomial(src_y_MA, dst_y_MA, Line_Re);
+                            double[] Res_x_AM = Fit.Polynomial(src_y_AM, dst_x_AM, Line_Re);
+                            double[] Res_y_AM = Fit.Polynomial(src_x_AM, dst_y_AM, Line_Re);
+                            //提取拟合直线数据 AM
+                            Temp_Fit_Data_AM = new Double_Fit_Data
+                            {
+                                K_X4 = 0,
+                                K_X3 = 0,
+                                K_X2 = 0,
+                                K_X1 = (decimal)Res_x_AM[1],
+                                Delta_X = (decimal)Res_x_AM[0],
+                                K_Y4 = 0,
+                                K_Y3 = 0,
+                                K_Y2 = 0,
+                                K_Y1 = (decimal)Res_y_AM[1],
+                                Delta_Y = (decimal)Res_y_AM[0]
+                            };
+                            //提取拟合直线数据 MA
+                            Temp_Fit_Data_MA = new Double_Fit_Data
+                            {
+                                K_X4 = 0,
+                                K_X3 = 0,
+                                K_X2 = 0,
+                                K_X1 = (decimal)Res_x_MA[1],
+                                Delta_X = (decimal)Res_x_MA[0],
+                                K_Y4 = 0,
+                                K_Y3 = 0,
+                                K_Y2 = 0,
+                                K_Y1 = (decimal)Res_y_MA[1],
+                                Delta_Y = (decimal)Res_y_MA[0]
                             };
                         }
                         else
                         {
-                            R_X = Fit.Line(src_x, dst_x);
-                            R_Y = Fit.Line(src_y, dst_y);
+                            R_X_MA = Fit.Line(src_x_MA, dst_x_MA); 
+                            R_Y_MA = Fit.Line(src_y_MA, dst_y_MA);
+                            R_X_AM = Fit.Line(src_y_AM, dst_x_AM);
+                            R_Y_AM = Fit.Line(src_x_AM, dst_y_AM);
                             //提取拟合直线数据
-                            Temp_Fit_Data = new Double_Fit_Data
+                            Temp_Fit_Data_AM = new Double_Fit_Data
                             {
-                                K_X1 = (decimal)R_X.Item2,
-                                Delta_X = (decimal)R_X.Item1,
-                                K_Y1 = (decimal)R_Y.Item2,
-                                Delta_Y = (decimal)R_Y.Item1
+                                K_X1 = (decimal)R_X_AM.Item2,
+                                Delta_X = (decimal)R_X_AM.Item1,
+                                K_Y1 = (decimal)R_Y_AM.Item2,
+                                Delta_Y = (decimal)R_Y_AM.Item1
+                            };
+                            //提取拟合直线数据
+                            Temp_Fit_Data_MA = new Double_Fit_Data
+                            {
+                                K_X1 = (decimal)R_X_MA.Item2,
+                                Delta_X = (decimal)R_X_MA.Item1,
+                                K_Y1 = (decimal)R_Y_MA.Item2,
+                                Delta_Y = (decimal)R_Y_MA.Item1
                             };
                         }                        
                         //保存进入Line_Fit_Data
-                        Line_Fit_Data.Add(new Double_Fit_Data(Temp_Fit_Data));
+                        Line_Fit_Data_AM.Add(new Double_Fit_Data(Temp_Fit_Data_AM));
                         //清空数据
-                        Temp_Fit_Data.Empty();
+                        Temp_Fit_Data_AM.Empty();
+                        //保存进入Line_Fit_Data
+                        Line_Fit_Data_MA.Add(new Double_Fit_Data(Temp_Fit_Data_MA));
+                        //清空数据
+                        Temp_Fit_Data_MA.Empty();
                     }
                     //保存轴拟合数据
-                    CSV_RW.SaveCSV(CSV_RW.Double_Fit_Data_DataTable(Line_Fit_Data), "Gts_Line_Fit_Data");
+                    CSV_RW.SaveCSV(CSV_RW.Double_Fit_Data_DataTable(Line_Fit_Data_AM), "Gts_Line_Fit_Data_AM");
+                    //保存轴拟合数据
+                    CSV_RW.SaveCSV(CSV_RW.Double_Fit_Data_DataTable(Line_Fit_Data_MA), "Gts_Line_Fit_Data_MA");
                 }
                 else
                 {
@@ -1027,17 +1187,30 @@ namespace Laser_Build_1._0
                         for (j = 0; j < Para_List.Parameter.Gts_Calibration_Row - 1; j++)
                         {
 
+                            ////标准数据  平台坐标
+                            //srcTri[0] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Xm), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Ym));
+                            //srcTri[1] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row].Xm), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row].Ym));
+                            //srcTri[2] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row + 1].Xm), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row + 1].Ym));
+                            ////srcTri[3] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + 1].Xm), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + 1].Ym));
+
+                            ////仿射数据  测量坐标
+                            //dstTri[0] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Xo), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Yo));
+                            //dstTri[1] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row].Xo), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row].Yo));
+                            //dstTri[2] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row + 1].Xo), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row + 1].Yo));
+                            ////dstTri[3] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + 1].Xo), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + 1].Yo));
+
                             //标准数据  平台坐标
-                            srcTri[0] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Xm), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Ym));
-                            srcTri[1] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row].Xm), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row].Ym));
-                            srcTri[2] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row + 1].Xm), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row + 1].Ym));
+                            srcTri[0] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Xo), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Yo));
+                            srcTri[1] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row].Xo), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row].Yo));
+                            srcTri[2] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row + 1].Xo), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row + 1].Yo));
                             //srcTri[3] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + 1].Xm), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + 1].Ym));
 
                             //仿射数据  测量坐标
-                            dstTri[0] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Xo), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Yo));
-                            dstTri[1] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row].Xo), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row].Yo));
-                            dstTri[2] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row + 1].Xo), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row + 1].Yo));
+                            dstTri[0] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Xm), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col].Ym));
+                            dstTri[1] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row].Xm), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row].Ym));
+                            dstTri[2] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row + 1].Xm), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + Para_List.Parameter.Gts_Calibration_Row + 1].Ym));
                             //dstTri[3] = new PointF((float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + 1].Xo), (float)(correct_Datas[j + i * Para_List.Parameter.Gts_Calibration_Col + 1].Yo));
+
 
                             //计算仿射变换矩阵
                             mat = CvInvoke.GetAffineTransform(srcTri, dstTri);
@@ -1059,40 +1232,19 @@ namespace Laser_Build_1._0
             return Result;
 
         }
+        //abstract affinity parameter from array
         public static Affinity_Matrix Array_To_Affinity(double[] temp_array)
         {
-            Affinity_Matrix Result = new Affinity_Matrix();
-            //获取仿射变换参数
-            Result.Cos_Value = Convert.ToDecimal(temp_array[0]);//余弦值
-            //范围限制
-            if (Result.Cos_Value > 1.0m)
+            Affinity_Matrix Result = new Affinity_Matrix
             {
-                Result.Cos_Value = 1.0m;
-            }
-            else if (Result.Cos_Value < -1.0m)
-            {
-                Result.Cos_Value = -1.0m;
-            }
-            //else if (Math.Abs(Result.Cos_Value) < 0.002m)
-            //{
-            //    Result.Cos_Value = 0.0m;
-            //}
-            Result.Sin_Value = Convert.ToDecimal(temp_array[1]);//正弦值
-            //范围限制
-            if (Result.Sin_Value > 1.0m)
-            {
-                Result.Sin_Value = 1.0m;
-            }
-            else if (Result.Sin_Value < -1.0m)
-            {
-                Result.Sin_Value = -1.0m;
-            }
-            //else if (Math.Abs(Result.Sin_Value) < 0.002m)
-            //{
-            //    Result.Sin_Value = 0.0m;
-            //}
-            Result.Delta_X = Convert.ToDecimal(temp_array[2]);//x方向偏移
-            Result.Delta_Y = Convert.ToDecimal(temp_array[5]);//y方向偏移
+                //获取仿射变换参数
+                Stretch_X = Convert.ToDecimal(temp_array[0]),
+                Distortion_X = Convert.ToDecimal(temp_array[1]),
+                Delta_X = Convert.ToDecimal(temp_array[2]),//x方向偏移
+                Stretch_Y = Convert.ToDecimal(temp_array[4]),
+                Distortion_Y = Convert.ToDecimal(temp_array[3]),
+                Delta_Y = Convert.ToDecimal(temp_array[5])//y方向偏移
+            };
             //返回结果
             return Result;
         }
@@ -1127,7 +1279,7 @@ namespace Laser_Build_1._0
             return Result;
         }
         //dxf 仿射变换 求DX，DY，Dct(sin \cos)
-        public static Affinity_Matrix Cal_Affinity()//标准数据 //差异化数据 
+        public static Affinity_Matrix Cal_Affinity()
         {
             //建立变量
             Affinity_Matrix Result = new Affinity_Matrix();
@@ -1152,14 +1304,14 @@ namespace Laser_Build_1._0
             temp_array = mat.GetDoubleArray();
             //获取仿射变换参数
             Result = Array_To_Affinity(temp_array);
+
             //保存为文件
             string sdatetime = DateTime.Now.ToString("D");
             string filePath = "";
             string delimiter = ",";
             string strHeader = "";
             filePath = @"./\Config/" + "Cal_Affinity.csv";
-
-            strHeader += "Cos,Sin,Delatx,Deltay";
+            strHeader += "Stretch_X,Distortion_X,Delat_X,Stretch_Y,Distortion_Y,Delta_Y";
             bool isExit = File.Exists(filePath);
             StreamWriter sw = new StreamWriter(filePath, true, Encoding.GetEncoding("gb2312"));
             if (!isExit)
@@ -1168,9 +1320,11 @@ namespace Laser_Build_1._0
             }
             //output rows data
             string strRowValue = "";
-            strRowValue += Result.Cos_Value + delimiter
-                         + Result.Sin_Value + delimiter
+            strRowValue += Result.Stretch_X + delimiter
+                         + Result.Distortion_X + delimiter
                          + Result.Delta_X + delimiter
+                         + Result.Stretch_Y + delimiter
+                         + Result.Distortion_Y + delimiter
                          + Result.Delta_Y;
             sw.WriteLine(strRowValue);
             sw.Close();
@@ -1178,33 +1332,252 @@ namespace Laser_Build_1._0
             //追加进入仿射变换List
             return Result;
         }
-        //获取线性补偿坐标
-        public static Vector Get_Line_Fit_Coordinate(Decimal x,decimal y,List<Double_Fit_Data> line_fit_data)  
+        //dxf 仿射变换 求DX，DY，Dct(sin \cos)
+        public static Affinity_Matrix Cal_Affinity(List<Vector> indata)
         {
+            //建立变量
+            Affinity_Matrix Result = new Affinity_Matrix();
+            if (indata.Count>=3)
+            {
+                //定义仿射变换数组 
+                Mat mat = new Mat(new Size(3, 2), Emgu.CV.CvEnum.DepthType.Cv32F, 1); //2行 3列 的矩阵
+                ///定义点位数组
+                PointF[] srcTri = new PointF[3];//标准数据
+                PointF[] dstTri = new PointF[3];//差异化数据 
+                double[] temp_array;
+                //数据提取
+                //标准数据
+                srcTri[0] = new PointF((float)(Para_List.Parameter.Mark_Dxf1.X), (float)(Para_List.Parameter.Mark_Dxf1.Y));
+                srcTri[1] = new PointF((float)(Para_List.Parameter.Mark_Dxf2.X), (float)(Para_List.Parameter.Mark_Dxf2.Y));
+                srcTri[2] = new PointF((float)(Para_List.Parameter.Mark_Dxf3.X), (float)(Para_List.Parameter.Mark_Dxf3.Y));
+                //仿射数据
+                dstTri[0] = new PointF((float)(indata[0].X), (float)(indata[0].Y));
+                dstTri[1] = new PointF((float)(indata[1].X), (float)(indata[1].Y));
+                dstTri[2] = new PointF((float)(indata[2].X), (float)(indata[2].Y));
+                //计算仿射变换矩阵
+                mat = CvInvoke.GetAffineTransform(srcTri, dstTri);
+                //提取矩阵数据
+                temp_array = mat.GetDoubleArray();
+                //获取仿射变换参数
+                Result = Array_To_Affinity(temp_array);
+
+                //保存为文件
+                string sdatetime = DateTime.Now.ToString("D");
+                string filePath = "";
+                string delimiter = ",";
+                string strHeader = "";
+                filePath = @"./\Config/" + "Cal_Affinity.csv";
+                strHeader += "Stretch_X,Distortion_X,Delat_X,Stretch_Y,Distortion_Y,Delta_Y";
+                bool isExit = File.Exists(filePath);
+                StreamWriter sw = new StreamWriter(filePath, true, Encoding.GetEncoding("gb2312"));
+                if (!isExit)
+                {
+                    sw.WriteLine(strHeader);
+                }
+                //output rows data
+                string strRowValue = "";
+                strRowValue += Result.Stretch_X + delimiter
+                             + Result.Distortion_X + delimiter
+                             + Result.Delta_X + delimiter
+                             + Result.Stretch_Y + delimiter
+                             + Result.Distortion_Y + delimiter
+                             + Result.Delta_Y;
+                sw.WriteLine(strRowValue);
+                sw.Close();
+
+                //追加进入仿射变换List
+                return Result;
+            }
+            else
+            {
+                return Result;
+            }
+            
+        }
+        //获取线性补偿坐标
+        public static Vector Get_Line_Fit_Coordinate_AM(decimal x,decimal y,List<Double_Fit_Data> line_fit_data)  
+        {
+            Vector Result = new Vector();
             //临时定位变量
             Int16 m, n;
             decimal X_per, Y_per;
             decimal K_x1, K_x2, K_x3, K_x4, B_x;
-            decimal K_y1, K_y2, K_y3, K_y4, B_y;
+            decimal K_y1, K_y2, K_y3, K_y4, B_y; 
+
             //获取落点
-            m = Seek_X_Pos(x);
-            n = Seek_Y_Pos(y);
+            m = Seek_X_Pos(y);
+            n = Seek_Y_Pos(x);
             //计算比率
-            X_per = Math.Abs(x - m * Para_List.Parameter.Gts_Calibration_Cell) / Para_List.Parameter.Gts_Calibration_Cell;
-            Y_per = Math.Abs(y - m * Para_List.Parameter.Gts_Calibration_Cell) / Para_List.Parameter.Gts_Calibration_Cell;
-            //计算实际 线性拟合数据
+            X_per = Math.Abs(y - m * Para_List.Parameter.Gts_Calibration_Cell) / Para_List.Parameter.Gts_Calibration_Cell;
+            Y_per = Math.Abs(x - n * Para_List.Parameter.Gts_Calibration_Cell) / Para_List.Parameter.Gts_Calibration_Cell;
+            //计算拟合参数
             K_x1 = (line_fit_data[m + 1].K_X1 - line_fit_data[m].K_X1) * X_per + line_fit_data[m].K_X1;
             K_x2 = (line_fit_data[m + 1].K_X2 - line_fit_data[m].K_X2) * X_per + line_fit_data[m].K_X2;
             K_x3 = (line_fit_data[m + 1].K_X3 - line_fit_data[m].K_X3) * X_per + line_fit_data[m].K_X3;
             K_x4 = (line_fit_data[m + 1].K_X4 - line_fit_data[m].K_X4) * X_per + line_fit_data[m].K_X4;
             B_x = (line_fit_data[m + 1].Delta_X - line_fit_data[m].Delta_X) * X_per + line_fit_data[m].Delta_X;
-            K_y1 = (line_fit_data[m + 1].K_Y1 - line_fit_data[m].K_Y1) * Y_per + line_fit_data[m].K_Y1;
-            K_y2 = (line_fit_data[m + 1].K_Y2 - line_fit_data[m].K_Y2) * Y_per + line_fit_data[m].K_Y2;
-            K_y3 = (line_fit_data[m + 1].K_Y3 - line_fit_data[m].K_Y3) * Y_per + line_fit_data[m].K_Y3;
-            K_y4 = (line_fit_data[m + 1].K_Y4 - line_fit_data[m].K_Y4) * Y_per + line_fit_data[m].K_Y4;
-            B_y = (line_fit_data[m + 1].Delta_Y - line_fit_data[m].Delta_Y) * Y_per + line_fit_data[m].Delta_Y;
+            K_y1 = (line_fit_data[n + 1].K_Y1 - line_fit_data[n].K_Y1) * Y_per + line_fit_data[n].K_Y1;
+            K_y2 = (line_fit_data[n + 1].K_Y2 - line_fit_data[n].K_Y2) * Y_per + line_fit_data[n].K_Y2;
+            K_y3 = (line_fit_data[n + 1].K_Y3 - line_fit_data[n].K_Y3) * Y_per + line_fit_data[n].K_Y3;
+            K_y4 = (line_fit_data[n + 1].K_Y4 - line_fit_data[n].K_Y4) * Y_per + line_fit_data[n].K_Y4;
+            B_y = (line_fit_data[n + 1].Delta_Y - line_fit_data[n].Delta_Y) * Y_per + line_fit_data[n].Delta_Y;
+            //计算结果
+            Result = new Vector(K_x4 * x * x * x * x + K_x3 * x * x * x + K_x2 * x * x + K_x1 * x + B_x, K_y4 * y * y * y * y + K_y3 * y * y * y + K_y2 * y * y + K_y1 * y + B_y);
+#if DEBUG
+            string sdatetime = DateTime.Now.ToString("D");
+            string delimiter = ",";
+            string strHeader = "";
+            //保存的位置和文件名称
+            string File_Path = @"./\Config/" + "Gts_Correct_Line_Fit " + sdatetime + ".csv";
+            strHeader += "原X坐标,原Y坐标,补偿后X坐标,补偿后Y坐标,补偿前后X差值,补偿前后Y差值,取值坐标X位置,取值坐标Y位置";
+            bool isExit = File.Exists(File_Path);
+            StreamWriter sw = new StreamWriter(File_Path, true, Encoding.GetEncoding("gb2312"));
+            if (!isExit)
+            {
+                sw.WriteLine(strHeader);
+            }
+            //output rows data
+            string strRowValue = "";
+            strRowValue += x + delimiter
+                            + y + delimiter
+                            + Result.X+ delimiter
+                            + Result.Y + delimiter
+                            + (Result.X - x) + delimiter
+                            + (Result.Y - y) + delimiter
+                            + m + delimiter
+                            + n + delimiter;
+            sw.WriteLine(strRowValue);
+            sw.Close();
+#endif
             //返回实际坐标
-            return new Vector(K_x4 * x * x * x * x + K_x3 * x * x * x + K_x2 * x * x + K_x1 * x + B_x, K_y4 * y * y * y * y + K_y3 * y * y * y + K_y2 * y * y + K_y1 * y + B_y);
+            return Result;
+        }
+        //获取线性补偿坐标
+        public static Vector Get_Line_Fit_Coordinate_MA(decimal x, decimal y, List<Double_Fit_Data> line_fit_data)
+        {
+            Vector Result = new Vector();
+            //临时定位变量
+            Int16 m, n;
+            decimal X_per, Y_per;
+            decimal K_x1, K_x2, K_x3, K_x4, B_x;
+            decimal K_y1, K_y2, K_y3, K_y4, B_y;
+
+            //获取落点
+            m = Seek_X_Pos(y);
+            n = Seek_Y_Pos(x);
+            //计算比率
+            X_per = Math.Abs(y - m * Para_List.Parameter.Gts_Calibration_Cell) / Para_List.Parameter.Gts_Calibration_Cell;
+            Y_per = Math.Abs(x - n * Para_List.Parameter.Gts_Calibration_Cell) / Para_List.Parameter.Gts_Calibration_Cell;
+            //计算拟合参数
+            K_x1 = (line_fit_data[m + 1].K_X1 - line_fit_data[m].K_X1) * X_per + line_fit_data[m].K_X1;
+            K_x2 = (line_fit_data[m + 1].K_X2 - line_fit_data[m].K_X2) * X_per + line_fit_data[m].K_X2;
+            K_x3 = (line_fit_data[m + 1].K_X3 - line_fit_data[m].K_X3) * X_per + line_fit_data[m].K_X3;
+            K_x4 = (line_fit_data[m + 1].K_X4 - line_fit_data[m].K_X4) * X_per + line_fit_data[m].K_X4;
+            B_x = (line_fit_data[m + 1].Delta_X - line_fit_data[m].Delta_X) * X_per + line_fit_data[m].Delta_X;
+            K_y1 = (line_fit_data[n + 1].K_Y1 - line_fit_data[n].K_Y1) * Y_per + line_fit_data[n].K_Y1;
+            K_y2 = (line_fit_data[n + 1].K_Y2 - line_fit_data[n].K_Y2) * Y_per + line_fit_data[n].K_Y2;
+            K_y3 = (line_fit_data[n + 1].K_Y3 - line_fit_data[n].K_Y3) * Y_per + line_fit_data[n].K_Y3;
+            K_y4 = (line_fit_data[n + 1].K_Y4 - line_fit_data[n].K_Y4) * Y_per + line_fit_data[n].K_Y4;
+            B_y = (line_fit_data[n + 1].Delta_Y - line_fit_data[n].Delta_Y) * Y_per + line_fit_data[n].Delta_Y;
+            //计算结果
+            Result = new Vector(K_x4 * x * x * x * x + K_x3 * x * x * x + K_x2 * x * x + K_x1 * x + B_x, K_y4 * y * y * y * y + K_y3 * y * y * y + K_y2 * y * y + K_y1 * y + B_y);
+#if DEBUG
+            string sdatetime = DateTime.Now.ToString("D");
+            string delimiter = ",";
+            string strHeader = "";
+            //保存的位置和文件名称
+            string File_Path = @"./\Config/" + "Gts_Correct_Line_Fit " + sdatetime + ".csv";
+            strHeader += "原X坐标,原Y坐标,补偿后X坐标,补偿后Y坐标,补偿前后X差值,补偿前后Y差值,取值坐标X位置,取值坐标Y位置";
+            bool isExit = File.Exists(File_Path);
+            StreamWriter sw = new StreamWriter(File_Path, true, Encoding.GetEncoding("gb2312"));
+            if (!isExit)
+            {
+                sw.WriteLine(strHeader);
+            }
+            //output rows data
+            string strRowValue = "";
+            strRowValue += x + delimiter
+                            + y + delimiter
+                            + Result.X+ delimiter
+                            + Result.Y + delimiter
+                            + (Result.X - x) + delimiter
+                            + (Result.Y - y) + delimiter
+                            + m + delimiter
+                            + n + delimiter;
+            sw.WriteLine(strRowValue);
+            sw.Close();
+#endif
+            //返回实际坐标
+            return Result;
+        }
+        ///get point affinity point'
+        ///
+        public static Vector Get_Aff_After(Vector src,Affinity_Matrix affinity_Matrices)
+        { 
+            return new Vector(src.X * affinity_Matrices.Stretch_X + src.Y * affinity_Matrices.Distortion_X + affinity_Matrices.Delta_X,src.Y * affinity_Matrices.Stretch_Y + src.X * affinity_Matrices.Distortion_Y + affinity_Matrices.Delta_Y);
+        }
+        //获取Affinity补偿坐标
+        public static Vector Get_Affinity_Point(int type,decimal x, decimal y, List<Affinity_Matrix> affinity_Matrices)//0-A_M,1-M_A
+        {
+            Vector Result = new Vector();
+            //临时定位变量
+            Int16 m, n;
+            //获取落点
+            m = Seek_X_Pos(x);
+            n = Seek_Y_Pos(y);
+            if (type == 1) //Motor_Coordinate ---- Actual_Coordinate
+            {
+                //终点计算
+                if (affinity_Matrices.Count > 1)
+                {
+                    Result = new Vector(x * affinity_Matrices[n * Para_List.Parameter.Gts_Affinity_Col + m].Stretch_X - y * affinity_Matrices[n * Para_List.Parameter.Gts_Affinity_Col + m].Distortion_X + affinity_Matrices[n * Para_List.Parameter.Gts_Affinity_Col + m].Delta_X, y * affinity_Matrices[n * Para_List.Parameter.Gts_Affinity_Col + m].Stretch_Y - x * affinity_Matrices[n * Para_List.Parameter.Gts_Affinity_Col + m].Distortion_Y + affinity_Matrices[n * Para_List.Parameter.Gts_Affinity_Col + m].Delta_Y);
+                }
+                else if ((affinity_Matrices.Count > 0) && (affinity_Matrices.Count == 1))
+                {
+                    Result = new Vector(x * affinity_Matrices[0].Stretch_X - y * affinity_Matrices[0].Distortion_X + affinity_Matrices[0].Delta_X, y * affinity_Matrices[0].Stretch_Y - x * affinity_Matrices[0].Distortion_Y + affinity_Matrices[0].Delta_Y);
+                }
+            }
+            else
+            {
+                //终点计算
+                if (affinity_Matrices.Count > 1)
+                {
+                    Result = new Vector(x * affinity_Matrices[n * Para_List.Parameter.Gts_Affinity_Col + m].Stretch_X + y * affinity_Matrices[n * Para_List.Parameter.Gts_Affinity_Col + m].Distortion_X + affinity_Matrices[n * Para_List.Parameter.Gts_Affinity_Col + m].Delta_X, y * affinity_Matrices[n * Para_List.Parameter.Gts_Affinity_Col + m].Stretch_Y + x * affinity_Matrices[n * Para_List.Parameter.Gts_Affinity_Col + m].Distortion_Y + affinity_Matrices[n * Para_List.Parameter.Gts_Affinity_Col + m].Delta_Y);
+                }
+                else if ((affinity_Matrices.Count > 0) && (affinity_Matrices.Count == 1))
+                {
+                    Result = new Vector(x * affinity_Matrices[0].Stretch_X + y * affinity_Matrices[0].Distortion_X + affinity_Matrices[0].Delta_X, y * affinity_Matrices[0].Stretch_Y + x * affinity_Matrices[0].Distortion_Y + affinity_Matrices[0].Delta_Y);
+                }
+            }
+            
+#if DEBUG
+            string sdatetime = DateTime.Now.ToString("D");
+            string delimiter = ",";
+            string strHeader = "";
+            //保存的位置和文件名称
+            string File_Path = @"./\Config/" + "Gts_Correct_Line_Fit " + sdatetime + ".csv";
+            strHeader += "原X坐标,原Y坐标,补偿后X坐标,补偿后Y坐标,补偿前后X差值,补偿前后Y差值,取值坐标X位置,取值坐标Y位置";
+            bool isExit = File.Exists(File_Path);
+            StreamWriter sw = new StreamWriter(File_Path, true, Encoding.GetEncoding("gb2312"));
+            if (!isExit)
+            {
+                sw.WriteLine(strHeader);
+            }
+            //output rows data
+            string strRowValue = "";
+            strRowValue += x + delimiter
+                            + y + delimiter
+                            + Result.X+ delimiter
+                            + Result.Y + delimiter
+                            + (Result.X - x) + delimiter
+                            + (Result.Y - y) + delimiter
+                            + m + delimiter
+                            + n + delimiter;
+            sw.WriteLine(strRowValue);
+            sw.Close();
+#endif
+            //返回实际坐标
+            return Result;
         }
     }
     //RTC校准数据处理
@@ -1225,7 +1598,7 @@ namespace Laser_Build_1._0
             //定义仿射变换矩阵转换数组
             double[] temp_array;
             //拟合高阶次数
-            short Line_Re = 4;
+            short Line_Re = 1;
             //数据处理
             if (Para_List.Parameter.Rtc_Calibration_Col * Para_List.Parameter.Rtc_Calibration_Row == correct_Datas.Count)//矫正和差异数据完整
             {
@@ -1392,11 +1765,11 @@ namespace Laser_Build_1._0
             decimal K_x1, K_x2, K_x3, K_x4, B_x;
             decimal K_y1, K_y2, K_y3, K_y4, B_y; 
             //获取落点
-            m = Seek_X_Pos(x);
-            n = Seek_Y_Pos(y);
+            m = Seek_X_Pos(y);
+            n = Seek_Y_Pos(x);
             //计算比率
-            X_per = Math.Abs(x - m * Para_List.Parameter.Rtc_Calibration_Cell) / Para_List.Parameter.Rtc_Calibration_Cell;
-            Y_per = Math.Abs(y - m * Para_List.Parameter.Rtc_Calibration_Cell) / Para_List.Parameter.Rtc_Calibration_Cell;
+            X_per = Math.Abs(y - m * Para_List.Parameter.Rtc_Calibration_Cell) / Para_List.Parameter.Rtc_Calibration_Cell;
+            Y_per = Math.Abs(x - m * Para_List.Parameter.Rtc_Calibration_Cell) / Para_List.Parameter.Rtc_Calibration_Cell;
             //计算实际 线性拟合数据
             K_x1 = (line_fit_data[m + 1].K_X1 - line_fit_data[m].K_X1) * X_per + line_fit_data[m].K_X1;
             K_x2 = (line_fit_data[m + 1].K_X2 - line_fit_data[m].K_X2) * X_per + line_fit_data[m].K_X2;
@@ -1410,6 +1783,69 @@ namespace Laser_Build_1._0
             B_y = (line_fit_data[m + 1].Delta_Y - line_fit_data[m].Delta_Y) * Y_per + line_fit_data[m].Delta_Y;
             //返回实际坐标
             return new Vector(K_x4 * x * x * x * x + K_x3 * x * x * x + K_x2 * x * x + K_x1 * x + B_x, K_y4 * y * y * y * y + K_y3 * y * y * y + K_y2 * y * y + K_y1 * y + B_y);
+        }
+        //获取Affinity补偿坐标
+        public static Vector Get_Affinity_Point(int type, decimal x, decimal y, List<Affinity_Matrix> affinity_Matrices)//0-A_M,1-M_A
+        {
+            Vector Result = new Vector();
+            //临时定位变量
+            Int16 m, n;
+            //获取落点
+            m = Seek_X_Pos(x);
+            n = Seek_Y_Pos(y);
+            if (type == 1) //Motor_Coordinate ---- Actual_Coordinate
+            {
+                //终点计算
+                if (affinity_Matrices.Count > 1)
+                {
+                    Result = new Vector(x * affinity_Matrices[n * Para_List.Parameter.Rtc_Affinity_Col + m].Stretch_X - y * affinity_Matrices[n * Para_List.Parameter.Rtc_Affinity_Col + m].Distortion_X + affinity_Matrices[n * Para_List.Parameter.Rtc_Affinity_Col + m].Delta_X, y * affinity_Matrices[n * Para_List.Parameter.Rtc_Affinity_Col + m].Stretch_Y - x * affinity_Matrices[n * Para_List.Parameter.Rtc_Affinity_Col + m].Distortion_Y + affinity_Matrices[n * Para_List.Parameter.Rtc_Affinity_Col + m].Delta_Y);
+                }
+                else if ((affinity_Matrices.Count > 0) && (affinity_Matrices.Count == 1))
+                {
+                    Result = new Vector(x * affinity_Matrices[0].Stretch_X - y * affinity_Matrices[0].Distortion_X + affinity_Matrices[0].Delta_X, y * affinity_Matrices[0].Stretch_Y - x * affinity_Matrices[0].Distortion_Y + affinity_Matrices[0].Delta_Y);
+                }
+            }
+            else
+            {
+                //终点计算
+                if (affinity_Matrices.Count > 1)
+                {
+                    Result = new Vector(x * affinity_Matrices[n * Para_List.Parameter.Rtc_Affinity_Col + m].Stretch_X + y * affinity_Matrices[n * Para_List.Parameter.Rtc_Affinity_Col + m].Distortion_X + affinity_Matrices[n * Para_List.Parameter.Rtc_Affinity_Col + m].Delta_X, y * affinity_Matrices[n * Para_List.Parameter.Rtc_Affinity_Col + m].Stretch_Y + x * affinity_Matrices[n * Para_List.Parameter.Rtc_Affinity_Col + m].Distortion_Y + affinity_Matrices[n * Para_List.Parameter.Rtc_Affinity_Col + m].Delta_Y);
+                }
+                else if ((affinity_Matrices.Count > 0) && (affinity_Matrices.Count == 1))
+                {
+                    Result = new Vector(x * affinity_Matrices[0].Stretch_X + y * affinity_Matrices[0].Distortion_X + affinity_Matrices[0].Delta_X, y * affinity_Matrices[0].Stretch_Y + x * affinity_Matrices[0].Distortion_Y + affinity_Matrices[0].Delta_Y);
+                }
+            }
+
+#if DEBUG
+            string sdatetime = DateTime.Now.ToString("D");
+            string delimiter = ",";
+            string strHeader = "";
+            //保存的位置和文件名称
+            string File_Path = @"./\Config/" + "Gts_Correct_Line_Fit " + sdatetime + ".csv";
+            strHeader += "原X坐标,原Y坐标,补偿后X坐标,补偿后Y坐标,补偿前后X差值,补偿前后Y差值,取值坐标X位置,取值坐标Y位置";
+            bool isExit = File.Exists(File_Path);
+            StreamWriter sw = new StreamWriter(File_Path, true, Encoding.GetEncoding("gb2312"));
+            if (!isExit)
+            {
+                sw.WriteLine(strHeader);
+            }
+            //output rows data
+            string strRowValue = "";
+            strRowValue += x + delimiter
+                            + y + delimiter
+                            + Result.X+ delimiter
+                            + Result.Y + delimiter
+                            + (Result.X - x) + delimiter
+                            + (Result.Y - y) + delimiter
+                            + m + delimiter
+                            + n + delimiter;
+            sw.WriteLine(strRowValue);
+            sw.Close();
+#endif
+            //返回实际坐标
+            return Result;
         }
     }
     class Laser_Watt_Cal
@@ -1471,109 +1907,8 @@ namespace Laser_Build_1._0
             //返回结果
             return Result;
         }
-    }
-    //坐标转换 直接对从DXf的Arc、Circle、Line的坐标信息进行处理，返回对应的坐标信息，后续直接使用
-    public class Transform
-    {
-        //Entity数据提取完成后，先进行实际坐标转换处理
-        public List<Entity_Data> Resolve(List<Entity_Data> entity_Datas,List<Affinity_Matrix> affinity_Matrices)
-        {
-            //建立变量 
-            List<Entity_Data> Result = new List<Entity_Data>();
-            Entity_Data Temp_Data = new Entity_Data();
-            //临时定位变量
-            Int16 Start_m, Start_n,End_m, End_n, Center_m, Center_n; 
-            foreach (var O in entity_Datas)
-            {
-                //先清空
-                Temp_Data.Empty();
-                //后赋值                
-                Temp_Data = O;
-                //获取坐标坐落区域
-                Start_m = Convert.ToInt16((O.Start_x + Para_List.Parameter.Cam_Rtc.X) / Para_List.Parameter.Gts_Calibration_Cell);
-                Start_n = Convert.ToInt16((O.Start_y + Para_List.Parameter.Cam_Rtc.Y) / Para_List.Parameter.Gts_Calibration_Cell);
-                End_m = Convert.ToInt16((O.End_x + Para_List.Parameter.Cam_Rtc.X) / Para_List.Parameter.Gts_Calibration_Cell);
-                End_n = Convert.ToInt16((O.End_y + Para_List.Parameter.Cam_Rtc.Y) / Para_List.Parameter.Gts_Calibration_Cell); 
-                Center_m = Convert.ToInt16((O.Center_x + Para_List.Parameter.Cam_Rtc.X) / Para_List.Parameter.Gts_Calibration_Cell);
-                Center_n = Convert.ToInt16((O.Center_y + Para_List.Parameter.Cam_Rtc.Y) / Para_List.Parameter.Gts_Calibration_Cell);
-                //起点计算
-                Temp_Data.Start_x = O.Start_x * affinity_Matrices[Start_m * Para_List.Parameter.Gts_Affinity_Col + Start_n].Cos_Value + O.Start_y * affinity_Matrices[Start_m * Para_List.Parameter.Gts_Affinity_Col + Start_n].Sin_Value + affinity_Matrices[Start_m * Para_List.Parameter.Gts_Affinity_Col + Start_n].Delta_X;
-                Temp_Data.Start_y = O.Start_y * affinity_Matrices[Start_m * Para_List.Parameter.Gts_Affinity_Col + Start_n].Cos_Value - O.Start_x * affinity_Matrices[Start_m * Para_List.Parameter.Gts_Affinity_Col + Start_n].Sin_Value + affinity_Matrices[Start_n * Para_List.Parameter.Gts_Affinity_Col + Start_n].Delta_Y;
-                //终点计算
-                Temp_Data.End_x = O.End_x * affinity_Matrices[End_m * Para_List.Parameter.Gts_Affinity_Col + End_n].Cos_Value + O.End_y * affinity_Matrices[End_m * Para_List.Parameter.Gts_Affinity_Col + End_n].Sin_Value + affinity_Matrices[End_m * Para_List.Parameter.Gts_Affinity_Col + End_n].Delta_X;
-                Temp_Data.End_y = O.End_y * affinity_Matrices[End_m * Para_List.Parameter.Gts_Affinity_Col + End_n].Cos_Value - O.End_x * affinity_Matrices[End_m * Para_List.Parameter.Gts_Affinity_Col + End_n].Sin_Value + affinity_Matrices[End_n * Para_List.Parameter.Gts_Affinity_Col + End_n].Delta_Y;
-                //圆心计算
-                Temp_Data.Center_x = O.Center_x * affinity_Matrices[Center_m * Para_List.Parameter.Gts_Affinity_Col + Center_n].Cos_Value + O.Center_y * affinity_Matrices[Center_m * Para_List.Parameter.Gts_Affinity_Col + Center_n].Sin_Value + affinity_Matrices[Center_m * Para_List.Parameter.Gts_Affinity_Col + Center_n].Delta_X;
-                Temp_Data.Center_y = O.Center_y * affinity_Matrices[Center_m * Para_List.Parameter.Gts_Affinity_Col + Center_n].Cos_Value - O.Center_x * affinity_Matrices[Center_m * Para_List.Parameter.Gts_Affinity_Col + Center_n].Sin_Value + affinity_Matrices[Center_n * Para_List.Parameter.Gts_Affinity_Col + Center_n].Delta_Y;
-
-                //追加数据至Result
-                Result.Add(Temp_Data);
-                //清空Temp_Data
-                Temp_Data.Empty();
-
-            }
-            return Result;
-        }
-    }    
-    public class Point_Resolve
-    {       
-        //计算Gts坐标  对应的 实际坐标  逆仿射变换
-        public Vector Gts_To_Platom(decimal x,decimal y, Affinity_Rate Rate)
-        {
-            Vector Result=new Vector();
-            //系数计算
-            decimal Arc = Convert.ToDecimal(Math.PI) * (Rate.Angle / 180.0m);
-            decimal Cos_Arc = Convert.ToDecimal(Math.Cos(Convert.ToDouble(Arc)));
-            decimal Sin_Arc = Convert.ToDecimal(Math.Sin(Convert.ToDouble(Arc)));
-            //计算结果
-            Result.X = x * Cos_Arc + y * Sin_Arc + Rate.Delta_X;
-            Result.Y = y * Cos_Arc - x * Sin_Arc + Rate.Delta_Y;
-
-            return Result;
-        }
-        public Vector Gts_To_Platom(decimal x, decimal y)
-        {
-            Vector Result = new Vector();
-            //读取矫正表
-            List<Affinity_Matrix> Affinity_Mat = Serialize_Data.Reserialize_Affinity_Matrix("Affinity_Matrix.xml");
-            //获取坐标坐落区域
-            Int16 Pos_Row = Convert.ToInt16(x / Para_List.Parameter.Gts_Calibration_Cell);
-            Int16 Pos_Col = Convert.ToInt16(y / Para_List.Parameter.Gts_Calibration_Cell);
-            //数据计算  说明：因为是负的角度，故Sin值变为负值
-            Result.X = x * Affinity_Mat[Pos_Row * Para_List.Parameter.Gts_Affinity_Col + Pos_Col].Cos_Value + y * Affinity_Mat[Pos_Row * Para_List.Parameter.Gts_Affinity_Col + Pos_Col].Sin_Value + Affinity_Mat[Pos_Row * Para_List.Parameter.Gts_Affinity_Col + Pos_Col].Delta_X;
-            Result.Y = y * Affinity_Mat[Pos_Row * Para_List.Parameter.Gts_Affinity_Col + Pos_Col].Cos_Value - x * Affinity_Mat[Pos_Row * Para_List.Parameter.Gts_Affinity_Col + Pos_Col].Sin_Value + Affinity_Mat[Pos_Col * Para_List.Parameter.Gts_Affinity_Col + Pos_Col].Delta_Y;
-
-            return Result;
-        }
-        //计算实际坐标 对应的 Gts坐标  仿射变换
-        public Vector Platom_To_Gts(decimal x, decimal y, Affinity_Rate Rate)
-        {
-            Vector Result = new Vector();
-            //系数计算
-            decimal Arc = Convert.ToDecimal(Math.PI) * (Rate.Angle / 180.0m);
-            decimal Cos_Arc = Convert.ToDecimal(Math.Cos(Convert.ToDouble(Arc)));
-            decimal Sin_Arc = Convert.ToDecimal(Math.Sin(Convert.ToDouble(Arc)));
-            //计算结果
-            Result.X = x * Cos_Arc - y * Sin_Arc + Rate.Delta_X;
-            Result.Y = y * Cos_Arc + x * Sin_Arc + Rate.Delta_Y;
-
-            return Result;
-        }
-        public Vector Platom_To_Gts(decimal x, decimal y) 
-        {
-            Vector Result = new Vector();
-            //读取矫正表
-            List<Affinity_Matrix> Affinity_Mat = Serialize_Data.Reserialize_Affinity_Matrix("Affinity_Matrix.xml");
-            //获取坐标坐落区域
-            Int16 Pos_Row = Convert.ToInt16(x / Para_List.Parameter.Gts_Calibration_Cell);
-            Int16 Pos_Col = Convert.ToInt16(y / Para_List.Parameter.Gts_Calibration_Cell);
-            //数据计算  
-            Result.X = x * Affinity_Mat[Pos_Row * Para_List.Parameter.Gts_Affinity_Col + Pos_Col].Cos_Value - y * Affinity_Mat[Pos_Row * Para_List.Parameter.Gts_Affinity_Col + Pos_Col].Sin_Value + Affinity_Mat[Pos_Row * Para_List.Parameter.Gts_Affinity_Col + Pos_Col].Delta_X;
-            Result.Y = y * Affinity_Mat[Pos_Row * Para_List.Parameter.Gts_Affinity_Col + Pos_Col].Cos_Value + x * Affinity_Mat[Pos_Row * Para_List.Parameter.Gts_Affinity_Col + Pos_Col].Sin_Value + Affinity_Mat[Pos_Col * Para_List.Parameter.Gts_Affinity_Col + Pos_Col].Delta_Y;
-
-            return Result;
-        }
-    }
+    }   
+   
     public class Serialize_Data 
     {
        

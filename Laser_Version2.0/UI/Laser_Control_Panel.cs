@@ -616,16 +616,32 @@ namespace Laser_Version2._0
         //Amp2 电流 设置值 
         private void Amp2_Set_Current_TextChanged(object sender, EventArgs e)
         {
-            
+            if (!decimal.TryParse(Amp2_Set_Current.Text, out decimal tmp))
+            {
+                MessageBox.Show("请正确输入数字");
+                return;
+            }
+            Para_List.Parameter.Amp2_Current = tmp;
         }
         //激光功率 显示值和设置值 TextChanged
         private void Laser_Watt_Set_Value_TextChanged(object sender, EventArgs e)
         {
+            if (!decimal.TryParse(Laser_Watt_Set_Value.Text, out decimal tmp))
+            {
+                MessageBox.Show("请正确输入数字");
+                return;
+            }
+            Para_List.Parameter.PEC = tmp;
         }
         //激光频率 显示值和设置值 TextChanged
         private void Laser_Frequence_Set_Value_TextChanged(object sender, EventArgs e)
         {
-            
+            if (!decimal.TryParse(Laser_Frequence_Set_Value.Text, out decimal tmp))
+            {
+                MessageBox.Show("请正确输入数字");
+                return;
+            }
+            Para_List.Parameter.PRF = tmp;
         }
         //激光频率 显示值和设置值 MouseEnter
         private void Laser_Frequence_Set_Value_MouseEnter(object sender, EventArgs e)

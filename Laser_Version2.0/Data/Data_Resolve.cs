@@ -23,24 +23,25 @@ namespace Laser_Build_1._0
     {
         /***************************************************数据提取***************************************************************/
         //读取文件
-        public DxfDocument Read_File()
+        public DxfDocument Read_File(string filename)
         {
             //定义文件名
-            string Dxf_filename = "Sample.dxf";
-            DxfDocument Result = new DxfDocument();
-
-            //获取文件名
-            OpenFileDialog openfile = new OpenFileDialog();
-            if (openfile.ShowDialog() == DialogResult.OK)
+            string Dxf_filename = null;
+            if (filename==null)
             {
-                Dxf_filename = openfile.FileName;
+                Dxf_filename = "Sample.dxf";
             }
-
+            else
+            {
+                Dxf_filename = filename;
+            }
+            DxfDocument Result = new DxfDocument();
             //检查文件是否存在
             FileInfo fileInfo = new FileInfo(Dxf_filename);
             if (!fileInfo.Exists)
             {
-                Log.Commandhandler(Dxf_filename + "----文件不存在！！！" + "\r\n");
+                Main.dxf.appendInfo(Dxf_filename + "  文件不存在！！！");
+                Log.Commandhandler(Dxf_filename + "  文件不存在！！！" + "\r\n");
                 return Result;
             }
             DxfVersion dxfVersion = DxfDocument.CheckDxfFileVersion(Dxf_filename, out bool isBinary);
@@ -48,7 +49,8 @@ namespace Laser_Build_1._0
             // 检查Dxf文件版本是否正确
             if (dxfVersion < DxfVersion.AutoCad2000)
             {
-                Log.Commandhandler(Dxf_filename + "---文件版本不支持" + "\r\n");
+                Main.dxf.appendInfo(Dxf_filename + "  文件版本不支持");
+                Log.Commandhandler(Dxf_filename + "  文件版本不支持" + "\r\n");
                 return Result;
             }
 
@@ -58,10 +60,10 @@ namespace Laser_Build_1._0
             // this might be the case of a corrupt file or a problem in the library
             if (Result == null)
             {
-                Log.Commandhandler("Dxf文件读取失败" + "\r\n");
+                Main.dxf.appendInfo(Dxf_filename + "  Dxf文件读取失败");
+                Log.Commandhandler(Dxf_filename + "  Dxf文件读取失败" + "\r\n");
                 return Result;
             }
-
             //返回读取结果
             return Result;
         }
@@ -149,152 +151,6 @@ namespace Laser_Build_1._0
                     //提交进入Arc_Data
                     Result.Add(new Entity_Data(Temp_Entity_Data));
                     Temp_Entity_Data.Empty();
-                }
-            }
-            //返回结果
-            return Result;
-        }
-        //处理Dxf得到圆弧和线段数据
-        public List<Entity_Data> Resolve_Arc_Line_ex(DxfDocument dxf) 
-        {
-            //最终结果
-            List<Entity_Data> Result = new List<Entity_Data>();
-            //分段数据
-            int Num = 0;
-            //提取圆弧数据
-            if (dxf.Arcs.Count >=500)
-            {
-                Num = 10;
-            }
-            else
-            {
-                Num = 1;
-            }
-            //拆分数据
-            List<List<Arc>> Dxf_Arc =new List<List<Arc>>(AverageAssign<Arc>(new List<Arc>(dxf.Arcs),Num));
-            //建立圆弧拆分数据并行处理数据结果
-            List<Entity_Data>[] Arc_Result = new List<Entity_Data>[Num];
-            //圆弧数据提取
-            Parallel.For(0, Dxf_Arc.Count, Arc_i => {
-                Arc_Result[Arc_i] = new List<Entity_Data>();
-                for (int i = 0; i < Dxf_Arc[Arc_i].Count; i++)
-                {
-                    if (Dxf_Arc[Arc_i][i].Layer.Name == "Laser")
-                    {
-                        Entity_Data Temp_Entity_Data = new Entity_Data();
-                        Temp_Entity_Data.Type = 2;//圆弧
-                        //起点计算
-                        Temp_Entity_Data.Start_x = Convert.ToDecimal(Dxf_Arc[Arc_i][i].StartPoint.X);
-                        Temp_Entity_Data.Start_y = Convert.ToDecimal(Dxf_Arc[Arc_i][i].StartPoint.Y);
-                        //终点计算
-                        Temp_Entity_Data.End_x = Convert.ToDecimal(Dxf_Arc[Arc_i][i].EndPoint.X);
-                        Temp_Entity_Data.End_y = Convert.ToDecimal(Dxf_Arc[Arc_i][i].EndPoint.Y);
-                        //起始和终止角度提取
-                        Temp_Entity_Data.Cir_Start_Angle = Convert.ToDecimal(Dxf_Arc[Arc_i][i].StartAngle);
-                        if (Temp_Entity_Data.Cir_Start_Angle >= 359.99m)
-                        {
-                            Temp_Entity_Data.Cir_Start_Angle = 0.0m;
-                        }
-                        Temp_Entity_Data.Cir_End_Angle = Convert.ToDecimal(Dxf_Arc[Arc_i][i].EndAngle);
-                        if (Temp_Entity_Data.Cir_End_Angle <= 0.01m)
-                        {
-                            Temp_Entity_Data.Cir_End_Angle = 360.0m;
-                        }
-                        //圆心计算
-                        Temp_Entity_Data.Center_x = Convert.ToDecimal(Dxf_Arc[Arc_i][i].Center.X);
-                        Temp_Entity_Data.Center_y = Convert.ToDecimal(Dxf_Arc[Arc_i][i].Center.Y);
-                        Temp_Entity_Data.Circle_radius = Convert.ToDecimal(Dxf_Arc[Arc_i][i].Radius);
-                        //提交进入Arc_Data
-                        Arc_Result[Arc_i].Add(new Entity_Data(Temp_Entity_Data));
-
-                    }
-                }
-
-            });
-            //追加圆弧数据到Result
-            for (int Arc_j=0;Arc_j<Num;Arc_j++)
-            {
-                Result.AddRange(Arc_Result[Arc_j]);
-            }
-
-            //提取直线数据
-            if (dxf.Lines.Count >= 500)
-            {
-                Num = 10;
-            }
-            else
-            {
-                Num = 1;
-            }
-            //拆分数据
-            List<List<Line>> Dxf_Line = new List<List<Line>>(AverageAssign<Line>(new List<Line>(dxf.Lines), Num));
-            //建立直线拆分数据并行处理数据结果
-            List<Entity_Data>[] Line_Result = new List<Entity_Data>[Num];
-            //直线数据提取
-            Parallel.For(0, Dxf_Line.Count, Line_i => {
-                Line_Result[Line_i] = new List<Entity_Data>();
-                for (int i = 0; i < Dxf_Line[Line_i].Count; i++)
-                {
-                    if (Dxf_Line[Line_i][i].Layer.Name == "Laser")
-                    {
-                        Entity_Data Temp_Entity_Data = new Entity_Data();
-                        Temp_Entity_Data.Type = 1;//直线
-                        //起点计算
-                        Temp_Entity_Data.Start_x = Convert.ToDecimal(Dxf_Line[Line_i][i].StartPoint.X);
-                        Temp_Entity_Data.Start_y = Convert.ToDecimal(Dxf_Line[Line_i][i].StartPoint.Y);
-                        //终点计算
-                        Temp_Entity_Data.End_x = Convert.ToDecimal(Dxf_Line[Line_i][i].EndPoint.X);
-                        Temp_Entity_Data.End_y = Convert.ToDecimal(Dxf_Line[Line_i][i].EndPoint.Y);
-                        //提交进入Line_Data
-                        Line_Result[Line_i].Add(new Entity_Data(Temp_Entity_Data));
-                    }
-                }
-
-            });
-            //追加直线数据到Result
-            for (int Line_j = 0; Line_j < Num; Line_j++)
-            {
-                Result.AddRange(Line_Result[Line_j]);
-            }
-            //返回结果
-            return Result;
-        }
-        //处理Dxf得到多边形数据
-        public List<Entity_Data> Resolve_LightWeightPolyline(DxfDocument dxf)
-        {
-            List<Entity_Data> Result = new List<Entity_Data>();
-            //建立临时Entity数据
-            Entity_Data Temp_Entity_Data = new Entity_Data();
-            //临时变量
-            int i = 0, j = 0;
-            //LightWeightPolyline 多边形读取
-            if (dxf.LwPolylines.Count > 0)
-            {
-                for (i = 0; i < dxf.LwPolylines.Count; i++)
-                {
-                    if (dxf.LwPolylines[i].Layer.Name == "Laser")
-                    {
-                        for (j = 0; j < dxf.LwPolylines[i].Vertexes.Count; j++)
-                        {
-                            Temp_Entity_Data.Type = 1;//直线插补
-                            //起点计算
-                            Temp_Entity_Data.Start_x = Convert.ToDecimal(dxf.LwPolylines[i].Vertexes[j].Position.X);
-                            Temp_Entity_Data.Start_y = Convert.ToDecimal(dxf.LwPolylines[i].Vertexes[j].Position.Y);
-                            if (j <= dxf.LwPolylines[i].Vertexes.Count - 2)
-                            {
-                                Temp_Entity_Data.End_x = Convert.ToDecimal(dxf.LwPolylines[i].Vertexes[j + 1].Position.X);
-                                Temp_Entity_Data.End_y = Convert.ToDecimal(dxf.LwPolylines[i].Vertexes[j + 1].Position.Y);
-                            }
-                            else if (j == (dxf.LwPolylines[i].Vertexes.Count - 1))
-                            {
-                                Temp_Entity_Data.End_x = Convert.ToDecimal(dxf.LwPolylines[i].Vertexes[0].Position.X);
-                                Temp_Entity_Data.End_y = Convert.ToDecimal(dxf.LwPolylines[i].Vertexes[0].Position.Y);
-                            }
-                            //提交进入LwPolylines_Entity_Data
-                            Result.Add(new Entity_Data(Temp_Entity_Data));
-                            Temp_Entity_Data.Empty();
-                        }
-                    }
                 }
             }
             //返回结果
@@ -400,6 +256,18 @@ namespace Laser_Build_1._0
                     if (dxf.Circles[i].Layer.Name == "Mark")  //Mark点 数据收集
                     {
                         //原始数据
+                        Temp_Entity_Data.Type = 0;
+                        Temp_Entity_Data.Center_x = Convert.ToDecimal(dxf.Circles[i].Center.X);
+                        Temp_Entity_Data.Center_y = Convert.ToDecimal(dxf.Circles[i].Center.Y);
+                        Temp_Entity_Data.Circle_radius = Convert.ToDecimal(dxf.Circles[i].Radius);
+                        //提交进入Circle_Entity_Data
+                        Result.Add(new Entity_Data(Temp_Entity_Data));
+                        Temp_Entity_Data.Empty();
+                    }
+                    else if (dxf.Circles[i].Layer.Name == "Mark_Focus")  //Mark点 数据收集
+                    {
+                        //原始数据
+                        Temp_Entity_Data.Type = 10;
                         Temp_Entity_Data.Center_x = Convert.ToDecimal(dxf.Circles[i].Center.X);
                         Temp_Entity_Data.Center_y = Convert.ToDecimal(dxf.Circles[i].Center.Y);
                         Temp_Entity_Data.Circle_radius = Convert.ToDecimal(dxf.Circles[i].Radius);
@@ -413,27 +281,34 @@ namespace Laser_Build_1._0
             return Result;
         }
         //计算并排序Mark坐标点
-        public List<Vector> Mark_Calculate(List<Entity_Data> Mark_Datas)
+        public List<Vector> Mark_Calculate(List<Entity_Data> Mark_Datas_Collection)
         {
             //定义返回值
             List<Vector> Result = new List<Vector>();
-            //定义点
-            Vector Tmp_Point = new Vector();
+            List<Vector> Mark_Datas = new List<Vector>();
+            //abstract Mark Point
+            for (int i = 0;i< Mark_Datas_Collection.Count;i++)
+            {
+                if (Mark_Datas_Collection[i].Type == 10)
+                {
+                    Mark_Datas.Add(new Vector(Mark_Datas_Collection[i].Center_x, Mark_Datas_Collection[i].Center_y));
+                }
+            }
+            //排序
+            Mark_Datas = Mark_Datas.OrderBy(a =>a.X).ThenByDescending(a => a.Y).ToList();
+            //点位输出
             //左下点
-            Tmp_Point.X = (Mark_Datas.Min(o => o.Center_x));
-            Tmp_Point.Y = (Mark_Datas.Min(o => o.Center_y));
-            Para_List.Parameter.Mark_Dxf1 = new Vector(Tmp_Point);
-            Result.Add(new Vector(Tmp_Point));
+            Para_List.Parameter.Mark_Dxf1 = Mark_Datas[0];
+            Result.Add(new Vector(Mark_Datas[0]));
             //左上点
-            Tmp_Point.X = (Mark_Datas.Min(o => o.Center_x));
-            Tmp_Point.Y = (Mark_Datas.Max(o => o.Center_y));
-            Para_List.Parameter.Mark_Dxf2 = new Vector(Tmp_Point);
-            Result.Add(new Vector(Tmp_Point));
+            Para_List.Parameter.Mark_Dxf2 = new Vector(Mark_Datas[1]);
+            Result.Add(new Vector(Mark_Datas[1]));
             //右上点
-            Tmp_Point.X = (Mark_Datas.Max(o => o.Center_x));
-            Tmp_Point.Y = (Mark_Datas.Max(o => o.Center_y));
-            Para_List.Parameter.Mark_Dxf3 = new Vector(Tmp_Point);
-            Result.Add(new Vector(Tmp_Point));
+            Para_List.Parameter.Mark_Dxf3 = new Vector(Mark_Datas[3]);
+            Result.Add(new Vector(Mark_Datas[3]));
+            //右下点
+            Para_List.Parameter.Mark_Dxf4 = new Vector(Mark_Datas[2]);
+            Result.Add(new Vector(Mark_Datas[2]));
             //返回结果
             return Result;
         }
@@ -470,25 +345,15 @@ namespace Laser_Build_1._0
                 {
                     //sin取正  (当前坐标系采用) 已验证
                     //起点计算
-                    Temp_Data.Start_x = O.Start_x * Mark_affinity_Matrices.Cos_Value + O.Start_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
-                    Temp_Data.Start_y = O.Start_y * Mark_affinity_Matrices.Cos_Value - O.Start_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
+                    Temp_Data.Start_x = O.Start_x * Mark_affinity_Matrices.Stretch_X + O.Start_y * Mark_affinity_Matrices.Distortion_X + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
+                    Temp_Data.Start_y = O.Start_y * Mark_affinity_Matrices.Stretch_Y + O.Start_x * Mark_affinity_Matrices.Distortion_Y + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
                     //终点计算
-                    Temp_Data.End_x = O.End_x * Mark_affinity_Matrices.Cos_Value + O.End_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
-                    Temp_Data.End_y = O.End_y * Mark_affinity_Matrices.Cos_Value - O.End_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
+                    Temp_Data.End_x = O.End_x * Mark_affinity_Matrices.Stretch_X + O.End_y * Mark_affinity_Matrices.Distortion_X + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
+                    Temp_Data.End_y = O.End_y * Mark_affinity_Matrices.Stretch_Y + O.End_x * Mark_affinity_Matrices.Distortion_Y + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
                     //圆心计算
-                    Temp_Data.Center_x = O.Center_x * Mark_affinity_Matrices.Cos_Value + O.Center_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
-                    Temp_Data.Center_y = O.Center_y * Mark_affinity_Matrices.Cos_Value - O.Center_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
+                    Temp_Data.Center_x = O.Center_x * Mark_affinity_Matrices.Stretch_X + O.Center_y * Mark_affinity_Matrices.Distortion_X + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
+                    Temp_Data.Center_y = O.Center_y * Mark_affinity_Matrices.Stretch_Y + O.Center_x * Mark_affinity_Matrices.Distortion_Y + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
 
-                    ////sin取负 (当前坐标系不采用)
-                    ////起点计算
-                    //Temp_Data.Start_x = O.Start_x * Mark_affinity_Matrices.Cos_Value - O.Start_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
-                    //Temp_Data.Start_y = O.Start_y * Mark_affinity_Matrices.Cos_Value + O.Start_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
-                    ////终点计算
-                    //Temp_Data.End_x = O.End_x * Mark_affinity_Matrices.Cos_Value - O.End_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
-                    //Temp_Data.End_y = O.End_y * Mark_affinity_Matrices.Cos_Value + O.End_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
-                    ////圆心计算
-                    //Temp_Data.Center_x = O.Center_x * Mark_affinity_Matrices.Cos_Value - O.Center_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
-                    //Temp_Data.Center_y = O.Center_y * Mark_affinity_Matrices.Cos_Value + O.Center_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
                 }
                 //追加数据至Result
                 Result.Add(new Entity_Data(Temp_Data));
@@ -532,25 +397,15 @@ namespace Laser_Build_1._0
                     {
                         //sin取正  (当前坐标系采用) 已验证
                         //起点计算
-                        Temp_Data.Start_x = O.Start_x * Mark_affinity_Matrices.Cos_Value + O.Start_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
-                        Temp_Data.Start_y = O.Start_y * Mark_affinity_Matrices.Cos_Value - O.Start_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
+                        Temp_Data.Start_x = O.Start_x * Mark_affinity_Matrices.Stretch_X + O.Start_y * Mark_affinity_Matrices.Distortion_X + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
+                        Temp_Data.Start_y = O.Start_y * Mark_affinity_Matrices.Stretch_Y + O.Start_x * Mark_affinity_Matrices.Distortion_Y + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
                         //终点计算
-                        Temp_Data.End_x = O.End_x * Mark_affinity_Matrices.Cos_Value + O.End_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
-                        Temp_Data.End_y = O.End_y * Mark_affinity_Matrices.Cos_Value - O.End_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
+                        Temp_Data.End_x = O.End_x * Mark_affinity_Matrices.Stretch_X + O.End_y * Mark_affinity_Matrices.Distortion_X + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
+                        Temp_Data.End_y = O.End_y * Mark_affinity_Matrices.Stretch_Y + O.End_x * Mark_affinity_Matrices.Distortion_Y + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
                         //圆心计算
-                        Temp_Data.Center_x = O.Center_x * Mark_affinity_Matrices.Cos_Value + O.Center_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
-                        Temp_Data.Center_y = O.Center_y * Mark_affinity_Matrices.Cos_Value - O.Center_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
+                        Temp_Data.Center_x = O.Center_x * Mark_affinity_Matrices.Stretch_X + O.Center_y * Mark_affinity_Matrices.Distortion_X + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
+                        Temp_Data.Center_y = O.Center_y * Mark_affinity_Matrices.Stretch_Y + O.Center_x * Mark_affinity_Matrices.Distortion_Y + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
 
-                        ////sin取负 (当前坐标系不采用)
-                        ////起点计算
-                        //Temp_Data.Start_x = O.Start_x * Mark_affinity_Matrices.Cos_Value - O.Start_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
-                        //Temp_Data.Start_y = O.Start_y * Mark_affinity_Matrices.Cos_Value + O.Start_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
-                        ////终点计算
-                        //Temp_Data.End_x = O.End_x * Mark_affinity_Matrices.Cos_Value - O.End_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
-                        //Temp_Data.End_y = O.End_y * Mark_affinity_Matrices.Cos_Value + O.End_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
-                        ////圆心计算
-                        //Temp_Data.Center_x = O.Center_x * Mark_affinity_Matrices.Cos_Value - O.Center_y * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_X - Para_List.Parameter.Rtc_Org.X;
-                        //Temp_Data.Center_y = O.Center_y * Mark_affinity_Matrices.Cos_Value + O.Center_x * Mark_affinity_Matrices.Sin_Value + Mark_affinity_Matrices.Delta_Y - Para_List.Parameter.Rtc_Org.Y;
                     }
                     //追加数据至Temp_List
                     Temp_List.Add(new Entity_Data(Temp_Data));
@@ -564,53 +419,10 @@ namespace Laser_Build_1._0
             }
             
             return Result;
-        }
-        //标定板标定的整体仿射变换参数，计算的是加工轨迹的矫正值，则在生成加工轨迹数据后，统一对该数据进行标定板仿射变换参数修正
-        //整理生成的List<List<Interpolation_Data>>数据，直接处理entity_Datas数据，生成的是工控卡平台的数据
-        public List<Entity_Data> Calibration_Trail(List<Entity_Data> In_Data)
-        {
-            //建立变量 
-            List<Entity_Data> Result = new List<Entity_Data>();
-            Entity_Data Temp_Data = new Entity_Data();
-            //临时定位变量
-            Int16 Start_m, Start_n, End_m, End_n, Center_m, Center_n;
-            //获取标定板标定数据
-            List<Affinity_Matrix> affinity_Matrices = Reserialize_Affinity_Matrix("Affinity_Matrix.xml");
-            foreach (var O in In_Data)
-            {
-                //先清空
-                Temp_Data.Empty();
-                //后赋值
-
-                Temp_Data = O;
-                //获取坐标坐落区域
-                Start_m = Convert.ToInt16(O.Start_x / Para_List.Parameter.Gts_Calibration_Cell);
-                Start_n = Convert.ToInt16(O.Start_y / Para_List.Parameter.Gts_Calibration_Cell);
-                End_m = Convert.ToInt16(O.End_x / Para_List.Parameter.Gts_Calibration_Cell);
-                End_n = Convert.ToInt16(O.End_y / Para_List.Parameter.Gts_Calibration_Cell);
-                Center_m = Convert.ToInt16(O.Center_x / Para_List.Parameter.Gts_Calibration_Cell);
-                Center_n = Convert.ToInt16(O.Center_y / Para_List.Parameter.Gts_Calibration_Cell);
-                //起点计算
-                Temp_Data.Start_x = O.Start_x * affinity_Matrices[Start_m * Para_List.Parameter.Gts_Affinity_Col + Start_n].Cos_Value + O.Start_y * affinity_Matrices[Start_m * Para_List.Parameter.Gts_Affinity_Col + Start_n].Sin_Value + affinity_Matrices[Start_m * Para_List.Parameter.Gts_Affinity_Col + Start_n].Delta_X;
-                Temp_Data.Start_y = O.Start_y * affinity_Matrices[Start_m * Para_List.Parameter.Gts_Affinity_Col + Start_n].Cos_Value - O.Start_x * affinity_Matrices[Start_m * Para_List.Parameter.Gts_Affinity_Col + Start_n].Sin_Value + affinity_Matrices[Start_n * Para_List.Parameter.Gts_Affinity_Col + Start_n].Delta_Y;
-                //终点计算
-                Temp_Data.End_x = O.End_x * affinity_Matrices[End_m * Para_List.Parameter.Gts_Affinity_Col + End_n].Cos_Value + O.End_y * affinity_Matrices[End_m * Para_List.Parameter.Gts_Affinity_Col + End_n].Sin_Value + affinity_Matrices[End_m * Para_List.Parameter.Gts_Affinity_Col + End_n].Delta_X;
-                Temp_Data.End_y = O.End_y * affinity_Matrices[End_m * Para_List.Parameter.Gts_Affinity_Col + End_n].Cos_Value - O.End_x * affinity_Matrices[End_m * Para_List.Parameter.Gts_Affinity_Col + End_n].Sin_Value + affinity_Matrices[End_n * Para_List.Parameter.Gts_Affinity_Col + End_n].Delta_Y;
-                //圆心计算
-                Temp_Data.Center_x = O.Center_x * affinity_Matrices[Center_m * Para_List.Parameter.Gts_Affinity_Col + Center_n].Cos_Value + O.Center_y * affinity_Matrices[Center_m * Para_List.Parameter.Gts_Affinity_Col + Center_n].Sin_Value + affinity_Matrices[Center_m * Para_List.Parameter.Gts_Affinity_Col + Center_n].Delta_X;
-                Temp_Data.Center_y = O.Center_y * affinity_Matrices[Center_m * Para_List.Parameter.Gts_Affinity_Col + Center_n].Cos_Value - O.Center_x * affinity_Matrices[Center_m * Para_List.Parameter.Gts_Affinity_Col + Center_n].Sin_Value + affinity_Matrices[Center_n * Para_List.Parameter.Gts_Affinity_Col + Center_n].Delta_Y;
-
-                //追加数据至Result
-                Result.Add(Temp_Data);
-                //清空Temp_Data
-                Temp_Data.Empty();
-
-            }
-            return Result;
-        }
+        }       
 
         /***************************************************轨迹生成***************************************************************/
-        public List<List<Interpolation_Data>> Integrate_Arc_Line(List<Entity_Data> Arc_Line_Datas)
+        public List<List<Interpolation_Data>> Integrate_Arc_Line_Parrallel(List<Entity_Data> Arc_Line_Datas)
         {
             //排序
             Arc_Line_Datas = Arc_Line_Datas.OrderBy(a => a.Start_x).ThenBy(a =>a.Start_y).ToList();
@@ -620,7 +432,6 @@ namespace Laser_Build_1._0
             //临时变量
             List<Interpolation_Data> Temp_List_Data = new List<Interpolation_Data>();
             Interpolation_Data Temp_Data = new Interpolation_Data();
-            int i = 0;
             int Num = 0;
             int Del_Num_01 = 0;
             bool Del_Flag_01 = false;
@@ -845,7 +656,7 @@ namespace Laser_Build_1._0
             return Result;
         }
         //数据处理 生成Arc_Line整合数据  振镜和平台联合加工
-        public List<List<Interpolation_Data>> Integrate_Arc_Line_es(List<Entity_Data> Arc_Line_Datas)
+        public List<List<Interpolation_Data>> Integrate_Arc_Line(List<Entity_Data> Arc_Line_Datas)
         {
             //结果变量
             List<List<Interpolation_Data>> Result = new List<List<Interpolation_Data>>();
@@ -1530,7 +1341,7 @@ namespace Laser_Build_1._0
             //临时数据
             Interpolation_Data Temp_Data = new Interpolation_Data();
             //获取坐标点
-            Vector Start_Coordinate = new Vector(GTS_Fun.Interpolation.Get_Coordinate());
+            Vector Start_Coordinate = new Vector(GTS_Fun.Interpolation.Get_Coordinate(0));
             //数据处理合并为走刀直线添加起点坐标
             for (int cal = 0; cal < Result.Count; cal++)
             {

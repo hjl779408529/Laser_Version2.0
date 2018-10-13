@@ -136,12 +136,17 @@ namespace Para_List
         private static Vector mark1 = new Vector(0, 0);
         private static Vector mark2 = new Vector(0, 0);
         private static Vector mark3 = new Vector(0, 0);
+        private static Vector mark4 = new Vector(0, 0);
         //Dxf Mark点参数
         private static Vector mark_dxf1 = new Vector(0, 0);
         private static Vector mark_dxf2 = new Vector(0, 0);
         private static Vector mark_dxf3 = new Vector(0, 0);
+        private static Vector mark_dxf4 = new Vector(0, 0);
+
         //整体的仿射变换参数
         private static Affinity_Matrix trans_affinity = new Affinity_Matrix();
+        //标定板的仿射变换参数
+        private static Affinity_Matrix cal_trans_affinity = new Affinity_Matrix();
         //刀具补偿
         private static decimal cutter_radius = 0.5m; //刀具半径
         private static Int16 cutter_type = 0; //刀具补偿类型 0-不补偿、1-钻孔、2-落料
@@ -157,7 +162,10 @@ namespace Para_List
         private static decimal prf;
         private static decimal pec;
         //Mark矫正 与 不矫正
-        private static UInt16 calibration_type; 
+        private static UInt16 calibration_type;
+        private static decimal mark_reference;
+        private static UInt16 split_block_x;
+        private static UInt16 split_block_y;
 
         public static decimal Gts_Vel_reference { get => gts_vel_reference; set => gts_vel_reference = value; }
         public static decimal Gts_Acc_reference { get => gts_acc_reference; set => gts_acc_reference = value; }
@@ -249,10 +257,13 @@ namespace Para_List
         public static Vector Mark1 { get => mark1; set => mark1 = value; }
         public static Vector Mark2 { get => mark2; set => mark2 = value; }
         public static Vector Mark3 { get => mark3; set => mark3 = value; }
+        public static Vector Mark4 { get => mark4; set => mark4 = value; }
         public static Vector Mark_Dxf1 { get => mark_dxf1; set => mark_dxf1 = value; }
         public static Vector Mark_Dxf2 { get => mark_dxf2; set => mark_dxf2 = value; }
         public static Vector Mark_Dxf3 { get => mark_dxf3; set => mark_dxf3 = value; }
+        public static Vector Mark_Dxf4 { get => mark_dxf4; set => mark_dxf4 = value; }
         public static Affinity_Matrix Trans_Affinity { get => trans_affinity; set => trans_affinity = value; }
+        public static Affinity_Matrix Cal_Trans_Affinity { get => cal_trans_affinity; set => cal_trans_affinity = value; }
         public static decimal Cutter_Radius { get => cutter_radius; set => cutter_radius = value; }
         public static Int16 Cutter_Type { get => cutter_type; set => cutter_type = value; }        
         public static Vector Rtc_Limit { get => rtc_limit; set => rtc_limit = value; }
@@ -264,6 +275,9 @@ namespace Para_List
         public static decimal PRF { get => prf; set => prf = value; }
         public static decimal PEC { get => pec; set => pec = value; }
         public static UInt16 Calibration_Type { get => calibration_type; set => calibration_type = value; }
+        public static decimal Mark_Reference { get => mark_reference; set => mark_reference = value; }
+        public static UInt16 Split_Block_X { get => split_block_x; set => split_block_x = value; }
+        public static UInt16 Split_Block_Y { get => split_block_y; set => split_block_y = value; }
         //公开构造函数
         public Parameter() { }
     }
@@ -384,15 +398,19 @@ namespace Para_List
         private decimal rtc_cal_radius; //圆半径
         private decimal rtc_cal_interval; //间距
         //mark点参数
-        private Vector mark1 = new Vector(0, 0);
-        private Vector mark2 = new Vector(0, 0);
-        private Vector mark3 = new Vector(0, 0);
+        private static Vector mark1 = new Vector(0, 0);
+        private static Vector mark2 = new Vector(0, 0);
+        private static Vector mark3 = new Vector(0, 0);
+        private static Vector mark4 = new Vector(0, 0);
         //Dxf Mark点参数
-        private Vector mark_dxf1 = new Vector(0, 0);
-        private Vector mark_dxf2 = new Vector(0, 0);
-        private Vector mark_dxf3 = new Vector(0, 0);
+        private static Vector mark_dxf1 = new Vector(0, 0);
+        private static Vector mark_dxf2 = new Vector(0, 0);
+        private static Vector mark_dxf3 = new Vector(0, 0);
+        private static Vector mark_dxf4 = new Vector(0, 0);
         //整体的仿射变换参数
         private Affinity_Matrix trans_affinity;
+        //标定板的仿射变换参数
+        private Affinity_Matrix cal_trans_affinity;
         //刀具补偿
         private decimal cutter_radius = 0.5m; //刀具半径
         private Int16 cutter_type = 0; //刀具补偿类型 0-不补偿、1-钻孔、2-落料
@@ -408,6 +426,9 @@ namespace Para_List
         private decimal pec;
         //Mark矫正 与 不矫正
         private UInt16 calibration_type; //0--无Mark矫正，1--Mark矫正
+        private static decimal mark_reference;
+        private static UInt16 split_block_x;
+        private static UInt16 split_block_y;
         public decimal Gts_Vel_reference { get => gts_vel_reference; set => gts_vel_reference = value; }
         public decimal Gts_Acc_reference { get => gts_acc_reference; set => gts_acc_reference = value; }
         public decimal Gts_Pos_reference { get => gts_pos_reference; set => gts_pos_reference = value; }
@@ -497,10 +518,13 @@ namespace Para_List
         public Vector Mark1 { get => mark1; set => mark1 = value; }
         public Vector Mark2 { get => mark2; set => mark2 = value; }
         public Vector Mark3 { get => mark3; set => mark3 = value; }
+        public Vector Mark4 { get => mark4; set => mark4 = value; }
         public Vector Mark_Dxf1 { get => mark_dxf1; set => mark_dxf1 = value; }
         public Vector Mark_Dxf2 { get => mark_dxf2; set => mark_dxf2 = value; }
         public Vector Mark_Dxf3 { get => mark_dxf3; set => mark_dxf3 = value; }
+        public Vector Mark_Dxf4 { get => mark_dxf4; set => mark_dxf4 = value; }
         public Affinity_Matrix Trans_Affinity { get => trans_affinity; set => trans_affinity = value; }
+        public Affinity_Matrix Cal_Trans_Affinity { get => cal_trans_affinity; set => cal_trans_affinity = value; }
         public decimal Cutter_Radius { get => cutter_radius; set => cutter_radius = value; }
         public Int16 Cutter_Type { get => cutter_type; set => cutter_type = value; }
         public Vector Rtc_Limit { get => rtc_limit; set => rtc_limit = value; }
@@ -512,6 +536,9 @@ namespace Para_List
         public decimal PRF { get => prf; set => prf = value; }
         public decimal PEC { get => pec; set => pec = value; }
         public UInt16 Calibration_Type { get => calibration_type; set => calibration_type = value; }
+        public decimal Mark_Reference { get => mark_reference; set => mark_reference = value; }
+        public UInt16 Split_Block_X { get => split_block_x; set => split_block_x = value; }
+        public UInt16 Split_Block_Y { get => split_block_y; set => split_block_y = value; }
         //构造函数
         public Parameter_RW() { }
     } 
@@ -615,10 +642,13 @@ namespace Para_List
                 Mark1 = Para_List.Parameter.Mark1,
                 Mark2 = Para_List.Parameter.Mark2,
                 Mark3 = Para_List.Parameter.Mark3,
+                Mark4 = Para_List.Parameter.Mark4,
                 Mark_Dxf1 = Para_List.Parameter.Mark_Dxf1,
                 Mark_Dxf2 = Para_List.Parameter.Mark_Dxf2,
                 Mark_Dxf3 = Para_List.Parameter.Mark_Dxf3,
+                Mark_Dxf4 = Para_List.Parameter.Mark_Dxf4,
                 Trans_Affinity = Para_List.Parameter.Trans_Affinity,
+                Cal_Trans_Affinity = Para_List.Parameter.Cal_Trans_Affinity,
                 Cutter_Radius = Para_List.Parameter.Cutter_Radius,
                 Cutter_Type = Para_List.Parameter.Cutter_Type,
                 Rtc_Limit = Para_List.Parameter.Rtc_Limit,
@@ -629,7 +659,10 @@ namespace Para_List
                 Amp2_Current = Para_List.Parameter.Amp2_Current,
                 PRF = Para_List.Parameter.PRF,
                 PEC = Para_List.Parameter.PEC,
-                Calibration_Type = Para_List.Parameter.Calibration_Type
+                Calibration_Type = Para_List.Parameter.Calibration_Type,
+                Mark_Reference = Para_List.Parameter.Mark_Reference,
+                Split_Block_X = Para_List.Parameter.Split_Block_X,
+                Split_Block_Y = Para_List.Parameter.Split_Block_Y
             };
 
             //二进制 序列化
@@ -755,10 +788,13 @@ namespace Para_List
                     Para_List.Parameter.Mark1 = parameter.Mark1;
                     Para_List.Parameter.Mark2 = parameter.Mark2;
                     Para_List.Parameter.Mark3 = parameter.Mark3;
+                    Para_List.Parameter.Mark4 = parameter.Mark4;
                     Para_List.Parameter.Mark_Dxf1 = parameter.Mark_Dxf1;
                     Para_List.Parameter.Mark_Dxf2 = parameter.Mark_Dxf2;
                     Para_List.Parameter.Mark_Dxf3 = parameter.Mark_Dxf3;
+                    Para_List.Parameter.Mark_Dxf4 = parameter.Mark_Dxf4;
                     Para_List.Parameter.Trans_Affinity = parameter.Trans_Affinity;
+                    Para_List.Parameter.Cal_Trans_Affinity = parameter.Cal_Trans_Affinity;
                     Para_List.Parameter.Cutter_Radius = parameter.Cutter_Radius;
                     Para_List.Parameter.Cutter_Type = parameter.Cutter_Type;
                     Para_List.Parameter.Rtc_Limit = parameter.Rtc_Limit;
@@ -770,6 +806,9 @@ namespace Para_List
                     Para_List.Parameter.PRF = parameter.PRF;
                     Para_List.Parameter.PEC = parameter.PEC;
                     Para_List.Parameter.Calibration_Type = parameter.Calibration_Type;
+                    Para_List.Parameter.Mark_Reference = parameter.Mark_Reference;
+                    Para_List.Parameter.Split_Block_X = parameter.Split_Block_X;
+                    Para_List.Parameter.Split_Block_Y = parameter.Split_Block_Y;
                 }
             }
         }

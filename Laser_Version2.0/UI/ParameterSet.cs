@@ -35,7 +35,6 @@ namespace Laser_Version2._0
                 Para_List.Parameter.Cam_Reference = tmp;//1像素=0.008806mm ()
             });
         }
-
         /// <summary>
         /// 矫正Mark点坐标实际位置
         /// </summary>
@@ -43,7 +42,7 @@ namespace Laser_Version2._0
         /// <param name="e"></param>
         private void Set_Btn_Mark1_Click(object sender, EventArgs e)
         {
-            Calibration.Calibrate_Mark();
+            Calibration.Calibrate_Mark(0);
             //更新显示
             Set_txt_markX1.Text = Para_List.Parameter.Mark1.X.ToString();
             Set_txt_markY1.Text = Para_List.Parameter.Mark1.Y.ToString();
@@ -51,11 +50,14 @@ namespace Laser_Version2._0
             Set_txt_markY2.Text = Para_List.Parameter.Mark2.Y.ToString();
             Set_txt_markX3.Text = Para_List.Parameter.Mark3.X.ToString();
             Set_txt_markY3.Text = Para_List.Parameter.Mark3.Y.ToString();
-            numericUpDown1.Value = Intrigue;
-
-
+            Set_txt_markX4.Text = Para_List.Parameter.Mark4.X.ToString();
+            Set_txt_markY4.Text = Para_List.Parameter.Mark4.Y.ToString();
         }
-       
+        ///Re_Calibration Mark
+        private void Re_Cali_Mark_Click(object sender, EventArgs e)
+        {
+            Calibration.Calibrate_Mark(0);
+        }
         //Mark1 X坐标
         private void Set_txt_markX1_TextChanged(object sender, EventArgs e)
         {
@@ -181,7 +183,47 @@ namespace Laser_Version2._0
                 return;
             }            
         }
-
+        //Mark4 X坐标
+        private void Set_txt_markX4_TextChanged(object sender, EventArgs e)
+        {
+            if (!decimal.TryParse(Set_txt_markX4.Text, out decimal tmp))
+            {
+                MessageBox.Show("请正确输入数字");
+                return;
+            }
+            if ((tmp >= 0) && (tmp <= 350))
+            {
+                Tmp_Mark.X = tmp;
+                Tmp_Mark.Y = Para_List.Parameter.Mark4.Y;
+                Para_List.Parameter.Mark4 = new Vector(Tmp_Mark);
+            }
+            else
+            {
+                MessageBox.Show("请确认数值在0-350范围内");
+                return;
+            }
+        }
+        //Mark4 Y坐标
+        private void Set_txt_markY4_TextChanged(object sender, EventArgs e)
+        {
+            if (!decimal.TryParse(Set_txt_markY4.Text, out decimal tmp))
+            {
+                MessageBox.Show("请正确输入数字");
+                return;
+            }
+            if ((tmp >= 0) && (tmp <= 350))
+            {
+                Tmp_Mark.X = Para_List.Parameter.Mark4.X;
+                Tmp_Mark.Y = tmp;
+                Para_List.Parameter.Mark4 = new Vector(Tmp_Mark);
+            }
+            else
+            {
+                MessageBox.Show("请确认数值在0-350范围内");
+                return;
+            }
+        }
+        //form load
         private void ParameterSet_Load(object sender, EventArgs e)
         {
             Set_txt_valueK.Text = Para_List.Parameter.Cam_Reference.ToString();
@@ -191,9 +233,12 @@ namespace Laser_Version2._0
             Set_txt_markY2.Text = Para_List.Parameter.Mark2.Y.ToString();
             Set_txt_markX3.Text = Para_List.Parameter.Mark3.X.ToString();
             Set_txt_markY3.Text = Para_List.Parameter.Mark3.Y.ToString();
+            Set_txt_markX4.Text = Para_List.Parameter.Mark4.X.ToString();
+            Set_txt_markY4.Text = Para_List.Parameter.Mark4.Y.ToString();
             textBox19.Text = Para_List.Parameter.Rtc_Org.X.ToString();
             textBox18.Text = Para_List.Parameter.Rtc_Org.Y.ToString();
-        }
+            numericUpDown1.Value = (short)Intrigue;
+        }       
         //定位mark点1
         private void button1_Click(object sender, EventArgs e)
         {
@@ -208,6 +253,11 @@ namespace Laser_Version2._0
         private void button3_Click(object sender, EventArgs e)
         {
             Calibration.Mark(Para_List.Parameter.Mark3);
+        }
+        //定位mark点4
+        private void button6_Click(object sender, EventArgs e)
+        {
+            Calibration.Mark(Para_List.Parameter.Mark4);
         }
         //振镜与ORG 中心差值X/mm
         private void textBox19_TextChanged(object sender, EventArgs e)
@@ -241,20 +291,21 @@ namespace Laser_Version2._0
         {
             Initialization.Initial.T_Client.Get_Cam_Deviation(Intrigue);//触发拍照 
         }
-
+        //Cam_Intrigue_Num
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {
             Intrigue = (short)numericUpDown1.Value;
         }
-
+        //Re_Connect_Tcp
         private void Re_Connect_Click(object sender, EventArgs e)
         {
             Initialization.Initial.T_Client.TCP_Start();
         }
-
+        //Disconnect_Tcp
         private void Disconnect_Tcp_Click(object sender, EventArgs e)
         {
             Initialization.Initial.T_Client.Tcp_Close();
         }
+       
     }
 }

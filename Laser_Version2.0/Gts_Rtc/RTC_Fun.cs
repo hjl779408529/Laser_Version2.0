@@ -189,6 +189,11 @@ namespace RTC_Fun
         //构造函数
         public Motion()
         {
+            Load_Affinity_Matrix();
+        }
+        public static void Load_Affinity_Matrix()
+        {
+            //file name
             string File_Name = "";
             if (Para_List.Parameter.Rtc_Affinity_Type == 1)
             {
@@ -202,37 +207,48 @@ namespace RTC_Fun
             {
                 File_Name = "Rtc_Affinity_Matrix_Three.xml";
             }
+            //file path
             string File_Path = @"./\Config/" + File_Name;
-
-            if (File.Exists(File_Path))
+            //read file
+            if (Para_List.Parameter.Rtc_Affinity_Type == 2)
             {
-                //获取矫正数据
-                if (Para_List.Parameter.Rtc_Affinity_Type == 1)//点阵匹配
-                {
-                    affinity_Matrices = new List<Affinity_Matrix>(Serialize_Data.Reserialize_Affinity_Matrix(File_Name));
-                    Log.Info("Rtc矫正文件加载成功！！！,数据数量：" + affinity_Matrices.Count);
-                }
-                else if (Para_List.Parameter.Rtc_Affinity_Type == 2)//直线拟合
-                {
+                if (File.Exists(File_Path))
+                {                  
                     Fit_Matrices = new List<Double_Fit_Data>(CSV_RW.DataTable_Double_Fit_Data(CSV_RW.OpenCSV(File_Path)));
-                    Log.Info("Rtc矫正文件加载成功！！！,数据数量：" + Fit_Matrices.Count);
+                    Log.Info("Rtc 线性 矫正文件加载成功！！！,数据数量：" + Fit_Matrices.Count);
                 }
                 else
                 {
-                    affinity_Matrices = new List<Affinity_Matrix>(Serialize_Data.Reserialize_Affinity_Matrix(File_Name));
-                    Log.Info("Rtc矫正文件加载成功！！！,数据数量：" + affinity_Matrices.Count);
+                    Fit_Matrices = new List<Double_Fit_Data>();
+                    MessageBox.Show("Rtc 线性 矫正文件不存在，禁止加工，请检查！");
+                    Log.Info("Rtc 线性 矫正文件不存在，禁止加工，请检查！");
                 }
-                
             }
             else
             {
-                affinity_Matrices = new List<Affinity_Matrix>();
-                Fit_Matrices = new List<Double_Fit_Data>();
-                MessageBox.Show("Rtc矫正文件不存在，禁止加工，请检查！");
-                Log.Info("Rtc矫正文件不存在，禁止加工，请检查！");
+                if (File.Exists(File_Path))
+                {
+                    //获取矫正数据
+                    if (Para_List.Parameter.Rtc_Affinity_Type == 1)//点阵匹配
+                    {
+                        affinity_Matrices = new List<Affinity_Matrix>(Serialize_Data.Reserialize_Affinity_Matrix(File_Name));
+                        Log.Info("Rtc Affinity_ALL 矫正文件加载成功！！！,数据数量：" + affinity_Matrices.Count);
+                    }
+                    else
+                    {
+                        affinity_Matrices = new List<Affinity_Matrix>(Serialize_Data.Reserialize_Affinity_Matrix(File_Name));
+                        Log.Info("Rtc Affinity_Three 矫正文件加载成功！！！,数据数量：" + affinity_Matrices.Count);
+                    }
+                }
+                else
+                {
+                    affinity_Matrices = new List<Affinity_Matrix>();
+                    MessageBox.Show("Rtc Affinity_ALL/Affinity_Three 矫正文件不存在，禁止加工，请检查！");
+                    Log.Info("Rtc Affinity_ALL/Affinity_Three 矫正文件不存在，禁止加工，请检查！");
+                }
             }
-            
 
+           
         }
         //关闭激光
         public static void Close_Laser()
@@ -606,9 +622,6 @@ namespace RTC_Fun
         //执行指定的Interpolation_Data 使用校准数据进行坐标校准 图形数据
         public static void Draw_Correct(List<Interpolation_Data> Rtc_Datas, UInt32 List_No) 
         {
-
-            //临时定位变量
-            Int16 R0_m, R0_n, End_m, End_n, Center_m, Center_n;
             //定义处理的变量
             Vector Tmp_Point = new Vector();
             decimal Tmp_R0_X = 0.0m;
@@ -638,20 +651,9 @@ namespace RTC_Fun
             else
             {
                 //获取数据落点
-                R0_m = Rtc_Cal_Data_Resolve.Seek_X_Pos(Rtc_Datas[0].Rtc_x);
-                R0_n = Rtc_Cal_Data_Resolve.Seek_Y_Pos(Rtc_Datas[0].Rtc_y);
-
-                //终点计算
-                if (affinity_Matrices.Count > 1)
-                {
-                    Tmp_R0_X = Rtc_Datas[0].Rtc_x * affinity_Matrices[R0_n * Para_List.Parameter.Rtc_Affinity_Col + R0_m].Cos_Value + Rtc_Datas[0].Rtc_y * affinity_Matrices[R0_n * Para_List.Parameter.Rtc_Affinity_Col + R0_m].Sin_Value + affinity_Matrices[R0_n * Para_List.Parameter.Rtc_Affinity_Col + R0_m].Delta_X;
-                    Tmp_R0_Y = Rtc_Datas[0].Rtc_y * affinity_Matrices[R0_n * Para_List.Parameter.Rtc_Affinity_Col + R0_m].Cos_Value - Rtc_Datas[0].Rtc_x * affinity_Matrices[R0_n * Para_List.Parameter.Rtc_Affinity_Col + R0_m].Sin_Value + affinity_Matrices[R0_n * Para_List.Parameter.Rtc_Affinity_Col + R0_m].Delta_Y;
-                }
-                else if ((affinity_Matrices.Count > 0) && (affinity_Matrices.Count == 1))
-                {
-                    Tmp_R0_X = Rtc_Datas[0].Rtc_x * affinity_Matrices[0].Cos_Value + Rtc_Datas[0].Rtc_y * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_X;
-                    Tmp_R0_Y = Rtc_Datas[0].Rtc_y * affinity_Matrices[0].Cos_Value - Rtc_Datas[0].Rtc_x * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_Y;
-                }
+                Tmp_Point = new Vector(Gts_Cal_Data_Resolve.Get_Affinity_Point(0, Rtc_Datas[0].Rtc_x, Rtc_Datas[0].Rtc_y, affinity_Matrices));
+                Tmp_R0_X = Tmp_Point.X;
+                Tmp_R0_Y = Tmp_Point.Y;
             }
             
             
@@ -670,31 +672,17 @@ namespace RTC_Fun
                     Tmp_End_Y = Tmp_Point.Y;
                     Tmp_Point = new Vector(Rtc_Cal_Data_Resolve.Get_Line_Fit_Coordinate(o.Center_x, o.Center_y, Fit_Matrices));
                     Tmp_Center_X = Tmp_Point.X;
-                    Tmp_Center_Y = Tmp_Point.Y; ;
+                    Tmp_Center_Y = Tmp_Point.Y;
                 }
                 else
                 {
 
-                    //获取数据落点
-                    End_m = Rtc_Cal_Data_Resolve.Seek_X_Pos(o.End_x);
-                    End_n = Rtc_Cal_Data_Resolve.Seek_Y_Pos(o.End_y);
-                    Center_m = Rtc_Cal_Data_Resolve.Seek_X_Pos(o.Center_x);
-                    Center_n = Rtc_Cal_Data_Resolve.Seek_Y_Pos(o.Center_y);
-                    //终点计算
-                    if (affinity_Matrices.Count > 1)
-                    {
-                        Tmp_End_X = o.End_x * affinity_Matrices[End_n * Para_List.Parameter.Rtc_Affinity_Col + End_m].Cos_Value + o.End_y * affinity_Matrices[End_n * Para_List.Parameter.Rtc_Affinity_Col + End_m].Sin_Value + affinity_Matrices[End_n * Para_List.Parameter.Rtc_Affinity_Col + End_m].Delta_X;
-                        Tmp_End_Y = o.End_y * affinity_Matrices[End_n * Para_List.Parameter.Rtc_Affinity_Col + End_m].Cos_Value - o.End_x * affinity_Matrices[End_n * Para_List.Parameter.Rtc_Affinity_Col + End_m].Sin_Value + affinity_Matrices[End_n * Para_List.Parameter.Rtc_Affinity_Col + End_m].Delta_Y;
-                        Tmp_Center_X = o.Center_x * affinity_Matrices[Center_n * Para_List.Parameter.Rtc_Affinity_Col + Center_m].Cos_Value + o.Center_y * affinity_Matrices[Center_n * Para_List.Parameter.Rtc_Affinity_Col + Center_m].Sin_Value + affinity_Matrices[Center_n * Para_List.Parameter.Rtc_Affinity_Col + Center_m].Delta_X;
-                        Tmp_Center_Y = o.Center_y * affinity_Matrices[Center_n * Para_List.Parameter.Rtc_Affinity_Col + Center_m].Cos_Value - o.Center_x * affinity_Matrices[Center_n * Para_List.Parameter.Rtc_Affinity_Col + Center_m].Sin_Value + affinity_Matrices[Center_n * Para_List.Parameter.Rtc_Affinity_Col + Center_m].Delta_Y;
-                    }
-                    else if ((affinity_Matrices.Count > 0) && (affinity_Matrices.Count == 1))
-                    {
-                        Tmp_End_X = o.End_x * affinity_Matrices[0].Cos_Value + o.End_y * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_X;
-                        Tmp_End_Y = o.End_y * affinity_Matrices[0].Cos_Value - o.End_x * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_Y;
-                        Tmp_Center_X = o.Center_x * affinity_Matrices[0].Cos_Value + o.Center_y * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_X;
-                        Tmp_Center_Y = o.Center_y * affinity_Matrices[0].Cos_Value - o.Center_x * affinity_Matrices[0].Sin_Value + affinity_Matrices[0].Delta_Y;
-                    }
+                    Tmp_Point = new Vector(Rtc_Cal_Data_Resolve.Get_Affinity_Point(0, o.End_x, o.End_y, affinity_Matrices));
+                    Tmp_End_X = Tmp_Point.X;
+                    Tmp_End_Y = Tmp_Point.Y;
+                    Tmp_Point = new Vector(Rtc_Cal_Data_Resolve.Get_Affinity_Point(0, o.Center_x, o.Center_y, affinity_Matrices));
+                    Tmp_Center_X = Tmp_Point.X;
+                    Tmp_Center_Y = Tmp_Point.Y;
                 }
 #if !DEBUG
                 if (o.Type == 11)//arc_abs 绝对圆弧

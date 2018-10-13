@@ -39,6 +39,7 @@
             // 
             axMxDrawX1.Enabled = true;
             this.axMxDrawX1.Location = new System.Drawing.Point(8, 10);
+            this.axMxDrawX1.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right | System.Windows.Forms.AnchorStyles.Top;
             this.axMxDrawX1.Name = "axMxDrawX1";
             this.axMxDrawX1.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axMxDrawX1.OcxState")));
             this.axMxDrawX1.Size = new System.Drawing.Size(900, 600);
@@ -48,10 +49,10 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.ClientSize = new System.Drawing.Size(1380, 930);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
+            this.MaximizeBox = true;
+            this.MinimizeBox = true;
+            this.ClientSize = new System.Drawing.Size(1380, 945);
             this.Controls.Add(this.axMxDrawX1);
             this.Name = "Display_Dxf";
             this.Text = "Display_Dxf";

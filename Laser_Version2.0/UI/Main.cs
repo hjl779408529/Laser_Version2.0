@@ -31,8 +31,7 @@ namespace Laser_Build_1._0
 
         IO_Monitor iO_Monitor;//打开IO监视界面
         Laser_Program_Info Info_Display;//关于信息
-        Dxf dxf;//Dxf处理页面
-        Emgu_Figures figure;//图像测试页面
+        public static Dxf dxf;//Dxf处理页面
         Laser_Version2._0.Rtc_Handle Rtc_Manual;//振镜操作
         Menu_5_Axis_Handle menu_5_Axis_Handle;//轴手动操作页面
         Laser_Version2._0.ParameterSet parameterSet;    //参数设置界面
@@ -128,27 +127,7 @@ namespace Laser_Build_1._0
                 }
             }
         }
-        //Emgu图像
-        private void button8_Click(object sender, EventArgs e)
-        {
-            if (figure == null)
-            {
-                figure = new Emgu_Figures();
-                figure.Show();
-            }
-            else
-            {
-                if (figure.IsDisposed) //若子窗体关闭 则打开新子窗体 并显示
-                {
-                    figure = new Emgu_Figures();
-                    figure.Show();
-                }
-                else
-                {
-                    figure.Activate(); //使子窗体获得焦点
-                }
-            }
-        }
+        
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
             //释放GTS

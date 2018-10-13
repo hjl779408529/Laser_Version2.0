@@ -181,14 +181,14 @@ namespace Laser_Version2._0
         public static List<Affinity_Matrix> DataTable_Affinity_Matrix(DataTable New_Data)
         {
             List<Affinity_Matrix> Result = new List<Affinity_Matrix>();
-            if (New_Data.Columns.Count == 4) //确定数据格式是否合适
+            if (New_Data.Columns.Count == 6) //确定数据格式是否合适
             {
                 for (int i = 0; i < New_Data.Rows.Count; i++)
                 {
 
-                    if ((decimal.TryParse(New_Data.Rows[i][0].ToString(), out decimal Cos_Value)) && (decimal.TryParse(New_Data.Rows[i][1].ToString(), out decimal Sin_Value)) && (decimal.TryParse(New_Data.Rows[i][2].ToString(), out decimal Delta_X)) && (decimal.TryParse(New_Data.Rows[i][3].ToString(), out decimal Delta_Y)))
+                    if ((decimal.TryParse(New_Data.Rows[i][0].ToString(), out decimal Stretch_X)) && (decimal.TryParse(New_Data.Rows[i][1].ToString(), out decimal Distortion_X)) && (decimal.TryParse(New_Data.Rows[i][2].ToString(), out decimal Delta_X)) && (decimal.TryParse(New_Data.Rows[i][3].ToString(), out decimal Stretch_Y)) && (decimal.TryParse(New_Data.Rows[i][4].ToString(), out decimal Distortion_Y)) && (decimal.TryParse(New_Data.Rows[i][5].ToString(), out decimal Delta_Y)))
                     {
-                        Result.Add(new Affinity_Matrix(Cos_Value, Sin_Value, Delta_X, Delta_Y));
+                        Result.Add(new Affinity_Matrix(Stretch_X, Distortion_X, Delta_X, Stretch_Y, Distortion_Y, Delta_Y));
                     }
                 }
             }
@@ -197,7 +197,6 @@ namespace Laser_Version2._0
                 MessageBox.Show("数据格式异常！！！");
             }
             return Result;
-
         }
         /// <summary>
         /// 将 List<Affinity_Matrix> 转换为 datatable 数据
@@ -207,14 +206,16 @@ namespace Laser_Version2._0
         public static DataTable Affinity_Matrix_DataTable(List<Affinity_Matrix> New_Data)
         {
             DataTable Result = new DataTable();
-            Result.Columns.Add("余弦值 Cos", typeof(decimal));//添加列
-            Result.Columns.Add("正弦值 Sin", typeof(decimal));
-            Result.Columns.Add("X轴偏移 Delta_X", typeof(decimal));
-            Result.Columns.Add("Y轴偏移 Delta_Y", typeof(decimal));
+            Result.Columns.Add("Stretch_X", typeof(decimal));//添加列
+            Result.Columns.Add("Distortion_X", typeof(decimal));
+            Result.Columns.Add("Delta_X", typeof(decimal));
+            Result.Columns.Add("Stretch_Y", typeof(decimal));//添加列
+            Result.Columns.Add("Distortion_Y", typeof(decimal));
+            Result.Columns.Add("Delta_Y", typeof(decimal));
             //数据赋值
             for (int i = 0; i < New_Data.Count; i++)
             {
-                Result.Rows.Add(new object[] { New_Data[i].Cos_Value, New_Data[i].Sin_Value, New_Data[i].Delta_X, New_Data[i].Delta_Y });
+                Result.Rows.Add(new object[] { New_Data[i].Stretch_X, New_Data[i].Distortion_X, New_Data[i].Delta_X, New_Data[i].Stretch_Y, New_Data[i].Distortion_Y, New_Data[i].Delta_Y });
             }
             //结果返回
             return Result;
@@ -227,7 +228,7 @@ namespace Laser_Version2._0
                 for (int i = 0; i < New_Data.Rows.Count; i++)
                 {
 
-                    if ((decimal.TryParse(New_Data.Rows[i][0].ToString(), out decimal K_X1)) && (decimal.TryParse(New_Data.Rows[i][1].ToString(), out decimal K_X2)) && (decimal.TryParse(New_Data.Rows[i][2].ToString(), out decimal K_X3)) && (decimal.TryParse(New_Data.Rows[i][3].ToString(), out decimal K_X4)) && (decimal.TryParse(New_Data.Rows[i][3].ToString(), out decimal Delta_X)) && (decimal.TryParse(New_Data.Rows[i][0].ToString(), out decimal K_Y1)) && (decimal.TryParse(New_Data.Rows[i][1].ToString(), out decimal K_Y2)) && (decimal.TryParse(New_Data.Rows[i][2].ToString(), out decimal K_Y3)) && (decimal.TryParse(New_Data.Rows[i][3].ToString(), out decimal K_Y4)) && (decimal.TryParse(New_Data.Rows[i][3].ToString(), out decimal Delta_Y))) 
+                    if ((decimal.TryParse(New_Data.Rows[i][0].ToString(), out decimal K_X1)) && (decimal.TryParse(New_Data.Rows[i][1].ToString(), out decimal K_X2)) && (decimal.TryParse(New_Data.Rows[i][2].ToString(), out decimal K_X3)) && (decimal.TryParse(New_Data.Rows[i][3].ToString(), out decimal K_X4)) && (decimal.TryParse(New_Data.Rows[i][4].ToString(), out decimal Delta_X)) && (decimal.TryParse(New_Data.Rows[i][5].ToString(), out decimal K_Y1)) && (decimal.TryParse(New_Data.Rows[i][6].ToString(), out decimal K_Y2)) && (decimal.TryParse(New_Data.Rows[i][7].ToString(), out decimal K_Y3)) && (decimal.TryParse(New_Data.Rows[i][8].ToString(), out decimal K_Y4)) && (decimal.TryParse(New_Data.Rows[i][9].ToString(), out decimal Delta_Y)))
                     {
                         Result.Add(new Double_Fit_Data(K_X1, K_X2, K_X3, K_X4, Delta_X, K_Y1, K_Y2, K_Y3, K_Y4, Delta_Y));
                     }
@@ -268,7 +269,7 @@ namespace Laser_Version2._0
             {
                 for (int i = 0; i < New_Data.Rows.Count; i++)
                 {
-                    if ((decimal.TryParse(New_Data.Rows[i][0].ToString(), out decimal K1)) && (decimal.TryParse(New_Data.Rows[i][1].ToString(), out decimal K2)) && (decimal.TryParse(New_Data.Rows[i][2].ToString(), out decimal K3)) && (decimal.TryParse(New_Data.Rows[i][3].ToString(), out decimal K4)) && (decimal.TryParse(New_Data.Rows[i][3].ToString(), out decimal Delta)))
+                    if ((decimal.TryParse(New_Data.Rows[i][0].ToString(), out decimal K1)) && (decimal.TryParse(New_Data.Rows[i][1].ToString(), out decimal K2)) && (decimal.TryParse(New_Data.Rows[i][2].ToString(), out decimal K3)) && (decimal.TryParse(New_Data.Rows[i][3].ToString(), out decimal K4)) && (decimal.TryParse(New_Data.Rows[i][4].ToString(), out decimal Delta)))
                     {
                         Result.Add(new Fit_Data(K1, K2, K3, K4, Delta));
                     }

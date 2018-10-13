@@ -231,6 +231,15 @@ public struct Vector
     {
         return (decimal)Math.Sqrt((double)(this.x * this.x + this.y * this.y));
     }
+    public static Vector operator -(Vector a, Vector b)
+    {
+        return new Vector(a.X-b.X,a.Y-b.Y);
+    }
+    public static Vector operator +(Vector a, Vector b)
+    {
+        return new Vector(a.X + b.X, a.Y + b.Y);
+    }
+
 
 }
 //Max 和 Min 判断
