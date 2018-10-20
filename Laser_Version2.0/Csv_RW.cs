@@ -126,7 +126,6 @@ namespace Laser_Version2._0
             fs.Close();
             return dt;
         }
-
         /// <summary>
         /// 将 datatable 转换为 List<Correct_Data> 数据
         /// </summary>
@@ -137,8 +136,8 @@ namespace Laser_Version2._0
             List<Correct_Data> Result = new List<Correct_Data>();
             if (New_Data.Columns.Count == 4) //确定数据格式是否合适
             {
-                for (int i = 0; i < New_Data.Rows.Count; i++)                {
-                    
+                for (int i = 0; i < New_Data.Rows.Count; i++)
+                {                    
                     if ((decimal.TryParse(New_Data.Rows[i][0].ToString(), out decimal x0)) && (decimal.TryParse(New_Data.Rows[i][1].ToString(), out decimal y0)) && (decimal.TryParse(New_Data.Rows[i][2].ToString(), out decimal xm)) && (decimal.TryParse(New_Data.Rows[i][3].ToString(), out decimal ym)))
                     {
                         Result.Add(new Correct_Data(x0, y0, xm, ym));
@@ -220,6 +219,11 @@ namespace Laser_Version2._0
             //结果返回
             return Result;
         }
+        /// <summary>
+        /// 将 datatable 转换为 List<Double_Fit_Data> 
+        /// </summary>
+        /// <param name="New_Data"></param>
+        /// <returns></returns>
         public static List<Double_Fit_Data> DataTable_Double_Fit_Data(DataTable New_Data) 
         {
             List<Double_Fit_Data> Result = new List<Double_Fit_Data>();
@@ -239,8 +243,12 @@ namespace Laser_Version2._0
                 MessageBox.Show("数据格式异常！！！");
             }
             return Result;
-
         }
+        /// <summary>
+        /// 将 List<Double_Fit_Data> 转换为 datatable 
+        /// </summary>
+        /// <param name="New_Data"></param>
+        /// <returns></returns>
         public static DataTable Double_Fit_Data_DataTable(List<Double_Fit_Data> New_Data)
         {
             DataTable Result = new DataTable();
@@ -262,6 +270,11 @@ namespace Laser_Version2._0
             //结果返回
             return Result;
         }
+        /// <summary>
+        /// 将 datatable 转换为 List<Fit_Data> 
+        /// </summary>
+        /// <param name="New_Data"></param>
+        /// <returns></returns>
         public static List<Fit_Data> DataTable_Fit_Data(DataTable New_Data) 
         {
             List<Fit_Data> Result = new List<Fit_Data>();
@@ -282,6 +295,11 @@ namespace Laser_Version2._0
             return Result;
 
         }
+        /// <summary>
+        /// 将 List<Fit_Data> 转换为 datatable 
+        /// </summary>
+        /// <param name="New_Data"></param>
+        /// <returns></returns>
         public static DataTable Fit_Data_DataTable(List<Fit_Data> New_Data)
         {
             DataTable Result = new DataTable();
@@ -306,6 +324,11 @@ namespace Laser_Version2._0
     //调用方法： EncodingType.GetType(filename) 
     public class EncodingType    
     {
+        /// <summary>
+        /// 获取文件编码格式
+        /// </summary>
+        /// <param name="FILE_NAME"></param>
+        /// <returns></returns>
         public static System.Text.Encoding GetType(string FILE_NAME)
         {
             FileStream fs = new FileStream(FILE_NAME, FileMode.Open, FileAccess.Read);

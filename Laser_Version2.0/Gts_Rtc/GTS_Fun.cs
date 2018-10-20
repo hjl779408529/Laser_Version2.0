@@ -420,7 +420,6 @@ namespace GTS_Fun
         }
     }
 
-
     class Interpolation
     {
         public static short Gts_Return;//指令返回变量 
@@ -889,8 +888,6 @@ namespace GTS_Fun
                 Tmp_X = Tmp_Point.X;
                 Tmp_Y = Tmp_Point.Y;
             }
-            Log.Info(string.Format("原坐标：X-{0}，Y-{1}，矫正后坐标：X-{2}，Y-{3}",x,y, Tmp_X, Tmp_Y));
-
 #if !DEBUG
             //清除FIFO 0
             Clear_FIFO();

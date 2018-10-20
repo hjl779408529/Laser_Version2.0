@@ -10,6 +10,7 @@
     <AssemblyName>Laser_Version2.0</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -22,7 +23,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -64,6 +64,9 @@
     <StartupObject>
     </StartupObject>
   </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="CSkin">
       <HintPath>dll\CSkin 16.1.14.2\CSkin 4.0\CSkin.dll</HintPath>
@@ -82,6 +85,9 @@
     </Reference>
     <Reference Include="Gvs.Controls.Numeric">
       <HintPath>dll\Gvs.Controls.Numeric.dll</HintPath>
+    </Reference>
+    <Reference Include="HPSocketCS">
+      <HintPath>dll\HPSocket4C\HPSocketCS.dll</HintPath>
     </Reference>
     <Reference Include="log4net">
       <HintPath>dll\log4net.dll</HintPath>
@@ -125,6 +131,9 @@
     <Compile Include="Data\Correct_Data.cs" />
     <Compile Include="CRCTOOL.cs" />
     <Compile Include="Data\Data_Resolve.cs" />
+    <Compile Include="DecimalExtension.cs" />
+    <Compile Include="HPSocket_Communication.cs" />
+    <Compile Include="Laser_Watt_Operation.cs" />
     <Compile Include="Mat_Extension.cs" />
     <Compile Include="TimeOut.cs" />
     <Compile Include="UI\Laser_Control_Panel.cs">
@@ -163,6 +172,12 @@
       <DependentUpon>Laser_Program_Info.cs</DependentUpon>
     </Compile>
     <Compile Include="Log and Refresh_IO.cs" />
+    <Compile Include="UI\Laser_Watt.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Laser_Watt.Designer.cs">
+      <DependentUpon>Laser_Watt.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\Main.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -194,7 +209,6 @@
     <Compile Include="UI\Rtc_Handle.Designer.cs">
       <DependentUpon>Rtc_Handle.cs</DependentUpon>
     </Compile>
-    <Compile Include="Tclient.cs" />
     <Compile Include="Vector_Calculate.cs" />
     <EmbeddedResource Include="UI\Display_Dxf.resx">
       <DependentUpon>Display_Dxf.cs</DependentUpon>
@@ -210,6 +224,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UI\Laser_Program_Info.resx">
       <DependentUpon>Laser_Program_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\Laser_Watt.resx">
+      <DependentUpon>Laser_Watt.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\Main.resx">
       <DependentUpon>Main.cs</DependentUpon>
@@ -289,4 +306,12 @@
     </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
 </Project>

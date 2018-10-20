@@ -126,8 +126,8 @@ namespace Para_List
         private static Vector rtc_home = new Vector(0, 0);
 
         //定义串口号
-        private static Int32 com_no = 0;
-
+        private static Int32 laser_control_com_no = 0;
+        private static Int32 laser_watt_com_no = 0;
         //定义RTC校准尺寸
         private static decimal rtc_cal_radius = 1.0m; //圆半径
         private static decimal rtc_cal_interval = 4.0m; //间距
@@ -147,6 +147,10 @@ namespace Para_List
         private static Affinity_Matrix trans_affinity = new Affinity_Matrix();
         //标定板的仿射变换参数
         private static Affinity_Matrix cal_trans_affinity = new Affinity_Matrix();
+        //相机坐标系的仿射变换参数
+        private static Affinity_Matrix cam_trans_affinity = new Affinity_Matrix();
+        //振镜坐标系的仿射变换参数
+        private static Affinity_Matrix rtc_trans_affinity = new Affinity_Matrix(); 
         //刀具补偿
         private static decimal cutter_radius = 0.5m; //刀具半径
         private static Int16 cutter_type = 0; //刀具补偿类型 0-不补偿、1-钻孔、2-落料
@@ -251,7 +255,8 @@ namespace Para_List
         public static UInt32 List1_Size { get => list1_size; set => list1_size = value; }
         public static UInt32 List2_Size { get => list2_size; set => list2_size = value; }
         public static Vector Rtc_Home { get => rtc_home; set => rtc_home = value; }
-        public static Int32 Com_No { get => com_no; set => com_no = value; }
+        public static Int32 Laser_Control_Com_No { get => laser_control_com_no; set => laser_control_com_no = value; }
+        public static Int32 Laser_Watt_Com_No { get => laser_watt_com_no; set => laser_watt_com_no = value; }
         public static decimal Rtc_Cal_Radius { get => rtc_cal_radius; set => rtc_cal_radius = value; }
         public static decimal Rtc_Cal_Interval { get => rtc_cal_interval; set => rtc_cal_interval = value; }
         public static Vector Mark1 { get => mark1; set => mark1 = value; }
@@ -264,6 +269,8 @@ namespace Para_List
         public static Vector Mark_Dxf4 { get => mark_dxf4; set => mark_dxf4 = value; }
         public static Affinity_Matrix Trans_Affinity { get => trans_affinity; set => trans_affinity = value; }
         public static Affinity_Matrix Cal_Trans_Affinity { get => cal_trans_affinity; set => cal_trans_affinity = value; }
+        public static Affinity_Matrix Cam_Trans_Affinity { get => cam_trans_affinity; set => cam_trans_affinity = value; }
+        public static Affinity_Matrix Rtc_Trans_Affinity { get => rtc_trans_affinity; set => rtc_trans_affinity = value; }
         public static decimal Cutter_Radius { get => cutter_radius; set => cutter_radius = value; }
         public static Int16 Cutter_Type { get => cutter_type; set => cutter_type = value; }        
         public static Vector Rtc_Limit { get => rtc_limit; set => rtc_limit = value; }
@@ -393,7 +400,8 @@ namespace Para_List
         //定义Home_XY
         private Vector rtc_home;
         //定义串口号
-        private Int32 com_no = 0;
+        private Int32 laser_control_com_no = 0;
+        private Int32 laser_watt_com_no = 0;
         //定义RTC校准尺寸
         private decimal rtc_cal_radius; //圆半径
         private decimal rtc_cal_interval; //间距
@@ -411,6 +419,10 @@ namespace Para_List
         private Affinity_Matrix trans_affinity;
         //标定板的仿射变换参数
         private Affinity_Matrix cal_trans_affinity;
+        //相机坐标系的仿射变换参数
+        private Affinity_Matrix cam_trans_affinity;
+        //振镜坐标系的仿射变换参数
+        private Affinity_Matrix rtc_trans_affinity;        
         //刀具补偿
         private decimal cutter_radius = 0.5m; //刀具半径
         private Int16 cutter_type = 0; //刀具补偿类型 0-不补偿、1-钻孔、2-落料
@@ -512,7 +524,8 @@ namespace Para_List
         public UInt32 List1_Size { get => list1_size; set => list1_size = value; }
         public UInt32 List2_Size { get => list2_size; set => list2_size = value; }
         public Vector Rtc_Home { get => rtc_home; set => rtc_home = value; }
-        public Int32 Com_No { get => com_no; set => com_no = value; }
+        public Int32 Laser_Control_Com_No { get => laser_control_com_no; set => laser_control_com_no = value; }
+        public Int32 Laser_Watt_Com_No { get => laser_watt_com_no; set => laser_watt_com_no = value; }
         public decimal Rtc_Cal_Radius { get => rtc_cal_radius; set => rtc_cal_radius = value; }
         public decimal Rtc_Cal_Interval { get => rtc_cal_interval; set => rtc_cal_interval = value; }
         public Vector Mark1 { get => mark1; set => mark1 = value; }
@@ -525,6 +538,8 @@ namespace Para_List
         public Vector Mark_Dxf4 { get => mark_dxf4; set => mark_dxf4 = value; }
         public Affinity_Matrix Trans_Affinity { get => trans_affinity; set => trans_affinity = value; }
         public Affinity_Matrix Cal_Trans_Affinity { get => cal_trans_affinity; set => cal_trans_affinity = value; }
+        public Affinity_Matrix Cam_Trans_Affinity { get => cam_trans_affinity; set => cam_trans_affinity = value; }
+        public Affinity_Matrix Rtc_Trans_Affinity { get => rtc_trans_affinity; set => rtc_trans_affinity = value; }
         public decimal Cutter_Radius { get => cutter_radius; set => cutter_radius = value; }
         public Int16 Cutter_Type { get => cutter_type; set => cutter_type = value; }
         public Vector Rtc_Limit { get => rtc_limit; set => rtc_limit = value; }
@@ -636,7 +651,8 @@ namespace Para_List
                 List1_Size = Para_List.Parameter.List1_Size,
                 List2_Size = Para_List.Parameter.List2_Size,
                 Rtc_Home = Para_List.Parameter.Rtc_Home,
-                Com_No = Para_List.Parameter.Com_No,
+                Laser_Control_Com_No = Para_List.Parameter.Laser_Control_Com_No,
+                Laser_Watt_Com_No = Para_List.Parameter.Laser_Watt_Com_No,
                 Rtc_Cal_Radius = Para_List.Parameter.Rtc_Cal_Radius,
                 Rtc_Cal_Interval = Para_List.Parameter.Rtc_Cal_Interval,
                 Mark1 = Para_List.Parameter.Mark1,
@@ -649,6 +665,8 @@ namespace Para_List
                 Mark_Dxf4 = Para_List.Parameter.Mark_Dxf4,
                 Trans_Affinity = Para_List.Parameter.Trans_Affinity,
                 Cal_Trans_Affinity = Para_List.Parameter.Cal_Trans_Affinity,
+                Cam_Trans_Affinity = Para_List.Parameter.Cam_Trans_Affinity,
+                Rtc_Trans_Affinity = Para_List.Parameter.Rtc_Trans_Affinity,
                 Cutter_Radius = Para_List.Parameter.Cutter_Radius,
                 Cutter_Type = Para_List.Parameter.Cutter_Type,
                 Rtc_Limit = Para_List.Parameter.Rtc_Limit,
@@ -782,7 +800,8 @@ namespace Para_List
                     Para_List.Parameter.List1_Size = parameter.List1_Size;
                     Para_List.Parameter.List2_Size = parameter.List2_Size;
                     Para_List.Parameter.Rtc_Home = parameter.Rtc_Home;
-                    Para_List.Parameter.Com_No = parameter.Com_No;
+                    Para_List.Parameter.Laser_Control_Com_No = parameter.Laser_Control_Com_No;
+                    Para_List.Parameter.Laser_Watt_Com_No = parameter.Laser_Watt_Com_No;
                     Para_List.Parameter.Rtc_Cal_Radius = parameter.Rtc_Cal_Radius;
                     Para_List.Parameter.Rtc_Cal_Interval = parameter.Rtc_Cal_Interval;
                     Para_List.Parameter.Mark1 = parameter.Mark1;
@@ -795,6 +814,8 @@ namespace Para_List
                     Para_List.Parameter.Mark_Dxf4 = parameter.Mark_Dxf4;
                     Para_List.Parameter.Trans_Affinity = parameter.Trans_Affinity;
                     Para_List.Parameter.Cal_Trans_Affinity = parameter.Cal_Trans_Affinity;
+                    Para_List.Parameter.Cam_Trans_Affinity = parameter.Cam_Trans_Affinity;
+                    Para_List.Parameter.Rtc_Trans_Affinity = parameter.Rtc_Trans_Affinity;
                     Para_List.Parameter.Cutter_Radius = parameter.Cutter_Radius;
                     Para_List.Parameter.Cutter_Type = parameter.Cutter_Type;
                     Para_List.Parameter.Rtc_Limit = parameter.Rtc_Limit;

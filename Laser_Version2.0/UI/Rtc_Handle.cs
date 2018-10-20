@@ -51,6 +51,12 @@ namespace Laser_Version2._0
             Home_Vector = Para_List.Parameter.Rtc_Home;
 
             Mark_Speed.Text = (((decimal)Para_List.Parameter.Mark_Speed / Para_List.Parameter.Rtc_XPos_Reference) * 1000m).ToString();
+            Jump_Speed.Text = (((decimal)Para_List.Parameter.Jump_Speed / Para_List.Parameter.Rtc_XPos_Reference) * 1000m).ToString();
+            Laser_ON_Delay.Text = Para_List.Parameter.Laser_On_Delay.ToString();
+            Laser_Off_Delay.Text = Para_List.Parameter.Laser_Off_Delay.ToString();
+            Jump_Delay.Text = Para_List.Parameter.Jump_Delay.ToString();
+            Mark_Delay.Text = Para_List.Parameter.Mark_Delay.ToString();
+            Polygon_Delay.Text = Para_List.Parameter.Polygon_Delay.ToString();
 
         }
         //线程函数
@@ -209,7 +215,11 @@ namespace Laser_Version2._0
             }
             Para_List.Parameter.Rtc_YPos_Reference = tem;
         }
-
+        /// <summary>
+        /// Mark_Speed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Mark_Speed_TextChanged(object sender, EventArgs e)
         {
             if (!decimal.TryParse(Mark_Speed.Text, out decimal tem))
@@ -224,6 +234,90 @@ namespace Laser_Version2._0
         {
             //Para_List.Serialize_Parameter.Reserialize("Para.xml");
             RTC_Fun.Factory.Change_Para();
+        }
+        /// <summary>
+        /// Jump_Speed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Jump_Speed_TextChanged(object sender, EventArgs e)
+        {
+            if (!decimal.TryParse(Jump_Speed.Text, out decimal tem))
+            {
+                MessageBox.Show("请正确输入数字");
+                return;
+            }
+            Para_List.Parameter.Jump_Speed = (double)(tem * Para_List.Parameter.Rtc_XPos_Reference / 1000m);
+        }
+        /// <summary>
+        /// Laser_On_Delay
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Laser_ON_Delay_TextChanged(object sender, EventArgs e)
+        {
+            if (!int.TryParse(Laser_ON_Delay.Text, out int tem))
+            {
+                MessageBox.Show("请正确输入数字");
+                return;
+            }
+            Para_List.Parameter.Laser_On_Delay = tem;
+        }
+        /// <summary>
+        /// Laser_Off_Delay
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Laser_Off_Delay_TextChanged(object sender, EventArgs e)
+        {
+            if (!uint.TryParse(Laser_Off_Delay.Text, out uint tem))
+            {
+                MessageBox.Show("请正确输入数字");
+                return;
+            }
+            Para_List.Parameter.Laser_Off_Delay = tem;
+        }
+        /// <summary>
+        /// Jump_Delay
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Jump_Delay_TextChanged(object sender, EventArgs e)
+        {
+            if (!uint.TryParse(Jump_Delay.Text, out uint tem))
+            {
+                MessageBox.Show("请正确输入数字");
+                return;
+            }
+            Para_List.Parameter.Jump_Delay = tem;
+        }
+        /// <summary>
+        /// Mark_Delay
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Mark_Delay_TextChanged(object sender, EventArgs e)
+        {
+            if (!uint.TryParse(Mark_Delay.Text, out uint tem))
+            {
+                MessageBox.Show("请正确输入数字");
+                return;
+            }
+            Para_List.Parameter.Mark_Delay = tem;
+        }
+        /// <summary>
+        /// Polygon_Delay
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Polygon_Delay_TextChanged(object sender, EventArgs e)
+        {
+            if (!uint.TryParse(Polygon_Delay.Text, out uint tem))
+            {
+                MessageBox.Show("请正确输入数字");
+                return;
+            }
+            Para_List.Parameter.Polygon_Delay = tem;
         }
     }
 }

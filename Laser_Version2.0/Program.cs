@@ -44,14 +44,12 @@ namespace Laser_Build_1._0
             Refresh_Timer_1s.Elapsed += Gts_IO_RE.Timer_1s;
             Refresh_Timer_1s.AutoReset = true;
             Refresh_Timer_1s.Enabled = true;
-            Refresh_Timer_1s.Start(); 
+            Refresh_Timer_1s.Start();
 
             //窗体启动
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Main());  
-
-
+            Application.Run(new Main());     
         }
     }
 }
@@ -227,9 +225,9 @@ public struct Vector
         this.x = 0;
         this.y = 0;
     }
-    public decimal Length()
+    public decimal Length
     {
-        return (decimal)Math.Sqrt((double)(this.x * this.x + this.y * this.y));
+        get => (decimal)Math.Sqrt((double)(this.x * this.x + this.y * this.y));
     }
     public static Vector operator -(Vector a, Vector b)
     {

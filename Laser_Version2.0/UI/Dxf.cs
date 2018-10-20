@@ -52,35 +52,31 @@ namespace Laser_Build_1._0
         Data_Resolve Data_Cal = new Data_Resolve();
         private void Dxf_Load(object sender, EventArgs e)
         {
-            //启用定时器
-            Refresh_Timer.Elapsed += Refresh_Timer_Elapsed_Thread;
-            Refresh_Timer.AutoReset = true;
-            Refresh_Timer.Enabled = true;
-            Refresh_Timer.Start();
+            
             //初始数据刷新
             //工件坐标系偏移
-            textBox4.Text = Convert.ToString(Para_List.Parameter.Work.X);
-            textBox3.Text = Convert.ToString(Para_List.Parameter.Work.Y);
+            textBox4.Text = Para_List.Parameter.Work.X.ToString(4);
+            textBox3.Text = Para_List.Parameter.Work.Y.ToString(4);
             //直线插补
-            textBox2.Text = Convert.ToString(Para_List.Parameter.Line_synVel);
-            textBox1.Text = Convert.ToString(Para_List.Parameter.Line_synAcc);
+            textBox2.Text = Para_List.Parameter.Line_synVel.ToString(4);
+            textBox1.Text = Para_List.Parameter.Line_synAcc.ToString(4);
             //圆弧插补
-            textBox6.Text = Convert.ToString(Para_List.Parameter.Circle_synVel);
-            textBox5.Text = Convert.ToString(Para_List.Parameter.Circle_synAcc);
+            textBox6.Text = Para_List.Parameter.Circle_synVel.ToString(4);
+            textBox5.Text = Para_List.Parameter.Circle_synAcc.ToString(4);
 
             //坐标运动平滑系数
-            textBox12.Text = Convert.ToString(Para_List.Parameter.Syn_EvenTime);
+            textBox12.Text = Para_List.Parameter.Syn_EvenTime.ToString(4);
 
             //插补终止速度
-            textBox14.Text = Convert.ToString(Para_List.Parameter.Line_endVel);
-            textBox13.Text = Convert.ToString(Para_List.Parameter.Circle_endVel);
+            textBox14.Text = Para_List.Parameter.Line_endVel.ToString(4);
+            textBox13.Text = Para_List.Parameter.Circle_endVel.ToString(4);
 
             //坐标系定位坐标
             textBox23.Text = Convert.ToString(200);
             textBox22.Text = Convert.ToString(330);
 
             //刀具半径
-            Cutter_Radius.Text = Para_List.Parameter.Cutter_Radius.ToString();
+            Cutter_Radius.Text = Para_List.Parameter.Cutter_Radius.ToString(4);
             //刀具补偿类型
             Cutter_Comp.SelectedIndex = Para_List.Parameter.Cutter_Type;
             //选择起始加工位置
@@ -89,6 +85,12 @@ namespace Laser_Build_1._0
             //加工重复次数
             Rtc_Repeat_Num.Text = Para_List.Parameter.Rtc_Repeat.ToString();
             Gts_Repeat_Num.Text = Para_List.Parameter.Gts_Repeat.ToString();
+
+            //启用定时器
+            Refresh_Timer.Elapsed += Refresh_Timer_Elapsed_Thread;
+            Refresh_Timer.AutoReset = true;
+            Refresh_Timer.Enabled = true;
+            Refresh_Timer.Start();
 
         }
         //线程函数
@@ -461,7 +463,29 @@ namespace Laser_Build_1._0
         }
         private void Get_Cal_Affinity_Matricx()
         {
-            Calibration.Cal_Calibration_Affinity_Matrix();
+            ///先矫正坐标原点
+            if (Calibration.Calibrate_Org())
+            {
+                appendInfo("坐标原点矫正成功！！！");
+            }
+            else
+            {
+                appendInfo("坐标原点矫正失败！！！");                
+                return;
+            }
+            appendInfo("矫正后数据 X：" + Para_List.Parameter.Cal_Org.X + ", Y：" + Para_List.Parameter.Cal_Org.Y);
+            ///建立直角坐标系
+            GTS_Fun.Interpolation.Coordination(Para_List.Parameter.Work.X, Para_List.Parameter.Work.Y);
+            ///矫正标定板参数
+            if (Calibration.Cal_Calibration_Affinity_Matrix())
+            {
+                appendInfo("标定板仿射参数矫正成功！！！");
+            }
+            else
+            {
+                appendInfo("标定板仿射参数矫正失败！！！");
+                return;
+            }
             appendInfo("标定板仿射参数Stretch_X：" + Para_List.Parameter.Cal_Trans_Affinity.Stretch_X);
             appendInfo("标定板仿射参数Distortion_X：" + Para_List.Parameter.Cal_Trans_Affinity.Distortion_X);
             appendInfo("标定板仿射参数DeltaX：" + Para_List.Parameter.Cal_Trans_Affinity.Delta_X);
@@ -494,9 +518,16 @@ namespace Laser_Build_1._0
         //校准相机坐标原点
         private void Cal_Org_Point_Click(object sender, EventArgs e)
         {
-            Calibration.Calibrate_Org();
+            if (Calibration.Calibrate_Org())
+            {
+                appendInfo("坐标原点矫正成功！！！");
+            }
+            else
+            {
+                appendInfo("坐标原点矫正失败！！！");
+                return;
+            }
             appendInfo("矫正后数据 X：" + Para_List.Parameter.Cal_Org.X + ", Y：" + Para_List.Parameter.Cal_Org.Y);
-
         }
         //生成GTS校准数据
         private void Csv_Test_Click(object sender, EventArgs e)
@@ -518,6 +549,35 @@ namespace Laser_Build_1._0
 
             //将Gts Correctdata数据转换为CSV并保存
             //CSV_RW.SaveCSV(CSV_RW.Correct_Data_DataTable(Serialize_Data.Reserialize_Correct_Data("Gts_Correct_Data.xml")), "Gts_Correct_Data");
+        }
+        //生成GTS校准数据
+        private void Generate_Cal_Aquisition_Click(object sender, EventArgs e)
+        {
+            //Calibration.Get_Datas_Test();
+
+            //计算偏差
+            Vector Cam = new Vector();
+            Vector Cal_Actual_Point = new Vector();
+            Vector Result = new Vector();
+            //定位矫正坐标
+            GTS_Fun.Interpolation.Gts_Ready_Test(Cor_x, Cor_y);            
+            //相机反馈的当前坐标
+            Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation_Test_00(1));//触发拍照 
+            if (Cam.Length == 0)
+            {
+                MessageBox.Show("相机坐标提取失败，请检查！！！");
+                return;
+            }
+            //当前平台坐标 对应的 标定板坐标
+            Cal_Actual_Point = Calibration.Get_Cal_Actual_Point(new Vector(Cor_x, Cor_y));
+            //数据保存
+            Result = new Vector(Cal_Actual_Point + Cam);//实际坐标
+            Result = new Vector(Result.X - Cor_x,Result.Y - Cor_y);
+            //信息输出
+            MessageBox.Show(string.Format("计算差值XY:({0},{1})", Result.X, Result.Y));
+
+            //Laser_Watt_Cal.Resolve(CSV_RW.OpenCSV(@"./\Config/Laser_Data.csv"));
+
 
         }
         //坐标补偿加工
@@ -593,6 +653,28 @@ namespace Laser_Build_1._0
         private void Go_Cal_Point_Click(object sender, EventArgs e)
         {
             GTS_Fun.Interpolation.Gts_Ready_Test(Cor_x, Cor_y);
+            //计算偏差
+            Vector Cam = new Vector();
+            Vector Cam_Delta = new Vector();
+            Vector Cal_Actual_Point = new Vector();
+            Vector Result = new Vector(); 
+            //调用相机，获取对比的坐标信息
+            Thread.Sleep(50);
+            //相机反馈的当前坐标
+            Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(1));//触发拍照 
+            if (Cam.Length == 0)
+            {
+                MessageBox.Show("相机坐标提取失败，请检查！！！");
+                return;
+            }
+            //相机测算的实际偏差值:(相机反馈的当前坐标) - (相机中心坐标)
+            Cam_Delta = new Vector(Cam.X - 243 * Para_List.Parameter.Cam_Reference, Cam.Y - 324 * Para_List.Parameter.Cam_Reference);
+            //当前平台坐标 对应的 标定板坐标
+            Cal_Actual_Point =Calibration.Get_Cal_Actual_Point(new Vector(Cor_x, Cor_y));
+            //数据保存
+            Result = new Vector(Cal_Actual_Point.X - Cam_Delta.X - Cor_x, Cal_Actual_Point.Y - Cam_Delta.Y - Cor_y);//实际坐标
+            //信息输出
+            MessageBox.Show(string.Format("计算差值XY:({0},{1})", Result.X,Result.Y));
         }
         //加工起始位置选择
         private void Start_Pos_Sel_SelectedIndexChanged(object sender, EventArgs e)
@@ -639,6 +721,18 @@ namespace Laser_Build_1._0
         {
             Debug_Info_Display.Text = "";
         }
+        //测试HPsocket
+        HPSocket_Communication Hp_Tcp = new HPSocket_Communication();
+        private void button3_Click(object sender, EventArgs e)
+        {
+            Hp_Tcp.TCP_Start("127.0.0.1",6530);
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            Hp_Tcp.Send_Data(2);
+        }
+
 
         //定位坐标点
         private void button21_Click(object sender, EventArgs e)

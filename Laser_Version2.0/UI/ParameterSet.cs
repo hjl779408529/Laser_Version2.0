@@ -283,8 +283,8 @@ namespace Laser_Version2._0
         private void button4_Click(object sender, EventArgs e)
         {
             Calibration.Calibrate_RTC_ORG();
-            textBox19.Text = Para_List.Parameter.Rtc_Org.X.ToString();
-            textBox18.Text = Para_List.Parameter.Rtc_Org.Y.ToString();
+            textBox19.Text = Para_List.Parameter.Rtc_Org.X.ToString(4);
+            textBox18.Text = Para_List.Parameter.Rtc_Org.Y.ToString(4);
         }
         //触发拍照
         private void button5_Click(object sender, EventArgs e)
@@ -299,13 +299,24 @@ namespace Laser_Version2._0
         //Re_Connect_Tcp
         private void Re_Connect_Click(object sender, EventArgs e)
         {
-            Initialization.Initial.T_Client.TCP_Start();
+            Initialization.Initial.T_Client.TCP_Start("127.0.0.1",6230);
         }
         //Disconnect_Tcp
         private void Disconnect_Tcp_Click(object sender, EventArgs e)
         {
-            Initialization.Initial.T_Client.Tcp_Close();
+            Initialization.Initial.T_Client.Stop_Connect();
         }
-       
+        //矫正相机坐标系
+        private void Correct_Cam_Cor_Click(object sender, EventArgs e)
+        {
+            if (Calibration.Cal_Cam_Affinity())
+            {
+                MessageBox.Show("相机坐标系矫正完成！！！");
+            }
+            else
+            {
+                MessageBox.Show("相机坐标系矫正失败！！！");
+            }
+        }
     }
 }

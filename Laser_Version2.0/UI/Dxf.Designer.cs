@@ -87,6 +87,9 @@
             this.Get_Mark_Data = new System.Windows.Forms.Button();
             this.label9 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.Generate_Cal_Aquisition = new System.Windows.Forms.Button();
+            this.button3 = new System.Windows.Forms.Button();
+            this.button4 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -167,7 +170,7 @@
             this.Debug_Info_Display.Location = new System.Drawing.Point(1036, 45);
             this.Debug_Info_Display.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Debug_Info_Display.Name = "Debug_Info_Display";
-            this.Debug_Info_Display.Size = new System.Drawing.Size(470, 705);
+            this.Debug_Info_Display.Size = new System.Drawing.Size(460, 705);
             this.Debug_Info_Display.TabIndex = 36;
             this.Debug_Info_Display.Text = "";
             this.Debug_Info_Display.DoubleClick += new System.EventHandler(this.Debug_Info_Display_DoubleClick);
@@ -594,7 +597,7 @@
             this.Go_Cal_Point.Name = "Go_Cal_Point";
             this.Go_Cal_Point.Size = new System.Drawing.Size(154, 50);
             this.Go_Cal_Point.TabIndex = 119;
-            this.Go_Cal_Point.Text = "定位矫正坐标";
+            this.Go_Cal_Point.Text = "计算当前偏差(像素)";
             this.Go_Cal_Point.UseVisualStyleBackColor = true;
             this.Go_Cal_Point.Click += new System.EventHandler(this.Go_Cal_Point_Click);
             // 
@@ -713,11 +716,47 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "参数设置";
             // 
+            // Generate_Cal_Aquisition
+            // 
+            this.Generate_Cal_Aquisition.Location = new System.Drawing.Point(802, 562);
+            this.Generate_Cal_Aquisition.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Generate_Cal_Aquisition.Name = "Generate_Cal_Aquisition";
+            this.Generate_Cal_Aquisition.Size = new System.Drawing.Size(154, 50);
+            this.Generate_Cal_Aquisition.TabIndex = 129;
+            this.Generate_Cal_Aquisition.Text = "计算当前偏差(坐标系)";
+            this.Generate_Cal_Aquisition.UseVisualStyleBackColor = true;
+            this.Generate_Cal_Aquisition.Click += new System.EventHandler(this.Generate_Cal_Aquisition_Click);
+            // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(802, 631);
+            this.button3.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(154, 50);
+            this.button3.TabIndex = 130;
+            this.button3.Text = "连接";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
+            // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(802, 700);
+            this.button4.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(154, 50);
+            this.button4.TabIndex = 131;
+            this.button4.Text = "发送";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
+            // 
             // Dxf
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1542, 769);
+            this.ClientSize = new System.Drawing.Size(1532, 769);
+            this.Controls.Add(this.button4);
+            this.Controls.Add(this.button3);
+            this.Controls.Add(this.Generate_Cal_Aquisition);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.Get_Mark_Data);
             this.Controls.Add(this.Load_Gts_AM);
@@ -821,5 +860,8 @@
         private System.Windows.Forms.Button Get_Mark_Data;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.Button Generate_Cal_Aquisition;
+        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button button4;
     }
 }

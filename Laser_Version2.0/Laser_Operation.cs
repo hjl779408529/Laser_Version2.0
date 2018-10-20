@@ -36,14 +36,17 @@ namespace Laser_Version2._0
     }
     
     class Laser_Operation
-    {        
+    {
+        // Crc Computation Class
+        private CRCTool compCRC = new CRCTool();
+        public Laser_CC_Data Resolve_Rec = new Laser_CC_Data();//接收数据解析        
         //构造函数
         public Laser_Operation()
         {
             
-        }
+        }        
         //读取数据
-        public static void Read(string Address,string CC)//读取数据没有D1-Dn
+        public void Read(string Address,string CC)//读取数据没有D1-Dn
         {
             Laser_CC_Data CC_Data = new Laser_CC_Data();
             CC_Data.RW = "01";//读取标志
@@ -54,12 +57,12 @@ namespace Laser_Version2._0
             CC_Data.Sum = CC_Data.RW + CC_Data.DataSize + CC_Data.Address + CC_Data.Com_Control + CC_Data.Data;
             //MessageBox.Show(CC_Data.Sum);
             //发送数据
-            Initialization.Initial.Com_Comunication.Send_Data(CC_Data.Sum);
+            Initialization.Initial.Laser_Control_Com.Send_Data(CC_Data.Sum);
             //等待数据读取完成
             Thread.Sleep(200);
         }
         //写入数据
-        public static void Write(string Address, string CC,string Data)//写入数据，这就包含写入数据的参数：D1-Dn 
+        public void Write(string Address, string CC,string Data)//写入数据，这就包含写入数据的参数：D1-Dn 
         {
             Laser_CC_Data CC_Data = new Laser_CC_Data();
             CC_Data.RW = "00";//写入标志
@@ -71,12 +74,12 @@ namespace Laser_Version2._0
             CC_Data.Sum = CC_Data.RW + CC_Data.DataSize + CC_Data.Address + CC_Data.Com_Control + CC_Data.Data;
             //MessageBox.Show(CC_Data.Sum);
             //发送数据
-            Initialization.Initial.Com_Comunication.Send_Data(CC_Data.Sum);
+            Initialization.Initial.Laser_Control_Com.Send_Data(CC_Data.Sum);
             //等待数据读取完成
             Thread.Sleep(200);
         }
         //将数值10进制转16进制，再将16进制转换为字符串返回 中心是byte转化为ASCII
-        public static string Cal_Data_Size(UInt32 Num) 
+        public string Cal_Data_Size(UInt32 Num) 
         {
             string tempStr = null;
             if (Num <= 255)
@@ -91,7 +94,7 @@ namespace Laser_Version2._0
             return tempStr;
         }
         //将数值10进制转16进制，再将16进制转换为字符串返回 中心是byte转化为ASCII  5000 - 1388
-        public static string Uint_To_Str(UInt32 Num) 
+        public string Uint_To_Str(UInt32 Num) 
         {
             string tempStr = null;
             tempStr = string.Format("{0:X4}", Num);
@@ -114,7 +117,7 @@ namespace Laser_Version2._0
             return tempStr;
         }
         //将数值10进制转16进制，再将16进制转换为字符串返回 中心是byte转化为ASCII  5000 - 1388
-        public static string PRF_To_Str(UInt32 Num) 
+        public string PRF_To_Str(UInt32 Num) 
         {
             string tempStr = null;
             tempStr = string.Format("{0:X4}", Num);
@@ -145,6 +148,107 @@ namespace Laser_Version2._0
             //MessageBox.Show(tempStr);
             return tempStr;
         }
+        public void Resolve_Com_Data()
+        {
+            byte[] Rec_Data = Initialization.Initial.Laser_Control_Com.Receive_Byte;
+            //清空数据
+            Resolve_Rec.Empty();
+            //数据拆分
+            if (Rec_Data.Length >= 13)
+            {
+                Resolve_Rec.RW = System.Text.Encoding.Default.GetString(new byte[] { Rec_Data[0], Rec_Data[1] });
+                Resolve_Rec.DataSize = System.Text.Encoding.Default.GetString(new byte[] { Rec_Data[2], Rec_Data[3] });
+                Resolve_Rec.Address = System.Text.Encoding.Default.GetString(new byte[] { Rec_Data[4], Rec_Data[5] });
+                Resolve_Rec.Com_Control = System.Text.Encoding.Default.GetString(new byte[] { Rec_Data[6], Rec_Data[7] });
+            }
+            //检查格式
+            if ((Resolve_Rec.RW == "03") || (Resolve_Rec.RW == "02")) //03-Read,02-Write
+            {
+                if (uint.TryParse(Resolve_Rec.DataSize, out uint tmp))//接收数据大小
+                {
+                    if ((13 + tmp * 2) == Rec_Data.Length)//校验长度
+                    {
+                        if (tmp > 0)//DataSize>0 
+                        {
+                            for (int i = 0; i < tmp * 2; i++)
+                            {
+                                Resolve_Rec.Data = Resolve_Rec.Data + System.Text.Encoding.Default.GetString(new byte[] { Rec_Data[8 + i] });//获取Data数据
+                            }
+                            Resolve_Rec.Rec = Str_To_Uint16(Resolve_Rec.Data);//获取D1...Dn Uinte16格式
+                            Resolve_Rec.Rec_Byte = StrToHexByte(Resolve_Rec.Data);//获取D1...Dn Byte值
+                            Array.Reverse(Resolve_Rec.Rec_Byte);
+                            Resolve_Rec.Crc = System.Text.Encoding.Default.GetString(new byte[] { Rec_Data[8 + tmp * 2], Rec_Data[8 + tmp * 2 + 1], Rec_Data[8 + tmp * 2 + 2], Rec_Data[8 + tmp * 2 + 3] });//获取Crc校验
+                        }
+                        else
+                        {
+                            Resolve_Rec.Data = null;
+                            Resolve_Rec.Crc = System.Text.Encoding.Default.GetString(new byte[] { Rec_Data[8 + tmp * 2], Rec_Data[8 + tmp * 2 + 1], Rec_Data[8 + tmp * 2 + 2], Rec_Data[8 + tmp * 2 + 3] });//获取Crc校验
+                        }
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+                //接收数据组合
+                Resolve_Rec.Sum = Resolve_Rec.RW + Resolve_Rec.DataSize + Resolve_Rec.Address + Resolve_Rec.Com_Control + Resolve_Rec.Data;
+                //校验数据完整性
+                if (Crc_Append_Str((ushort)compCRC.Check_Sum(StrToHexByte(Resolve_Rec.Sum))) == Resolve_Rec.Crc)
+                {
+                    Prompt.Log.Info("激光控制接收数据 校验OK！！！");
+                }
+            }
+            else
+            {
+                Prompt.Log.Info("激光控制接收数据格式异常！！！");
+            }
+        }
+        //将string转换为Uint16
+        public UInt16[] Str_To_Uint16(string hexString)
+        {
+            hexString = hexString.Replace(" ", "");
+            if ((hexString.Length % 2) != 0) hexString = " " + hexString;
+            UInt16[] Result = new UInt16[hexString.Length / 2];
+            for (int i = 0; i < Result.Length; i++)
+            {
+                if (UInt16.TryParse(hexString.Substring(i * 2, 2).Replace(" ", ""), out UInt16 tmp))//判断是否可以转换
+                {
+                    Result[i] = tmp;
+                }
+            }
+            return Result;
+        }
+        //追加校准值
+        public string Crc_Append_Str(UInt32 Num)
+        {
+            string Result = null;
+            Result = string.Format("{0:X4}", Num);
+            //MessageBox.Show(Result);
+            return Result;
+        }
+        //Hex字符串转换16进制字节数组 只支持为16进制数字的字符串
+        public byte[] StrToHexByte(string hexString)
+        {
+            hexString = hexString.Replace(" ", "");
+            if ((hexString.Length % 2) != 0) hexString = " " + hexString;
+            byte[] returnBytes = new byte[hexString.Length / 2];
+            for (int i = 0; i < returnBytes.Length; i++)
+                returnBytes[i] = Convert.ToByte(hexString.Substring(i * 2, 2).Replace(" ", ""), 16);
+            return returnBytes;
+        }
+        //激光功率写入
+        public void Change_Pec(decimal pec)
+        {
+            if (Math.Abs(pec) < 100)
+            {
+                Write("00", "55", Uint_To_Str((UInt16)(pec * 10)));
+            }
+            else
+            {
+                MessageBox.Show("激光功率设置值超出允许范围！！！");
+            }
+        }
 
+        
     }
 }

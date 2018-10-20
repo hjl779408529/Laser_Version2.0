@@ -1,0 +1,14 @@
+﻿1>------ 已启动生成: 项目: Laser_Version2.0, 配置: Debug x64 ------
+1>  COM 引用“MxDrawXLib”是 ActiveX 控件“AxMxDrawXLib”的互操作程序集，但含有 /link 标志的编译器已将其标为已链接。系统会将此 COM 引用视为引用，并且不会链接该引用。
+1>D:\Visualstudio_Project\Laser\Laser_Program\10.12\Laser_Version2.0\Data\Correct_Data.cs(576,20,576,23): warning CS0219: 变量“Cam”已被赋值，但从未使用过它的值
+1>D:\Visualstudio_Project\Laser\Laser_Program\10.12\Laser_Version2.0\Data\Correct_Data.cs(577,20,577,29): warning CS0219: 变量“Cam_Delta”已被赋值，但从未使用过它的值
+1>D:\Visualstudio_Project\Laser\Laser_Program\10.12\Laser_Version2.0\Data\Correct_Data.cs(578,20,578,36): warning CS0219: 变量“Cal_Actual_Point”已被赋值，但从未使用过它的值
+1>D:\Visualstudio_Project\Laser\Laser_Program\10.12\Laser_Version2.0\Integrated.cs(47,54,47,55): warning CS0162: 检测到无法访问的代码
+1>D:\Visualstudio_Project\Laser\Laser_Program\10.12\Laser_Version2.0\Integrated.cs(138,54,138,55): warning CS0162: 检测到无法访问的代码
+1>D:\Visualstudio_Project\Laser\Laser_Program\10.12\Laser_Version2.0\Integrated.cs(251,54,251,55): warning CS0162: 检测到无法访问的代码
+1>D:\Visualstudio_Project\Laser\Laser_Program\10.12\Laser_Version2.0\UI\Dxf.cs(506,20,506,29): warning CS0219: 变量“File_Name”已被赋值，但从未使用过它的值
+1>D:\Visualstudio_Project\Laser\Laser_Program\10.12\Laser_Version2.0\Data\Data_Resolve.cs(1040,58,1040,59): warning CS0162: 检测到无法访问的代码
+1>D:\Visualstudio_Project\Laser\Laser_Program\10.12\Laser_Version2.0\Data\Data_Resolve.cs(1126,55,1126,56): warning CS0162: 检测到无法访问的代码
+1>CSC : warning CS1685: 预定义类型“ExtensionAttribute”是在全局别名的多个程序集中定义的；将使用“CSkin, Version=16.1.14.2, Culture=neutral, PublicKeyToken=null”中的定义
+1>  Laser_Version2.0 -> D:\Visualstudio_Project\Laser\Laser_Program\10.12\Laser_Version2.0\bin\x64\Debug\Laser_Version2.0.exe
+========== 生成: 成功 1 个，失败 0 个，最新 0 个，跳过 0 个 ==========

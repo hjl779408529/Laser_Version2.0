@@ -11,6 +11,8 @@ using GTS;
 using System.Timers;
 using System.Threading;
 using CCWin;
+using Initialization;
+using Laser_Version2._0;
 
 namespace Laser_Build_1._0
 {
@@ -18,14 +20,14 @@ namespace Laser_Build_1._0
     {
         
         public Main()
-        {
+        {            
             InitializeComponent();
             Control.CheckForIllegalCrossThreadCalls = false;//关闭CheckForIllegalCrossThreadCalls
             
         }
 
         private void Form1_Load(object sender, EventArgs e)
-        {          
+        {
 
         }                
 
@@ -36,7 +38,7 @@ namespace Laser_Build_1._0
         Menu_5_Axis_Handle menu_5_Axis_Handle;//轴手动操作页面
         Laser_Version2._0.ParameterSet parameterSet;    //参数设置界面
         Laser_Version2._0.Laser_Control_Panel Laser_Control_Window;//激光控制界面 
-
+        public static Laser_Version2._0.UI.Laser_Watt Laser_Watt_Window;//激光功率
 
         //打开IO监视界面
         private void Status_Click(object sender, EventArgs e)
@@ -330,6 +332,31 @@ namespace Laser_Build_1._0
                 else
                 {
                     Laser_Control_Window.Activate();//使子窗体获得焦点
+                }
+            }
+        }
+        /// <summary>
+        /// 激光功率计
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Laser_Watt_Button_Click(object sender, EventArgs e)
+        {
+            if (Laser_Watt_Window == null)
+            {
+                Laser_Watt_Window = new Laser_Version2._0.UI.Laser_Watt();
+                Laser_Watt_Window.Show();
+            }
+            else
+            {
+                if (Laser_Watt_Window.IsDisposed)//若子窗体关闭 则打开新子窗体 并显示
+                {
+                    Laser_Watt_Window = new Laser_Version2._0.UI.Laser_Watt();
+                    Laser_Watt_Window.Show();
+                }
+                else
+                {
+                    Laser_Watt_Window.Activate();//使子窗体获得焦点
                 }
             }
         }

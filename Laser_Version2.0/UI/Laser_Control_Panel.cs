@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Initialization;
-
+using Laser_Build_1._0;
 namespace Laser_Version2._0
 {
     public partial class Laser_Control_Panel : Form
@@ -40,14 +40,15 @@ namespace Laser_Version2._0
             Seed_Set_Current.Text = Para_List.Parameter.Seed_Current.ToString();
             Amp1_Set_Current.Text = Para_List.Parameter.Amp1_Current.ToString();
             Amp2_Set_Current.Text = Para_List.Parameter.Amp2_Current.ToString();
+            //Laser_Watt_Set_Value.Text = Laser_Watt_Cal.Percent_To_Watt(Para_List.Parameter.PEC).ToString();
             Laser_Watt_Set_Value.Text = Para_List.Parameter.PEC.ToString();
             Laser_Frequence_Set_Value.Text = Para_List.Parameter.PRF.ToString();//单位KHz
             //初始化通讯端口列表
-            Com_List.Items.AddRange(Initialization.Initial.Com_Comunication.PortName.ToArray());
+            Com_List.Items.AddRange(Initialization.Initial.Laser_Control_Com.PortName.ToArray());
             //初始化默认的Com端口
-            if (Initialization.Initial.Com_Comunication.PortName.Count>=1) Com_List.SelectedIndex = Para_List.Parameter.Com_No;
+            if (Initialization.Initial.Laser_Control_Com.PortName.Count>=1) Com_List.SelectedIndex = Para_List.Parameter.Laser_Control_Com_No;
             //状态刷新
-            if (Initial.Com_Comunication.ComDevice.IsOpen == false)
+            if (Initial.Laser_Control_Com.ComDevice.IsOpen == false)
             {
                 Re_connect.Text = "打开串口";
                 Com_Status.BackgroundImage = Properties.Resources.red;
@@ -93,16 +94,16 @@ namespace Laser_Version2._0
         //更改串口端口号
         private void Com_List_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Para_List.Parameter.Com_No = Com_List.SelectedIndex;
+            Para_List.Parameter.Laser_Control_Com_No = Com_List.SelectedIndex;
         }       
 
         //重连串口
         private void Re_connect_Click(object sender, EventArgs e)
         {
-            if (Para_List.Parameter.Com_No < Initial.Com_Comunication.PortName.Count)
+            if (Para_List.Parameter.Laser_Control_Com_No < Initial.Laser_Control_Com.PortName.Count)
             {
               
-                if (Initial.Com_Comunication.Open_Com(Para_List.Parameter.Com_No))
+                if (Initial.Laser_Control_Com.Open_Com(Para_List.Parameter.Laser_Control_Com_No))
                 {                    
                     //按钮启用
                     Power_OFF.Enabled = true;
@@ -139,33 +140,25 @@ namespace Laser_Version2._0
         private void Refresh_All_Status() 
         {
             //读取Seed电流
-            Laser_Operation.Read("00", "12");
-            if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 2)) Seed1_Current.Text = ((decimal)BitConverter.ToUInt16(Initial.Com_Comunication.Resolve_Rec.Rec_Byte, 0) / 100m).ToString();
+            Initial.Laser_Operation_00.Read("00", "12");
+            if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 2)) Seed1_Current.Text = ((decimal)BitConverter.ToUInt16(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte, 0) / 100m).ToString();
             //读取Amp1电流
-            Laser_Operation.Read("01", "12");
-            if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 2)) Amp1_Current.Text = ((decimal)BitConverter.ToUInt16(Initial.Com_Comunication.Resolve_Rec.Rec_Byte, 0) / 100m).ToString();
+            Initial.Laser_Operation_00.Read("01", "12");
+            if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 2)) Amp1_Current.Text = ((decimal)BitConverter.ToUInt16(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte, 0) / 100m).ToString();
             //读取Amp2电流
-            Laser_Operation.Read("02", "12");
-            if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 2)) Amp2_Current.Text = ((decimal)BitConverter.ToUInt16(Initial.Com_Comunication.Resolve_Rec.Rec_Byte, 0) / 100m).ToString();
+            Initial.Laser_Operation_00.Read("02", "12");
+            if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 2)) Amp2_Current.Text = ((decimal)BitConverter.ToUInt16(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte, 0) / 100m).ToString();
             //读取PEC功率值
-            Laser_Operation.Read("00", "55");
-            if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 2)) Laser_Watt_Set_Value.Text = ((decimal)BitConverter.ToUInt16(Initial.Com_Comunication.Resolve_Rec.Rec_Byte, 0) / 10m).ToString();
+            Initial.Laser_Operation_00.Read("00", "55");
+            //if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 2)) Laser_Watt_Set_Value.Text = Laser_Watt_Cal.Percent_To_Watt(((decimal)BitConverter.ToUInt16(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte, 0) / 10m)).ToString();
+            if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 2)) Laser_Watt_Set_Value.Text = ((decimal)BitConverter.ToUInt16(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte, 0) / 10m).ToString();
             //读取PRF频率值
-            Laser_Operation.Read("00", "21");
-            if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 3)) Laser_Frequence_Set_Value.Text = ((decimal)BitConverter.ToUInt32(new byte[] { Initial.Com_Comunication.Resolve_Rec.Rec_Byte[0], Initial.Com_Comunication.Resolve_Rec.Rec_Byte[1], Initial.Com_Comunication.Resolve_Rec.Rec_Byte[2],0x00 }, 0) / 1000m).ToString();
+            Initial.Laser_Operation_00.Read("00", "21");
+            if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 3)) Laser_Frequence_Set_Value.Text = ((decimal)BitConverter.ToUInt32(new byte[] { Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte[0], Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte[1], Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte[2],0x00 }, 0) / 1000m).ToString();
             //读取状态
-            Laser_Operation.Read("00", "0F");
+            Initial.Laser_Operation_00.Read("00", "0F");
             byte Status = 0x00;
-            if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 5)) Status = Initial.Com_Comunication.Resolve_Rec.Rec_Byte[Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length - 1];
-
-            //bit8 = byte1 & 128 == 128 ? 1 : 0;
-            //bit7 = byte1 & 64 == 64 ? 1 : 0;
-            //bit6 = byte1 & 32 == 32 ? 1 : 0;
-            //bit5 = byte1 & 16 == 16 ? 1 : 0;
-            //bit4 = byte1 & 8 == 8 ? 1 : 0;
-            //bit3 = byte1 & 4 == 4 ? 1 : 0;
-            //bit2 = byte1 & 2 == 2 ? 1 : 0;
-            //bit1 = byte1 & 1 == 1 ? 1 : 0;
+            if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 5)) Status = Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte[Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length - 1];
 
             //PowerOn
             if (Bit_Value.GetBitValue(Status, 0))
@@ -234,7 +227,7 @@ namespace Laser_Version2._0
         private void Reset_Laser_Click(object sender, EventArgs e)
         {
             //复位
-            Laser_Operation.Write("00", "07", "");
+            Initial.Laser_Operation_00.Write("00", "07", "");
         }
         //一键开机
         private void Power_On_Click(object sender, EventArgs e)
@@ -282,19 +275,19 @@ namespace Laser_Version2._0
 
             /**************Seed Ldd***************/
             //读取Seed电流
-            Laser_Operation.Read("00", "12");
-            if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 2)) Seed_Current = ((decimal)BitConverter.ToUInt16(Initial.Com_Comunication.Resolve_Rec.Rec_Byte, 0) / 100m);
+            Initial.Laser_Operation_00.Read("00", "12");
+            if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 2)) Seed_Current = ((decimal)BitConverter.ToUInt16(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte, 0) / 100m);
             Thread.Sleep(300);//等待300ms
             //打开Seed Ldd
-            if (Seed_Current < 0.2m) Laser_Operation.Write("00", "10", "01");
+            if (Seed_Current < 0.2m) Initial.Laser_Operation_00.Write("00", "10", "01");
             //状态判断
             Task.Factory.StartNew(() =>
             {
                 do
                 {
                     //读取Seed电流
-                    Laser_Operation.Read("00", "12");
-                    if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 2)) Seed_Current = ((decimal)BitConverter.ToUInt16(Initial.Com_Comunication.Resolve_Rec.Rec_Byte, 0) / 100m);
+                    Initial.Laser_Operation_00.Read("00", "12");
+                    if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 2)) Seed_Current = ((decimal)BitConverter.ToUInt16(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte, 0) / 100m);
                     Thread.Sleep(300);//等待300ms
                 } while ((Para_List.Parameter.Seed_Current - Seed_Current) > 0.2m);
             }).Wait(120 * 1000);//2 * 1000,ms,该时间范围内：代码段完成 或 超出该时间范围 返回并继续向下执行
@@ -304,18 +297,18 @@ namespace Laser_Version2._0
 
             /**************Seed Shutter Status***************/
             //读取Seed Shutter
-            Laser_Operation.Read("00", "04");
-            if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Com_Comunication.Resolve_Rec.Rec_Byte[Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length - 1];
+            Initial.Laser_Operation_00.Read("00", "04");
+            if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte[Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length - 1];
             Thread.Sleep(300);//等待300ms
             //打开Seed Shutter
-            if (!Bit_Value.GetBitValue(Status, 0)) Laser_Operation.Write("00", "04", "01");
+            if (!Bit_Value.GetBitValue(Status, 0)) Initial.Laser_Operation_00.Write("00", "04", "01");
             Task.Factory.StartNew(() =>
             {
                 do
                 {
                     //读取Seed Shutter
-                    Laser_Operation.Read("00", "04");
-                    if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Com_Comunication.Resolve_Rec.Rec_Byte[Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length - 1];
+                    Initial.Laser_Operation_00.Read("00", "04");
+                    if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte[Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length - 1];
                     Thread.Sleep(300);//等待300ms
                 } while (!Bit_Value.GetBitValue(Status, 0));
 
@@ -326,18 +319,18 @@ namespace Laser_Version2._0
 
             /**************PP Pulse Status***************/
             //读取PP Pulse
-            Laser_Operation.Read("00", "65");
-            if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Com_Comunication.Resolve_Rec.Rec_Byte[Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length - 1];
+            Initial.Laser_Operation_00.Read("00", "65");
+            if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte[Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length - 1];
             Thread.Sleep(300);//等待300ms
             //打开PP Pulse
-            if (!Bit_Value.GetBitValue(Status, 0)) Laser_Operation.Write("00", "65", "01");
+            if (!Bit_Value.GetBitValue(Status, 0)) Initial.Laser_Operation_00.Write("00", "65", "01");
             Task.Factory.StartNew(() =>
             {
                 do
                 {
                     //读取PP Pulse
-                    Laser_Operation.Read("00", "65");
-                    if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Com_Comunication.Resolve_Rec.Rec_Byte[Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length - 1];
+                    Initial.Laser_Operation_00.Read("00", "65");
+                    if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte[Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length - 1];
                     Thread.Sleep(300);//等待300ms
                 } while (!Bit_Value.GetBitValue(Status, 0));
 
@@ -348,18 +341,18 @@ namespace Laser_Version2._0
 
             /**************AOM Pulse Status***************/
             //读取AOM Pulse
-            Laser_Operation.Read("00", "66");
-            if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Com_Comunication.Resolve_Rec.Rec_Byte[Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length - 1];
+            Initial.Laser_Operation_00.Read("00", "66");
+            if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte[Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length - 1];
             Thread.Sleep(300);//等待300ms
             //打开AOM Pulse
-            if (!Bit_Value.GetBitValue(Status, 0)) Laser_Operation.Write("00", "66", "01");
+            if (!Bit_Value.GetBitValue(Status, 0)) Initial.Laser_Operation_00.Write("00", "66", "01");
             Task.Factory.StartNew(() =>
             {
                 do
                 {
                     //读取AOM Pulse
-                    Laser_Operation.Read("00", "66");
-                    if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Com_Comunication.Resolve_Rec.Rec_Byte[Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length - 1];
+                    Initial.Laser_Operation_00.Read("00", "66");
+                    if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte[Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length - 1];
                     Thread.Sleep(300);//等待300ms
                 } while (!Bit_Value.GetBitValue(Status, 0));
 
@@ -370,18 +363,18 @@ namespace Laser_Version2._0
 
             /**************AMP1 Ldd***************/
             //读取AMP1电流
-            Laser_Operation.Read("01", "12");
-            if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 2)) Amp1_Current = ((decimal)BitConverter.ToUInt16(Initial.Com_Comunication.Resolve_Rec.Rec_Byte, 0) / 100m);
+            Initial.Laser_Operation_00.Read("01", "12");
+            if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 2)) Amp1_Current = ((decimal)BitConverter.ToUInt16(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte, 0) / 100m);
             Thread.Sleep(300);//等待300ms
             //打开AMP1 Ldd
-            if (Amp1_Current < 0.2m) Laser_Operation.Write("01", "10", "01");
+            if (Amp1_Current < 0.2m) Initial.Laser_Operation_00.Write("01", "10", "01");
             Task.Factory.StartNew(() =>
             {
                 do
                 {
                     //读取AMP1电流
-                    Laser_Operation.Read("01", "12");
-                    if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 2)) Amp1_Current = ((decimal)BitConverter.ToUInt16(Initial.Com_Comunication.Resolve_Rec.Rec_Byte, 0) / 100m);
+                    Initial.Laser_Operation_00.Read("01", "12");
+                    if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 2)) Amp1_Current = ((decimal)BitConverter.ToUInt16(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte, 0) / 100m);
                     Thread.Sleep(300);//等待300ms
                 } while ((Para_List.Parameter.Amp1_Current - Amp1_Current) > 0.2m);
             }).Wait(120 * 1000);//2 * 1000,ms,该时间范围内：代码段完成 或 超出该时间范围 返回并继续向下执行
@@ -391,18 +384,18 @@ namespace Laser_Version2._0
 
             /**************AMP1 Shutter Status***************/
             //读取AMP1 Shutter
-            Laser_Operation.Read("01", "04");
-            if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Com_Comunication.Resolve_Rec.Rec_Byte[Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length - 1];
+            Initial.Laser_Operation_00.Read("01", "04");
+            if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte[Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length - 1];
             Thread.Sleep(300);//等待300ms
             //打开AMP1 Shutter
-            if (!Bit_Value.GetBitValue(Status, 0)) Laser_Operation.Write("01", "04", "01");
+            if (!Bit_Value.GetBitValue(Status, 0)) Initial.Laser_Operation_00.Write("01", "04", "01");
             Task.Factory.StartNew(() =>
             {
                 do
                 {
                     //读取AMP1 Shutter
-                    Laser_Operation.Read("01", "04");
-                    if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Com_Comunication.Resolve_Rec.Rec_Byte[Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length - 1];
+                    Initial.Laser_Operation_00.Read("01", "04");
+                    if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte[Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length - 1];
                     Thread.Sleep(300);//等待300ms
                 } while (!Bit_Value.GetBitValue(Status, 0));
 
@@ -413,19 +406,19 @@ namespace Laser_Version2._0
 
             /**************AMP2 Ldd***************/
             //读取AMP2电流
-            Laser_Operation.Read("02", "12");
-            if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 2)) Amp2_Current = ((decimal)BitConverter.ToUInt16(Initial.Com_Comunication.Resolve_Rec.Rec_Byte, 0) / 100m);
+            Initial.Laser_Operation_00.Read("02", "12");
+            if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 2)) Amp2_Current = ((decimal)BitConverter.ToUInt16(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte, 0) / 100m);
             Thread.Sleep(300);//等待300ms
             //打开AMP2 Ldd
-            if (Amp2_Current < 0.2m) Laser_Operation.Write("02", "10", "01");
+            if (Amp2_Current < 0.2m) Initial.Laser_Operation_00.Write("02", "10", "01");
             Task.Factory.StartNew(() =>
             {
 
                 do
                 {
                     //读取AMP2电流
-                    Laser_Operation.Read("02", "12");
-                    if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 2)) Amp2_Current = ((decimal)BitConverter.ToUInt16(Initial.Com_Comunication.Resolve_Rec.Rec_Byte, 0) / 100m);
+                    Initial.Laser_Operation_00.Read("02", "12");
+                    if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 2)) Amp2_Current = ((decimal)BitConverter.ToUInt16(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte, 0) / 100m);
                     Thread.Sleep(300);//等待300ms
                 } while ((Para_List.Parameter.Amp2_Current - Amp2_Current) > 0.2m);
             }).Wait(120 * 1000);//2 * 1000,ms,该时间范围内：代码段完成 或 超出该时间范围 返回并继续向下执行
@@ -453,18 +446,18 @@ namespace Laser_Version2._0
 
             /**************AMP2 Ldd***************/
             //读取AMP2电流
-            Laser_Operation.Read("02", "12");
-            if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 2)) Amp2_Current = ((decimal)BitConverter.ToUInt16(Initial.Com_Comunication.Resolve_Rec.Rec_Byte, 0) / 100m);
+            Initial.Laser_Operation_00.Read("02", "12");
+            if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 2)) Amp2_Current = ((decimal)BitConverter.ToUInt16(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte, 0) / 100m);
             Thread.Sleep(300);//等待300ms
             //关闭AMP2 Ldd
-            if (Amp2_Current > 0.2m) Laser_Operation.Write("02", "10", "00");
+            if (Amp2_Current > 0.2m) Initial.Laser_Operation_00.Write("02", "10", "00");
             Task.Factory.StartNew(() =>
             {
                 do
                 {
                     //读取AMP2电流
-                    Laser_Operation.Read("02", "12");
-                    if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 2)) Amp2_Current = ((decimal)BitConverter.ToUInt16(Initial.Com_Comunication.Resolve_Rec.Rec_Byte, 0) / 100m);
+                    Initial.Laser_Operation_00.Read("02", "12");
+                    if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 2)) Amp2_Current = ((decimal)BitConverter.ToUInt16(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte, 0) / 100m);
                     Thread.Sleep(300);//等待300ms
                 } while (Amp2_Current > 0.2m);
             }).Wait(120 * 1000);//2 * 1000,ms,该时间范围内：代码段完成 或 超出该时间范围 返回并继续向下执行
@@ -474,18 +467,18 @@ namespace Laser_Version2._0
 
             /**************AMP1 Ldd***************/
             //读取AMP1电流
-            Laser_Operation.Read("01", "12");
-            if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 2)) Amp1_Current = ((decimal)BitConverter.ToUInt16(Initial.Com_Comunication.Resolve_Rec.Rec_Byte, 0) / 100m);
+            Initial.Laser_Operation_00.Read("01", "12");
+            if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 2)) Amp1_Current = ((decimal)BitConverter.ToUInt16(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte, 0) / 100m);
             Thread.Sleep(300);//等待300ms
             //关闭AMP1 Ldd
-            if (Amp1_Current > 0.2m) Laser_Operation.Write("01", "10", "00");
+            if (Amp1_Current > 0.2m) Initial.Laser_Operation_00.Write("01", "10", "00");
             Task.Factory.StartNew(() =>
             {
                 do
                 {
                     //读取AMP1电流
-                    Laser_Operation.Read("01", "12");
-                    if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 2)) Amp1_Current = ((decimal)BitConverter.ToUInt16(Initial.Com_Comunication.Resolve_Rec.Rec_Byte, 0) / 100m);
+                    Initial.Laser_Operation_00.Read("01", "12");
+                    if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 2)) Amp1_Current = ((decimal)BitConverter.ToUInt16(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte, 0) / 100m);
                     Thread.Sleep(300);//等待300ms
                 } while (Amp1_Current > 0.2m);
             }).Wait(120 * 1000);//2 * 1000,ms,该时间范围内：代码段完成 或 超出该时间范围 返回并继续向下执行
@@ -495,18 +488,18 @@ namespace Laser_Version2._0
 
             /**************AOM Pulse Status***************/
             //读取AOM Pulse
-            Laser_Operation.Read("00", "66");
-            if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Com_Comunication.Resolve_Rec.Rec_Byte[Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length - 1];
+            Initial.Laser_Operation_00.Read("00", "66");
+            if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte[Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length - 1];
             Thread.Sleep(300);//等待300ms
             //关闭AOM Pulse
-            if (Bit_Value.GetBitValue(Status, 0)) Laser_Operation.Write("00", "66", "00");
+            if (Bit_Value.GetBitValue(Status, 0)) Initial.Laser_Operation_00.Write("00", "66", "00");
             Task.Factory.StartNew(() =>
             {
                 do
                 {
                     //读取AOM Pulse
-                    Laser_Operation.Read("00", "66");
-                    if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Com_Comunication.Resolve_Rec.Rec_Byte[Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length - 1];
+                    Initial.Laser_Operation_00.Read("00", "66");
+                    if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte[Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length - 1];
                     Thread.Sleep(300);//等待300ms
                 } while (Bit_Value.GetBitValue(Status, 0));
 
@@ -517,18 +510,18 @@ namespace Laser_Version2._0
 
             /**************PP Pulse Status***************/
             //读取PP Pulse
-            Laser_Operation.Read("00", "65");
-            if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Com_Comunication.Resolve_Rec.Rec_Byte[Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length - 1];
+            Initial.Laser_Operation_00.Read("00", "65");
+            if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte[Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length - 1];
             Thread.Sleep(300);//等待300ms
             //关闭PP Pulse
-            if (Bit_Value.GetBitValue(Status, 0)) Laser_Operation.Write("00", "65", "00");
+            if (Bit_Value.GetBitValue(Status, 0)) Initial.Laser_Operation_00.Write("00", "65", "00");
             Task.Factory.StartNew(() =>
             {
                 do
                 {
                     //读取PP Pulse
-                    Laser_Operation.Read("00", "65");
-                    if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Com_Comunication.Resolve_Rec.Rec_Byte[Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length - 1];
+                    Initial.Laser_Operation_00.Read("00", "65");
+                    if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte[Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length - 1];
                     Thread.Sleep(300);//等待300ms
                 } while (Bit_Value.GetBitValue(Status, 0));
 
@@ -539,18 +532,18 @@ namespace Laser_Version2._0
 
             /**************Seed Shutter Status***************/
             //读取Seed Shutter
-            Laser_Operation.Read("00", "04");
-            if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Com_Comunication.Resolve_Rec.Rec_Byte[Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length - 1];
+            Initial.Laser_Operation_00.Read("00", "04");
+            if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte[Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length - 1];
             Thread.Sleep(300);//等待300ms
             //关闭Seed Shutter
-            if (Bit_Value.GetBitValue(Status, 0)) Laser_Operation.Write("00", "04", "00");
+            if (Bit_Value.GetBitValue(Status, 0)) Initial.Laser_Operation_00.Write("00", "04", "00");
             Task.Factory.StartNew(() =>
             {
                 do
                 {
                     //读取Seed Shutter
-                    Laser_Operation.Read("00", "04");
-                    if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Com_Comunication.Resolve_Rec.Rec_Byte[Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length - 1];
+                    Initial.Laser_Operation_00.Read("00", "04");
+                    if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 1)) Status = Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte[Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length - 1];
                     Thread.Sleep(300);//等待300ms
                 } while (Bit_Value.GetBitValue(Status, 0));
 
@@ -561,19 +554,19 @@ namespace Laser_Version2._0
 
             /**************Seed Ldd***************/
             //读取Seed电流
-            Laser_Operation.Read("00", "12");
-            if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 2)) Seed_Current = ((decimal)BitConverter.ToUInt16(Initial.Com_Comunication.Resolve_Rec.Rec_Byte, 0) / 100m);
+            Initial.Laser_Operation_00.Read("00", "12");
+            if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 2)) Seed_Current = ((decimal)BitConverter.ToUInt16(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte, 0) / 100m);
             Thread.Sleep(300);//等待300ms
             //关闭Seed Ldd
-            if (Seed_Current > 0.2m) Laser_Operation.Write("00", "10", "00");
+            if (Seed_Current > 0.2m) Initial.Laser_Operation_00.Write("00", "10", "00");
             //状态判断
             Task.Factory.StartNew(() =>
             {
                 do
                 {
                     //读取Seed电流
-                    Laser_Operation.Read("00", "12");
-                    if (!(Initial.Com_Comunication.Resolve_Rec.Rec_Byte == null) && (Initial.Com_Comunication.Resolve_Rec.Rec_Byte.Length == 2)) Seed_Current = ((decimal)BitConverter.ToUInt16(Initial.Com_Comunication.Resolve_Rec.Rec_Byte, 0) / 100m);
+                    Initial.Laser_Operation_00.Read("00", "12");
+                    if (!(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte == null) && (Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte.Length == 2)) Seed_Current = ((decimal)BitConverter.ToUInt16(Initial.Laser_Operation_00.Resolve_Rec.Rec_Byte, 0) / 100m);
                     Thread.Sleep(300);//等待300ms
                 } while (Seed_Current > 0.2m);
             }).Wait(120 * 1000);//2 * 1000,ms,该时间范围内：代码段完成 或 超出该时间范围 返回并继续向下执行
@@ -586,12 +579,12 @@ namespace Laser_Version2._0
         //功率写入
         private void Watt_Confirm_Click(object sender, EventArgs e)
         {
-            Laser_Operation.Write("00", "55", Laser_Operation.Uint_To_Str((UInt16)(Para_List.Parameter.PEC * 10)));
+            Initial.Laser_Operation_00.Change_Pec(Para_List.Parameter.PEC);
         }
         //频率写入
         private void Frequence_Confirm_Click(object sender, EventArgs e)
         {
-            Laser_Operation.Write("00", "21", Laser_Operation.PRF_To_Str((UInt32)(Para_List.Parameter.PRF * 1000)));
+            Initial.Laser_Operation_00.Write("00", "21", Initial.Laser_Operation_00.PRF_To_Str((UInt32)(Para_List.Parameter.PRF * 1000)));
         }
         //Seed 电流 设置值 
         private void Seed_Set_Current_TextChanged(object sender, EventArgs e)
@@ -631,6 +624,7 @@ namespace Laser_Version2._0
                 MessageBox.Show("请正确输入数字");
                 return;
             }
+            //Para_List.Parameter.PEC =Laser_Watt_Cal.Watt_To_Percent(tmp);
             Para_List.Parameter.PEC = tmp;
         }
         //激光频率 显示值和设置值 TextChanged

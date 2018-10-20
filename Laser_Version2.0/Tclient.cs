@@ -48,12 +48,12 @@ namespace Laser_Build_1._0
             if (client != null && client.Connected)
             {
                 asyncread(client);
-                Log.Commandhandler("相机Tcp 连接成功！！！");
+                Log.Error("相机Tcp 连接成功！！！");
 
             }
             else
             {
-                Log.Commandhandler("相机Tcp 连接失败！！！");
+                Log.Error("相机Tcp 连接失败！！！");
             }
         }
         public void Tcp_Close()
@@ -125,7 +125,7 @@ namespace Laser_Build_1._0
                     {
                         Receive_Cordinate = new Vector(d_tmp_x, d_tmp_y);
                         Rec_Ok = true;
-                        //MessageBox.Show(string.Format("(X:{0},Y:{1})", Receive_Cordinate.X * Para_List.Parameter.Cam_Reference, Receive_Cordinate.Y * Para_List.Parameter.Cam_Reference));
+                        MessageBox.Show(string.Format("(X:{0},Y:{1})", Receive_Cordinate.X, Receive_Cordinate.Y));
                     }
                     else
                     {
@@ -162,17 +162,68 @@ namespace Laser_Build_1._0
             //等待完成
             Task.Factory.StartNew(() => { do { } while (!Rec_Ok); }).Wait(5 * 1000);//5 * 1000,该时间范围内：代码段完成 或 超出该时间范围 返回并继续向下执行
             //换算数据
-            if (Rec_Ok)
+            if ((Rec_Ok) && !(Receive_Cordinate.X == 999) && !((Receive_Cordinate.Y == 999)))
             {
                 Result = new Vector(Receive_Cordinate.X * Para_List.Parameter.Cam_Reference, Receive_Cordinate.Y * Para_List.Parameter.Cam_Reference);
             }
             else
             {
                 Result = new Vector(999, 999);//异常接收退出
-                Log.Commandhandler("相机数据获取超时！！！");
+                Log.Error("相机数据获取超时！！！");
             }            
             //返回数据
             return Result;
         }
+        public Vector Get_Cam_Deviation_Test(int order)
+        {
+            Vector Result;
+            //发送指令
+            Senddata(order);
+            //等待完成
+            Task.Factory.StartNew(() => { do { } while (!Rec_Ok); }).Wait(5 * 1000);//5 * 1000,该时间范围内：代码段完成 或 超出该时间范围 返回并继续向下执行
+            //换算数据
+            if ((Rec_Ok) && !(Receive_Cordinate.X == 999) && !((Receive_Cordinate.Y == 999)))
+            {
+                Result = new Vector(Receive_Cordinate.X, Receive_Cordinate.Y);
+            }
+            else
+            {
+                Result = new Vector(999, 999);//异常接收退出
+                Log.Error("相机数据获取超时！！！");
+            }
+            //返回数据
+            return Result;
+        }
+        public Vector Get_Cam_Deviation_Test_00(int order) 
+        {
+            Vector Result;
+            //发送指令
+            Senddata(order);
+            //等待完成
+            Task.Factory.StartNew(() => { do { } while (!Rec_Ok); }).Wait(5 * 1000);//5 * 1000,该时间范围内：代码段完成 或 超出该时间范围 返回并继续向下执行
+            //换算数据
+            if ((Rec_Ok) && !(Receive_Cordinate.X == 999) && !((Receive_Cordinate.Y == 999)))
+            {
+                Result = new Vector(Get_Cam_Actual_Point(Receive_Cordinate.X, Receive_Cordinate.Y));
+            }
+            else
+            {
+                Result = new Vector(999, 999);//异常接收退出
+                Log.Error("相机数据获取超时！！！");
+            }
+            //返回数据
+            return Result;
+        }
+        /// <summary>
+        /// 返回相机坐标反推额实际坐标
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        public Vector Get_Cam_Actual_Point(decimal x, decimal y)
+        {
+            return new Vector(x * Para_List.Parameter.Cam_Trans_Affinity.Stretch_X + y * Para_List.Parameter.Cam_Trans_Affinity.Distortion_X + Para_List.Parameter.Cam_Trans_Affinity.Delta_X, y * Para_List.Parameter.Cam_Trans_Affinity.Stretch_Y + x * Para_List.Parameter.Cam_Trans_Affinity.Distortion_Y + Para_List.Parameter.Cam_Trans_Affinity.Delta_Y);
+        }
+
     }
 }

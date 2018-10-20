@@ -39,7 +39,7 @@ namespace Prompt
         }
 
         //用于程序的执行Log记录
-        public static void Commandhandler(string command)
+        public static void Error(string command)
         {
             //生成错误日志
             C_log.Error(command);

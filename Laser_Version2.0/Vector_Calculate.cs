@@ -23,7 +23,7 @@ namespace Laser_Version2._0
         public decimal AngleBetweenVector(Vector point1, Vector point2) 
         {
             decimal Result = 0;
-            decimal Cos_theta = Dot(point1, point2) / (point1.Length() * point2.Length());
+            decimal Cos_theta = Dot(point1, point2) / (point1.Length * point2.Length);
             //范围限制
             if (Math.Abs(Cos_theta - 1.0m) < 0.00001m)
             {

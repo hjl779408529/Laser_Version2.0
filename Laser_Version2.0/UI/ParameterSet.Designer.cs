@@ -30,6 +30,7 @@
         {
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.Correct_Cam_Cor = new System.Windows.Forms.Button();
             this.Disconnect_Tcp = new System.Windows.Forms.Button();
             this.Re_Connect = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
@@ -41,6 +42,7 @@
             this.textBox19 = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.Re_Cali_Mark = new System.Windows.Forms.Button();
             this.button6 = new System.Windows.Forms.Button();
             this.Set_txt_markY4 = new System.Windows.Forms.TextBox();
             this.Set_txt_markX4 = new System.Windows.Forms.TextBox();
@@ -61,7 +63,6 @@
             this.Set_txt_markY1 = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.Set_txt_valueK = new System.Windows.Forms.TextBox();
-            this.Re_Cali_Mark = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -78,6 +79,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.Correct_Cam_Cor);
             this.groupBox1.Controls.Add(this.Disconnect_Tcp);
             this.groupBox1.Controls.Add(this.Re_Connect);
             this.groupBox1.Controls.Add(this.button5);
@@ -95,14 +97,25 @@
             this.groupBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.groupBox1.Size = new System.Drawing.Size(650, 673);
+            this.groupBox1.Size = new System.Drawing.Size(650, 696);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "系统参数";
             // 
+            // Correct_Cam_Cor
+            // 
+            this.Correct_Cam_Cor.Location = new System.Drawing.Point(252, 488);
+            this.Correct_Cam_Cor.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.Correct_Cam_Cor.Name = "Correct_Cam_Cor";
+            this.Correct_Cam_Cor.Size = new System.Drawing.Size(195, 52);
+            this.Correct_Cam_Cor.TabIndex = 101;
+            this.Correct_Cam_Cor.Text = "矫正相机坐标系";
+            this.Correct_Cam_Cor.UseVisualStyleBackColor = true;
+            this.Correct_Cam_Cor.Click += new System.EventHandler(this.Correct_Cam_Cor_Click);
+            // 
             // Disconnect_Tcp
             // 
-            this.Disconnect_Tcp.Location = new System.Drawing.Point(385, 598);
+            this.Disconnect_Tcp.Location = new System.Drawing.Point(385, 628);
             this.Disconnect_Tcp.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Disconnect_Tcp.Name = "Disconnect_Tcp";
             this.Disconnect_Tcp.Size = new System.Drawing.Size(109, 52);
@@ -113,7 +126,7 @@
             // 
             // Re_Connect
             // 
-            this.Re_Connect.Location = new System.Drawing.Point(252, 598);
+            this.Re_Connect.Location = new System.Drawing.Point(252, 628);
             this.Re_Connect.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Re_Connect.Name = "Re_Connect";
             this.Re_Connect.Size = new System.Drawing.Size(109, 52);
@@ -124,7 +137,7 @@
             // 
             // button5
             // 
-            this.button5.Location = new System.Drawing.Point(518, 598);
+            this.button5.Location = new System.Drawing.Point(518, 628);
             this.button5.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(109, 52);
@@ -135,7 +148,7 @@
             // 
             // numericUpDown1
             // 
-            this.numericUpDown1.Location = new System.Drawing.Point(548, 542);
+            this.numericUpDown1.Location = new System.Drawing.Point(548, 572);
             this.numericUpDown1.Maximum = new decimal(new int[] {
             2,
             0,
@@ -158,7 +171,7 @@
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(276, 530);
+            this.button4.Location = new System.Drawing.Point(252, 557);
             this.button4.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(195, 52);
@@ -170,7 +183,7 @@
             // label20
             // 
             this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(25, 590);
+            this.label20.Location = new System.Drawing.Point(25, 612);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(206, 18);
             this.label20.TabIndex = 97;
@@ -178,7 +191,7 @@
             // 
             // textBox18
             // 
-            this.textBox18.Location = new System.Drawing.Point(53, 624);
+            this.textBox18.Location = new System.Drawing.Point(53, 646);
             this.textBox18.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBox18.Name = "textBox18";
             this.textBox18.Size = new System.Drawing.Size(150, 28);
@@ -188,7 +201,7 @@
             // label21
             // 
             this.label21.AutoSize = true;
-            this.label21.Location = new System.Drawing.Point(25, 510);
+            this.label21.Location = new System.Drawing.Point(25, 492);
             this.label21.Name = "label21";
             this.label21.Size = new System.Drawing.Size(206, 18);
             this.label21.TabIndex = 95;
@@ -196,7 +209,7 @@
             // 
             // textBox19
             // 
-            this.textBox19.Location = new System.Drawing.Point(53, 545);
+            this.textBox19.Location = new System.Drawing.Point(53, 527);
             this.textBox19.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBox19.Name = "textBox19";
             this.textBox19.Size = new System.Drawing.Size(150, 28);
@@ -241,6 +254,17 @@
             this.groupBox2.Size = new System.Drawing.Size(650, 373);
             this.groupBox2.TabIndex = 4;
             this.groupBox2.TabStop = false;
+            // 
+            // Re_Cali_Mark
+            // 
+            this.Re_Cali_Mark.Location = new System.Drawing.Point(401, 301);
+            this.Re_Cali_Mark.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.Re_Cali_Mark.Name = "Re_Cali_Mark";
+            this.Re_Cali_Mark.Size = new System.Drawing.Size(195, 52);
+            this.Re_Cali_Mark.TabIndex = 12;
+            this.Re_Cali_Mark.Text = "二次矫正Mark坐标";
+            this.Re_Cali_Mark.UseVisualStyleBackColor = true;
+            this.Re_Cali_Mark.Click += new System.EventHandler(this.Re_Cali_Mark_Click);
             // 
             // button6
             // 
@@ -432,17 +456,6 @@
             this.Set_txt_valueK.TabIndex = 1;
             this.Set_txt_valueK.TextChanged += new System.EventHandler(this.Set_txt_valueK_TextChanged);
             // 
-            // Re_Cali_Mark
-            // 
-            this.Re_Cali_Mark.Location = new System.Drawing.Point(401, 301);
-            this.Re_Cali_Mark.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.Re_Cali_Mark.Name = "Re_Cali_Mark";
-            this.Re_Cali_Mark.Size = new System.Drawing.Size(195, 52);
-            this.Re_Cali_Mark.TabIndex = 12;
-            this.Re_Cali_Mark.Text = "二次矫正Mark坐标";
-            this.Re_Cali_Mark.UseVisualStyleBackColor = true;
-            this.Re_Cali_Mark.Click += new System.EventHandler(this.Re_Cali_Mark_Click);
-            // 
             // ParameterSet
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
@@ -498,5 +511,6 @@
         private System.Windows.Forms.TextBox Set_txt_markX4;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Button Re_Cali_Mark;
+        private System.Windows.Forms.Button Correct_Cam_Cor;
     }
 }

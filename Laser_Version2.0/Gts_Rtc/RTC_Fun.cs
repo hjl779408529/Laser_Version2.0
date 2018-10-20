@@ -431,67 +431,7 @@ namespace RTC_Fun
             {
                 RTC5Wrap.get_status(out Busy, out uint Position);
             } while (Busy != 0U);
-        }
-        //执行No指定的Rtc_Data封闭图形数据
-        public static void Draw(List<List<Rtc_Data>> Rtc_Datas,UInt16 No,UInt32 List_No)
-        {
-            //  wait list List_No to be not busy
-            //  load_list( List_No, 0) returns 1 if successful, otherwise 0
-            //  执行到POS 0
-            do
-            {
-
-            }
-            while (RTC5Wrap.load_list(List_No, 0u) == 0);
-            // Transmit the following list commands to the list buffer.
-            RTC5Wrap.set_start_list(List_No);
-           
-            //生成数据
-            foreach (var o in Rtc_Datas[No])
-            {
-                if (o.Type==1)//arc_abs 绝对圆弧
-                {
-                    RTC5Wrap.arc_abs(Convert.ToInt32(-o.Center_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(o.Center_x * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToDouble(o.Angle));
-                    //RTC5Wrap.set_ellipse(1,1, 0,Convert.ToDouble(o.Angle));
-                    //RTC5Wrap.mark_ellipse_abs(Convert.ToInt32(-o.Center_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(o.Center_x * Para_List.Parameter.Rtc_XPos_Reference), 0);//圆心坐标，扁率:a-b/a
-                }
-                else if (o.Type == 2)//arc_rel
-                {
-                    RTC5Wrap.arc_rel(Convert.ToInt32(-o.Center_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(o.Center_x * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToDouble(o.Angle));
-                    //RTC5Wrap.set_ellipse(1, 1, 0, Convert.ToDouble(o.Angle));
-                    //RTC5Wrap.mark_ellipse_rel(Convert.ToInt32(-o.Center_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(o.Center_x * Para_List.Parameter.Rtc_XPos_Reference), 0);//圆心坐标，扁率:a-b/a
-                }
-                else if (o.Type == 3)//jump_abs
-                {
-                    RTC5Wrap.jump_abs(Convert.ToInt32(-o.End_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_XPos_Reference));
-                }
-                else if (o.Type == 4)//jump_rel
-                {
-                    RTC5Wrap.jump_rel(Convert.ToInt32(-o.End_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_XPos_Reference));
-                }
-                else if (o.Type == 5)//mark_abs
-                {
-                    RTC5Wrap.mark_abs(Convert.ToInt32(-o.End_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_XPos_Reference));
-                }
-                else if (o.Type == 6)//mark_rel
-                {
-                    RTC5Wrap.mark_rel(Convert.ToInt32(-o.End_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_XPos_Reference));
-                }
-            }
-
-            //设置List结束位置
-            RTC5Wrap.set_end_of_list();
-
-            //启动执行
-            RTC5Wrap.execute_list(List_No);
-
-            //Busy 运行等待结束
-            uint Busy;
-            do
-            {
-                RTC5Wrap.get_status(out Busy, out uint Position);
-            } while (Busy != 0U);
-        }
+        }       
         //执行指定的Interpolation_Data 图形数据
         public static void Draw(List<Interpolation_Data> Rtc_Datas,UInt32 List_No)
         {
@@ -651,7 +591,7 @@ namespace RTC_Fun
             else
             {
                 //获取数据落点
-                Tmp_Point = new Vector(Gts_Cal_Data_Resolve.Get_Affinity_Point(0, Rtc_Datas[0].Rtc_x, Rtc_Datas[0].Rtc_y, affinity_Matrices));
+                Tmp_Point = new Vector(Rtc_Cal_Data_Resolve.Get_Affinity_Point(0, Rtc_Datas[0].Rtc_x, Rtc_Datas[0].Rtc_y, affinity_Matrices));
                 Tmp_R0_X = Tmp_Point.X;
                 Tmp_R0_Y = Tmp_Point.Y;
             }
@@ -728,74 +668,6 @@ namespace RTC_Fun
                 RTC5Wrap.get_status(out Busy, out uint Position);                
             } while (Busy != 0U);
 #endif
-        }
-        //执行list Interpolation_Data 数据
-        public static void Draw(List<List<Interpolation_Data>> Rtc_Datas, UInt32 List_No)
-        {
-            //  wait list List_No to be not busy
-            //  load_list( List_No, 0) returns 1 if successful, otherwise 0
-            //  执行到POS 0
-            do
-            {
-
-            }
-            while (RTC5Wrap.load_list(List_No, 0u) == 0);
-            // Transmit the following list commands to the list buffer.
-            RTC5Wrap.set_start_list(List_No);
-
-            //生成数据
-            foreach (var n in Rtc_Datas)
-            {
-                foreach (var o in n)
-                {
-                    //初始Jump到启动点位
-                    for (int i = 0; i < n.Count; i++)
-                    {
-                        if (i == 0)
-                        {
-                            RTC5Wrap.jump_abs(Convert.ToInt32(-n[i].Rtc_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(n[i].Rtc_x * Para_List.Parameter.Rtc_XPos_Reference));
-                        }
-                    } 
-                    if (o.Type == 11)//arc_abs 绝对圆弧
-                    {
-                        RTC5Wrap.arc_abs(Convert.ToInt32(-o.Center_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(o.Center_x * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToDouble(o.Angle));
-                    }
-                    else if (o.Type == 12)//arc_rel
-                    {
-                        RTC5Wrap.arc_rel(Convert.ToInt32(-o.Center_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(o.Center_x * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToDouble(o.Angle));
-                    }
-                    else if (o.Type == 13)//jump_abs
-                    {
-                        RTC5Wrap.jump_abs(Convert.ToInt32(-o.End_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_XPos_Reference));
-                    }
-                    else if (o.Type == 14)//jump_rel
-                    {
-                        RTC5Wrap.jump_rel(Convert.ToInt32(-o.End_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_XPos_Reference));
-                    }
-                    else if (o.Type == 15)//mark_abs
-                    {
-                        RTC5Wrap.mark_abs(Convert.ToInt32(-o.End_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_XPos_Reference));
-                    }
-                    else if (o.Type == 16)//mark_rel
-                    {
-                        RTC5Wrap.mark_rel(Convert.ToInt32(-o.End_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_XPos_Reference));
-                    }
-                }
-            }            
-
-            //设置List结束位置
-            RTC5Wrap.set_end_of_list();
-
-            //启动执行
-            RTC5Wrap.execute_list(List_No);
-
-            //Busy 运行等待结束
-            uint Busy;
-            do
-            {
-                RTC5Wrap.get_status(out Busy, out uint Position);
-            } while (Busy != 0U);
-        }
-
+        }       
     }
 }

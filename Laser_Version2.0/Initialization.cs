@@ -19,9 +19,13 @@ namespace Initialization
         //定义GTS函数调用返回值
         short Com_Return;        
         //强制定义RS232端口
-        public static RS232 Com_Comunication = new RS232();
+        public static RS232 Laser_Control_Com = new RS232(); //激光发生器 串口通讯
+        public static Laser_Operation Laser_Operation_00 = new Laser_Operation(); //激光发生器 控制
+        public static RS232 Laser_Watt_Com = new RS232(); //激光功率计 串口通讯
+        public static Laser_Watt_Operation Laser_Watt_00 = new Laser_Watt_Operation();//激光功率计
+        public static Double_Fit_Data Laser_Watt_Percent_Relate = new Double_Fit_Data();//激光功率与百分比对应关系
         //定义Tcp连接
-        public static Tclient T_Client = new Tclient();
+        public static HPSocket_Communication T_Client = new HPSocket_Communication();
         public void Gts_Initial()
         {
             //打开运动控制器 
@@ -60,22 +64,65 @@ namespace Initialization
             Para_List.Serialize_Parameter.Reserialize("Para.xml");
 
         }
-        //232通讯初始化
+        //Rs232通讯初始化
         public void RS232_Initial() 
         {
-            if (Para_List.Parameter.Com_No < Com_Comunication.PortName.Count)
+            //激光控制器 232
+            Laser_Control_Com.Receive_Event += new Receive_Delegate(Laser_Operation_00.Resolve_Com_Data);
+            if (Para_List.Parameter.Laser_Control_Com_No < Laser_Control_Com.PortName.Count)
             {
-                Com_Comunication.Open_Com(Para_List.Parameter.Com_No);
+                Laser_Control_Com.Open_Com(Para_List.Parameter.Laser_Control_Com_No);
             }
             else
             {
                 MessageBox.Show("激光控制器通讯串口端口编号异常，请在激光控制面板选择正确的串口编号！！！");
-            }            
+            }
+            //激光功率计 232
+            Laser_Watt_Com.Receive_Event += new Receive_Delegate(Laser_Watt_00.Resolve_Com_Data);
+            if (Para_List.Parameter.Laser_Watt_Com_No < Laser_Watt_Com.PortName.Count)
+            {
+                if (Laser_Watt_Com.Open_Com(Para_List.Parameter.Laser_Watt_Com_No, 3))
+                {
+
+                }
+            }
+            else
+            {
+                MessageBox.Show("激光控制器通讯串口端口编号异常，请在激光控制面板选择正确的串口编号！！！");
+            }
+            //加载功率 与 百分比校准文件
+            Load_Watt_Percent_Relate();
+        }
+        public bool Load_Watt_Percent_Relate()
+        {            
+            string File_Name = "Laser_Watt_Percent_Relate.csv";
+            string File_Path = @"./\Config/" + File_Name;
+            if (File.Exists(File_Path))
+            {
+                //获取矫正数据
+                if (CSV_RW.DataTable_Double_Fit_Data(CSV_RW.OpenCSV(File_Path)).Count >= 1)
+                {
+                    Laser_Watt_Percent_Relate = new Double_Fit_Data(CSV_RW.DataTable_Double_Fit_Data(CSV_RW.OpenCSV(File_Path))[0]);
+                    Log.Info("Laser_Watt_Percent_Relate 矫正文件加载成功！！！");
+                    return true;
+                } 
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                MessageBox.Show("Laser_Watt_Percent_Relate 矫正文件不存在！！！，禁止加工，请检查！");
+                Log.Info("Laser_Watt_Percent_Relate 矫正文件不存在！！！，禁止加工，请检查！");
+                return false;
+            }
+            
         }
         //Tcp通讯初始化
         public void Tcp_Initial() 
         {
-            T_Client.TCP_Start();
+            T_Client.TCP_Start("127.0.0.1",6230);
         }
         //laser 功率矫正初始化
 

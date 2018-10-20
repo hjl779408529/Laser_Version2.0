@@ -20,7 +20,7 @@ namespace Laser_Build_1._0
 
         private void Display_Dxf_Load(object sender, EventArgs e)
         {
-
+            this.axMxDrawX1.ShowRulerWindow = true;
         }
     }
 }

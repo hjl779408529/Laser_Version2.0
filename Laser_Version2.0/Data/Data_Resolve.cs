@@ -41,7 +41,7 @@ namespace Laser_Build_1._0
             if (!fileInfo.Exists)
             {
                 Main.dxf.appendInfo(Dxf_filename + "  文件不存在！！！");
-                Log.Commandhandler(Dxf_filename + "  文件不存在！！！" + "\r\n");
+                Log.Error(Dxf_filename + "  文件不存在！！！" + "\r\n");
                 return Result;
             }
             DxfVersion dxfVersion = DxfDocument.CheckDxfFileVersion(Dxf_filename, out bool isBinary);
@@ -50,7 +50,7 @@ namespace Laser_Build_1._0
             if (dxfVersion < DxfVersion.AutoCad2000)
             {
                 Main.dxf.appendInfo(Dxf_filename + "  文件版本不支持");
-                Log.Commandhandler(Dxf_filename + "  文件版本不支持" + "\r\n");
+                Log.Error(Dxf_filename + "  文件版本不支持" + "\r\n");
                 return Result;
             }
 
@@ -61,7 +61,7 @@ namespace Laser_Build_1._0
             if (Result == null)
             {
                 Main.dxf.appendInfo(Dxf_filename + "  Dxf文件读取失败");
-                Log.Commandhandler(Dxf_filename + "  Dxf文件读取失败" + "\r\n");
+                Log.Error(Dxf_filename + "  Dxf文件读取失败" + "\r\n");
                 return Result;
             }
             //返回读取结果
@@ -1775,7 +1775,7 @@ namespace Laser_Build_1._0
                                 // (positive angle values correspond to clockwise angles);
                                 // allowed range: [–3600.0° … +3600.0°] (±10 full circles);
                                 // out-of-range values will be edge-clipped.
-                                Temp_Data.Angle = 360;//这个参数得看RTC手册，整圆的旋转角度
+                                Temp_Data.Angle = 370;//这个参数得看RTC手册，整圆的旋转角度
 
                                 //Rtc定位 激光加工起点坐标
                                 Temp_Data.Rtc_x = Temp_Data.Center_x;
@@ -2204,7 +2204,7 @@ namespace Laser_Build_1._0
                                     // (positive angle values correspond to clockwise angles);
                                     // allowed range: [–3600.0° … +3600.0°] (±10 full circles);
                                     // out-of-range values will be edge-clipped.
-                                    Temp_Data.Angle = 360;//这个参数得看RTC手册，整圆的旋转角度
+                                    Temp_Data.Angle = 370;//这个参数得看RTC手册，整圆的旋转角度
 
                                     //Rtc定位 激光加工起点坐标
                                     Temp_Data.Rtc_x = Temp_Data.Center_x;
@@ -2580,7 +2580,7 @@ namespace Laser_Build_1._0
                                     // (positive angle values correspond to clockwise angles);
                                     // allowed range: [–3600.0° … +3600.0°] (±10 full circles);
                                     // out-of-range values will be edge-clipped.
-                                    Temp_Data.Angle = 360;//这个参数得看RTC手册，整圆的旋转角度
+                                    Temp_Data.Angle = 370;//这个参数得看RTC手册，整圆的旋转角度
 
                                     //Rtc定位 激光加工起点坐标
                                     Temp_Data.Rtc_x = Temp_Data.Center_x;
@@ -2696,8 +2696,8 @@ namespace Laser_Build_1._0
             {
                 //向量以交点为起始点，分别指向当前刀具加工方向，下一段刀具加工方向
                 //使用单位矢量
-                Vector Line1 = new Vector((Indata_1.End_x - Indata_1.Start_x) / (new Vector(Indata_1.End_x - Indata_1.Start_x, Indata_1.End_y - Indata_1.Start_y).Length()), (Indata_1.End_y - Indata_1.Start_y) / (new Vector(Indata_1.End_x - Indata_1.Start_x, Indata_1.End_y - Indata_1.Start_y).Length()));
-                Vector Line2 = new Vector((Indata_2.End_x - Indata_2.Start_x) / (new Vector(Indata_2.End_x - Indata_2.Start_x, Indata_2.End_y - Indata_2.Start_y).Length()), (Indata_2.End_y - Indata_2.Start_y) / (new Vector(Indata_2.End_x - Indata_2.Start_x, Indata_2.End_y - Indata_2.Start_y).Length()));
+                Vector Line1 = new Vector((Indata_1.End_x - Indata_1.Start_x) / (new Vector(Indata_1.End_x - Indata_1.Start_x, Indata_1.End_y - Indata_1.Start_y).Length), (Indata_1.End_y - Indata_1.Start_y) / (new Vector(Indata_1.End_x - Indata_1.Start_x, Indata_1.End_y - Indata_1.Start_y).Length));
+                Vector Line2 = new Vector((Indata_2.End_x - Indata_2.Start_x) / (new Vector(Indata_2.End_x - Indata_2.Start_x, Indata_2.End_y - Indata_2.Start_y).Length), (Indata_2.End_y - Indata_2.Start_y) / (new Vector(Indata_2.End_x - Indata_2.Start_x, Indata_2.End_y - Indata_2.Start_y).Length));
                 decimal Angle = Vec_Cal.AngleBetweenVector(Line1, Line2);
                 //计算等距线交点
                 if (Angle == 180) //角度为180,共线且方向相反
@@ -2718,7 +2718,7 @@ namespace Laser_Build_1._0
             {
                 //向量以交点为起始点，分别指向当前刀具加工方向，下一段刀具加工方向
                 //使用单位矢量
-                Vector Line = new Vector((Indata_1.End_x - Indata_1.Start_x) / (new Vector(Indata_1.End_x - Indata_1.Start_x, Indata_1.End_y - Indata_1.Start_y).Length()), (Indata_1.End_y - Indata_1.Start_y) / (new Vector(Indata_1.End_x - Indata_1.Start_x, Indata_1.End_y - Indata_1.Start_y).Length()));
+                Vector Line = new Vector((Indata_1.End_x - Indata_1.Start_x) / (new Vector(Indata_1.End_x - Indata_1.Start_x, Indata_1.End_y - Indata_1.Start_y).Length), (Indata_1.End_y - Indata_1.Start_y) / (new Vector(Indata_1.End_x - Indata_1.Start_x, Indata_1.End_y - Indata_1.Start_y).Length));
                 //保持坐标值 矢量
                 Vector Center_Start = new Vector(Indata_2.Center_x - Indata_2.Start_x, Indata_2.Center_y - Indata_2.Start_y);
                 //圆弧方向  顺圆弧、逆圆弧
@@ -2758,7 +2758,7 @@ namespace Laser_Build_1._0
             {
                 //向量以交点为起始点，分别指向当前刀具加工方向，下一段刀具加工方向
                 //使用单位矢量
-                Vector Line = new Vector((Indata_2.End_x - Indata_2.Start_x) / (new Vector(Indata_2.End_x - Indata_2.Start_x, Indata_2.End_y - Indata_2.Start_y).Length()), (Indata_2.End_y - Indata_2.Start_y) / (new Vector(Indata_2.End_x - Indata_2.Start_x, Indata_2.End_y - Indata_2.Start_y).Length()));
+                Vector Line = new Vector((Indata_2.End_x - Indata_2.Start_x) / (new Vector(Indata_2.End_x - Indata_2.Start_x, Indata_2.End_y - Indata_2.Start_y).Length), (Indata_2.End_y - Indata_2.Start_y) / (new Vector(Indata_2.End_x - Indata_2.Start_x, Indata_2.End_y - Indata_2.Start_y).Length));
                 //保持坐标值 矢量
                 Vector Center_Start = new Vector(Indata_1.Center_x - Indata_1.Start_x, Indata_1.Center_y - Indata_1.Start_y);
                 Vector Line_01 = new Vector(Indata_1.Start_x + Center_Start.X - Indata_2.Start_x, Indata_1.Start_y + Center_Start.Y - Indata_2.Start_y);
@@ -2918,7 +2918,7 @@ namespace Laser_Build_1._0
             Temp_Data.Center_x = 0;
             Temp_Data.Center_y = 0;
             //圆弧角度
-            Temp_Data.Angle = 360;
+            Temp_Data.Angle = 370;
             //追加修改的数据
             Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
             Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
@@ -2944,7 +2944,7 @@ namespace Laser_Build_1._0
             Temp_Data.Center_x = Interval;
             Temp_Data.Center_y = 0;
             //圆弧角度
-            Temp_Data.Angle = 360;
+            Temp_Data.Angle = 370;
             //追加修改的数据
             Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
             Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
@@ -2970,7 +2970,7 @@ namespace Laser_Build_1._0
             Temp_Data.Center_x = -Interval;
             Temp_Data.Center_y = 0;
             //圆弧角度
-            Temp_Data.Angle = 360;
+            Temp_Data.Angle = 370;
             //追加修改的数据
             Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
             Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
@@ -2996,7 +2996,7 @@ namespace Laser_Build_1._0
             Temp_Data.Center_x = 0;
             Temp_Data.Center_y = Interval;
             //圆弧角度
-            Temp_Data.Angle = 360;
+            Temp_Data.Angle = 370;
             //追加修改的数据
             Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
             Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
@@ -3022,7 +3022,7 @@ namespace Laser_Build_1._0
             Temp_Data.Center_x = 0;
             Temp_Data.Center_y = -Interval;
             //圆弧角度
-            Temp_Data.Angle = 360;
+            Temp_Data.Angle = 370;
             //追加修改的数据
             Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
             Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));

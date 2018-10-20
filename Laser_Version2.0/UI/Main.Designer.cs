@@ -56,6 +56,7 @@
             this.button7 = new System.Windows.Forms.Button();
             this.button9 = new System.Windows.Forms.Button();
             this.button10 = new System.Windows.Forms.Button();
+            this.Laser_Watt_Button = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -303,11 +304,23 @@
             this.button10.UseVisualStyleBackColor = true;
             this.button10.Click += new System.EventHandler(this.button10_Click);
             // 
+            // Laser_Watt_Button
+            // 
+            this.Laser_Watt_Button.Location = new System.Drawing.Point(76, 342);
+            this.Laser_Watt_Button.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Laser_Watt_Button.Name = "Laser_Watt_Button";
+            this.Laser_Watt_Button.Size = new System.Drawing.Size(140, 46);
+            this.Laser_Watt_Button.TabIndex = 20;
+            this.Laser_Watt_Button.Text = "Laser_Watt";
+            this.Laser_Watt_Button.UseVisualStyleBackColor = true;
+            this.Laser_Watt_Button.Click += new System.EventHandler(this.Laser_Watt_Button_Click);
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1344, 712);
+            this.Controls.Add(this.Laser_Watt_Button);
             this.Controls.Add(this.button10);
             this.Controls.Add(this.button9);
             this.Controls.Add(this.button7);
@@ -362,6 +375,7 @@
         //建立TcpClient
         private System.Windows.Forms.ToolStripMenuItem Menu_ParameterSet;
         private System.Windows.Forms.Button button10;
+        private System.Windows.Forms.Button Laser_Watt_Button;
     }
 }
 
