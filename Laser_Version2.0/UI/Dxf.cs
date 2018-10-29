@@ -55,28 +55,28 @@ namespace Laser_Build_1._0
             
             //初始数据刷新
             //工件坐标系偏移
-            textBox4.Text = Para_List.Parameter.Work.X.ToString(4);
-            textBox3.Text = Para_List.Parameter.Work.Y.ToString(4);
+            textBox4.Text = Para_List.Parameter.Work.X.ToString(6);
+            textBox3.Text = Para_List.Parameter.Work.Y.ToString(6);
             //直线插补
-            textBox2.Text = Para_List.Parameter.Line_synVel.ToString(4);
-            textBox1.Text = Para_List.Parameter.Line_synAcc.ToString(4);
+            textBox2.Text = Para_List.Parameter.Line_synVel.ToString(6);
+            textBox1.Text = Para_List.Parameter.Line_synAcc.ToString(6);
             //圆弧插补
-            textBox6.Text = Para_List.Parameter.Circle_synVel.ToString(4);
-            textBox5.Text = Para_List.Parameter.Circle_synAcc.ToString(4);
+            textBox6.Text = Para_List.Parameter.Circle_synVel.ToString(6);
+            textBox5.Text = Para_List.Parameter.Circle_synAcc.ToString(6);
 
             //坐标运动平滑系数
-            textBox12.Text = Para_List.Parameter.Syn_EvenTime.ToString(4);
+            textBox12.Text = Para_List.Parameter.Syn_EvenTime.ToString(6);
 
             //插补终止速度
-            textBox14.Text = Para_List.Parameter.Line_endVel.ToString(4);
-            textBox13.Text = Para_List.Parameter.Circle_endVel.ToString(4);
+            textBox14.Text = Para_List.Parameter.Line_endVel.ToString(6);
+            textBox13.Text = Para_List.Parameter.Circle_endVel.ToString(6);
 
             //坐标系定位坐标
             textBox23.Text = Convert.ToString(200);
             textBox22.Text = Convert.ToString(330);
 
             //刀具半径
-            Cutter_Radius.Text = Para_List.Parameter.Cutter_Radius.ToString(4);
+            Cutter_Radius.Text = Para_List.Parameter.Cutter_Radius.ToString(6);
             //刀具补偿类型
             Cutter_Comp.SelectedIndex = Para_List.Parameter.Cutter_Type;
             //选择起始加工位置
@@ -133,7 +133,8 @@ namespace Laser_Build_1._0
         /// 
         public void appendInfo(string info)
         {
-            Debug_Info_Display.AppendText(Cal_Elapse_Time.Get_Current_Time(2) + "  " + info + "\r\n");
+            Debug_Info_Display.AppendText(Cal_Elapse_Time.Get_Current_Time(1) + "\r\n");
+            Debug_Info_Display.AppendText(info + "\r\n");
         }
         //获取文件名
         private void button6_Click(object sender, EventArgs e)
@@ -184,8 +185,17 @@ namespace Laser_Build_1._0
             appendInfo("Dxf数据提取中！！！！");
             //建立临时数据存储组 和数据矫正
             List<Entity_Data> Arc_Line_Entity_Data = new List<Entity_Data>(Data_Cal.Calibration_Entity(Data_Cal.Resolve_Arc_Line(dxf), Para_List.Parameter.Trans_Affinity));//提取圆弧直线数据
+            ///测试 圆弧角度
+            //for (int i = 0; i < Arc_Line_Entity_Data.Count; i++)
+            //{
+            //    if (Arc_Line_Entity_Data[i].Type == 2)
+            //    {
+            //        appendInfo(string.Format("起始角度：{0}，终点角度：{1}", Arc_Line_Entity_Data[i].Cir_Start_Angle, Arc_Line_Entity_Data[i].Cir_End_Angle));
+            //    }
+            //}
+
             List<Entity_Data> Circle_Entity_Data = new List<Entity_Data>(Data_Cal.Calibration_Entity(Data_Cal.Resolve_Circle(dxf), Para_List.Parameter.Trans_Affinity));//提取圆数据
-            List<List<Entity_Data>> LwPolylines_Entity_Data = new List<List<Entity_Data>>(Data_Cal.Calibration_List_Entity(Data_Cal.Resolve_LWPolyline(dxf), Para_List.Parameter.Trans_Affinity)); //提取多边形数据            
+            List<List<Entity_Data>> LwPolylines_Entity_Data = new List<List<Entity_Data>>(Data_Cal.Calibration_List_Entity(Data_Cal.Resolve_LWPolyline(dxf), Para_List.Parameter.Trans_Affinity)); //提取多边形数据   
             appendInfo("Dxf数据提取完成！！！！");
             appendInfo("直线和圆弧 数据计数：" + Arc_Line_Entity_Data.Count);
             appendInfo("多边形 数据计数：" + LwPolylines_Entity_Data.Count);
@@ -193,6 +203,18 @@ namespace Laser_Build_1._0
             appendInfo("轨迹数据生成中！！！！");
             //直线圆弧数据转换为  轨迹加工数据
             Arc_Line_List_Data = new List<List<Interpolation_Data>>(Data_Cal.Integrate_Arc_Line(Arc_Line_Entity_Data));
+            ///测试 圆弧角度
+            //for (int i = 0; i < Arc_Line_List_Data.Count; i++)
+            //{
+            //    for (int j = 0;j< Arc_Line_List_Data[i].Count; j++)
+            //    {
+            //        if (Arc_Line_List_Data[i][j].Type == 2)
+            //        {
+            //            appendInfo(string.Format("角度：{0}", Arc_Line_List_Data[i][j].Angle));
+            //        }
+            //    }
+               
+            //}
             //多边形转换为  轨迹加工数据
             LwPolyline_List_Data = new List<List<Interpolation_Data>>(Data_Cal.Integrate_LWPolyline(LwPolylines_Entity_Data));
             //整圆数据转换为  轨迹加工数据
@@ -202,6 +224,22 @@ namespace Laser_Build_1._0
             Concat_List_Data.AddRange(Arc_Line_List_Data);
             Concat_List_Data.AddRange(LwPolyline_List_Data);
             Concat_List_Data.AddRange(Circle_List_Data);
+            //for (int i = 0; i < Concat_List_Data.Count; i++)
+            //{
+            //    appendInfo("序号：" + i);
+            //    for (int j = 0; j < Concat_List_Data[i].Count; j++)
+            //    {
+
+            //        if (Concat_List_Data[i][j].Type == 2)
+            //        {
+            //            appendInfo(string.Format("    类型：{4},起点({0},{1}),终点({2},{3}),角度{5}", Concat_List_Data[i][j].Start_x, Concat_List_Data[i][j].Start_y, Concat_List_Data[i][j].End_x, Concat_List_Data[i][j].End_y, Concat_List_Data[i][j].Type, Concat_List_Data[i][j].Angle));
+            //        }
+            //        else if (Concat_List_Data[i][j].Type == 1)
+            //        {
+            //            appendInfo(string.Format("    类型：{4},起点({0},{1}),终点({2},{3})", Concat_List_Data[i][j].Start_x, Concat_List_Data[i][j].Start_y, Concat_List_Data[i][j].End_x, Concat_List_Data[i][j].End_y, Concat_List_Data[i][j].Type));
+            //        }
+            //    }
+            //}
             appendInfo("轨迹数据生成完成！！！！");
             appendInfo("刀具补偿数据生成中！！！！");
             //刀具补偿
@@ -241,8 +279,16 @@ namespace Laser_Build_1._0
         {
             if (Prompt.Refresh.Axis01_EN)
             {
-                GTS_Fun.Axis_Home.Home(1);
-                appendInfo("X轴归零完成！！！");
+                //GTS_Fun.Axis_Home.Home_Upper_Monitor(1);
+                if (GTS_Fun.Axis_Home.Axis01_Home_Down_Motor() == 0)
+                {
+                    appendInfo("X轴归零完成！！！");
+                }
+                else
+                {
+                    appendInfo("X轴归零失败！！！");
+                }
+                    
             }
             else
             {
@@ -253,8 +299,15 @@ namespace Laser_Build_1._0
         {
             if (Prompt.Refresh.Axis02_EN)
             {
-                GTS_Fun.Axis_Home.Home(2);
-                appendInfo("Y轴归零完成！！！");
+                //GTS_Fun.Axis_Home.Home_Upper_Monitor(2);
+                if (GTS_Fun.Axis_Home.Axis02_Home_Down_Motor() == 0)
+                {
+                    appendInfo("Y轴归零完成！！！");
+                }
+                else
+                {
+                    appendInfo("Y轴归零失败！！！");
+                }
             }
             else
             {
@@ -266,6 +319,7 @@ namespace Laser_Build_1._0
         private void button2_Click(object sender, EventArgs e)
         {
             GTS_Fun.Interpolation.Coordination(Para_List.Parameter.Work.X, Para_List.Parameter.Work.Y);
+            appendInfo("直角坐标系建立完成！！！");
         }
         //DXF 窗口关闭
         private void Dxf_FormClosed(object sender, FormClosedEventArgs e)
@@ -445,9 +499,93 @@ namespace Laser_Build_1._0
         {
             Rtc_List_Data.Clear();
             Data_Resolve Test = new Data_Resolve();
-            Test.Separate_Rtc_Gts_Limit(Concat_List_Data).ForEach(m => Rtc_List_Data.Add(m));
-            appendInfo("RTC和GTS数据拆分完成！！！！");
-            appendInfo("RTC和GTS数据拆分后数据数量：" + Rtc_List_Data.Count);
+            if (Concat_List_Data.Count>=1)
+            {
+                Test.Separate_Rtc_Gts_Limit(Concat_List_Data).ForEach(m => Rtc_List_Data.Add(m));
+                appendInfo("RTC和GTS数据拆分完成！！！！");
+                appendInfo("RTC和GTS数据拆分后数据数量：" + Rtc_List_Data.Count);
+                //for (int i = 0; i < Rtc_List_Data.Count; i++)
+                //{
+                //    appendInfo(string.Format("计数:{0}", Rtc_List_Data[i].Count));
+                //}
+                //for (int i = 0; i < Rtc_List_Data.Count; i++)
+                //{
+                //    for (int j = 0; j < Rtc_List_Data[i].Count; j++)
+                //    {
+                //        if (Rtc_List_Data[i][j].Type == 11)
+                //        {
+                //            appendInfo(string.Format("X：{0}，Y：{1}", Rtc_List_Data[i][0].Rtc_x, Rtc_List_Data[i][0].Rtc_y));
+                //            appendInfo(string.Format("角度：{0}", Rtc_List_Data[i][j].Angle));
+                //        }
+                //    }
+                //}
+                //验证坐标
+                //for (int i = 0; i < Rtc_List_Data.Count; i++)
+                //{
+                //    for (int j = 0; j < Rtc_List_Data[i].Count; j++)
+                //    {
+                //        if (Rtc_List_Data[i][j].Type == 11)
+                //        {
+                //            appendInfo(string.Format("起点({0},{1}),终点({2},{3})", Rtc_List_Data[i][0].Rtc_x + Rtc_List_Data[i][0].Gts_x, Rtc_List_Data[i][0].Rtc_y + Rtc_List_Data[i][0].Gts_y, Rtc_List_Data[i][0].End_x + Rtc_List_Data[i][0].Gts_x, Rtc_List_Data[i][0].End_y + Rtc_List_Data[i][0].Gts_y));
+                //            //appendInfo(string.Format("角度：{0}", Rtc_List_Data[i][j].Angle));
+                //        }
+                //    }
+                //}
+                for (int i = 0; i < Rtc_List_Data.Count; i++)
+                {
+                    appendInfo("序号：" + i + "加工类型:" + Rtc_List_Data[i][0].Work);
+                    for (int j = 0; j < Rtc_List_Data[i].Count; j++)
+                    {
+                        if (Rtc_List_Data[i][j].Work == 10)
+                        {
+                            if (Rtc_List_Data[i][j].Type == 2)
+                            {
+                                appendInfo(string.Format("    类型：{4},起点({0},{1}),终点({2},{3}),角度{5}", Rtc_List_Data[i][j].Start_x, Rtc_List_Data[i][j].Start_y, Rtc_List_Data[i][j].End_x, Rtc_List_Data[i][j].End_y, Rtc_List_Data[i][j].Type, Rtc_List_Data[i][j].Angle));
+                            }
+                            else if (Rtc_List_Data[i][j].Type == 3)
+                            {
+                                appendInfo(string.Format("    类型：{4},起点({0},{1}),终点({2},{3}),角度{5}", Rtc_List_Data[i][j].Start_x, Rtc_List_Data[i][j].Start_y, Rtc_List_Data[i][j].End_x, Rtc_List_Data[i][j].End_y, Rtc_List_Data[i][j].Type, Rtc_List_Data[i][j].Angle));
+                            }
+                            else if (Rtc_List_Data[i][j].Type == 1)
+                            {
+                                appendInfo(string.Format("    类型：{4},起点({0},{1}),终点({2},{3})", Rtc_List_Data[i][j].Start_x, Rtc_List_Data[i][j].Start_y, Rtc_List_Data[i][j].End_x, Rtc_List_Data[i][j].End_y, Rtc_List_Data[i][j].Type));
+                            }
+                        }
+                        else if (Rtc_List_Data[i][j].Work == 20)
+                        {
+                            if (j == 0) appendInfo(string.Format("    本段起点({0},{1})", Rtc_List_Data[i][j].Rtc_x, Rtc_List_Data[i][j].Rtc_y));
+                            if (Rtc_List_Data[i][j].Type == 11)
+                            {
+                                appendInfo(string.Format("    类型：{4},起点({0},{1}),终点({2},{3}),角度{5},圆心({6},{7})", Rtc_List_Data[i][j].Start_x, Rtc_List_Data[i][j].Start_y, Rtc_List_Data[i][j].End_x, Rtc_List_Data[i][j].End_y, Rtc_List_Data[i][j].Type, Rtc_List_Data[i][j].Angle, Rtc_List_Data[i][j].Center_x, Rtc_List_Data[i][j].Center_y));
+                            }
+                            else if (Rtc_List_Data[i][j].Type == 15)
+                            {
+                                appendInfo(string.Format("    类型：{4},起点({0},{1}),终点({2},{3})", Rtc_List_Data[i][j].Start_x, Rtc_List_Data[i][j].Start_y, Rtc_List_Data[i][j].End_x, Rtc_List_Data[i][j].End_y, Rtc_List_Data[i][j].Type));
+                            }
+                            else if (Rtc_List_Data[i][j].Type == 13)
+                            {
+                                appendInfo(string.Format("    类型：{4},起点({0},{1}),终点({2},{3})", Rtc_List_Data[i][j].Start_x, Rtc_List_Data[i][j].Start_y, Rtc_List_Data[i][j].End_x, Rtc_List_Data[i][j].End_y, Rtc_List_Data[i][j].Type));
+                            }
+                        }
+                    }
+                }
+                //for (int i = 0; i < Rtc_List_Data.Count; i++)
+                //{
+                //    appendInfo("序号：" + i + "加工类型:" + Rtc_List_Data[i][0].Work);
+                //    if (Rtc_List_Data[i].Count >= 1)
+                //    {
+                //        if (Rtc_List_Data[i][0].Work == 20)
+                //        {
+                //            appendInfo(string.Format("    Gts基准点({0},{1})", Rtc_List_Data[i][0].Gts_x, Rtc_List_Data[i][0].Gts_y));
+                //            appendInfo(string.Format("    Rtc起点({0},{1})", Rtc_List_Data[i][0].Rtc_x, Rtc_List_Data[i][0].Rtc_y));
+                //        }
+                //    }
+                //}
+            }
+            else
+            {
+                appendInfo("无可用数据拆分！！！！");
+            }            
         }
         //定位坐标原点
         private void button10_Click(object sender, EventArgs e)
@@ -457,11 +595,11 @@ namespace Laser_Build_1._0
         //计算标定板仿射参数
         private void button12_Click(object sender, EventArgs e)
         {
-            Thread Integrate_thread = new Thread(Get_Cal_Affinity_Matricx);
-            Integrate_thread.Start();
+            Thread Get_Cal_Angle_thread = new Thread(Get_Cal_Angle_Matricx);
+            Get_Cal_Angle_thread.Start();
 
         }
-        private void Get_Cal_Affinity_Matricx()
+        private void Get_Cal_Angle_Matricx()
         {
             ///先矫正坐标原点
             if (Calibration.Calibrate_Org())
@@ -470,28 +608,29 @@ namespace Laser_Build_1._0
             }
             else
             {
-                appendInfo("坐标原点矫正失败！！！");                
+                appendInfo("坐标原点矫正失败！！！");
                 return;
             }
             appendInfo("矫正后数据 X：" + Para_List.Parameter.Cal_Org.X + ", Y：" + Para_List.Parameter.Cal_Org.Y);
             ///建立直角坐标系
             GTS_Fun.Interpolation.Coordination(Para_List.Parameter.Work.X, Para_List.Parameter.Work.Y);
-            ///矫正标定板参数
-            if (Calibration.Cal_Calibration_Affinity_Matrix())
+
+            //矫正标定板旋转参数
+            if (Calibration.Cal_Calibration_Angle_Matrix())
             {
-                appendInfo("标定板仿射参数矫正成功！！！");
+                appendInfo("标定板旋转参数矫正成功！！！");
             }
             else
             {
-                appendInfo("标定板仿射参数矫正失败！！！");
+                appendInfo("标定板旋转参数矫正失败！！！");
                 return;
             }
-            appendInfo("标定板仿射参数Stretch_X：" + Para_List.Parameter.Cal_Trans_Affinity.Stretch_X);
-            appendInfo("标定板仿射参数Distortion_X：" + Para_List.Parameter.Cal_Trans_Affinity.Distortion_X);
-            appendInfo("标定板仿射参数DeltaX：" + Para_List.Parameter.Cal_Trans_Affinity.Delta_X);
-            appendInfo("标定板仿射参数Stretch_Y：" + Para_List.Parameter.Cal_Trans_Affinity.Stretch_Y);
-            appendInfo("标定板仿射参数Distortion_Y：" + Para_List.Parameter.Cal_Trans_Affinity.Distortion_Y);
-            appendInfo("标定板仿射参数DeltaY：" + Para_List.Parameter.Cal_Trans_Affinity.Delta_Y);
+            appendInfo("标定板旋转参数Stretch_X：" + Para_List.Parameter.Cal_Trans_Angle.Stretch_X);
+            appendInfo("标定板旋转参数Distortion_X：" + Para_List.Parameter.Cal_Trans_Angle.Distortion_X);
+            appendInfo("标定板旋转参数DeltaX：" + Para_List.Parameter.Cal_Trans_Angle.Delta_X);
+            appendInfo("标定板旋转参数Stretch_Y：" + Para_List.Parameter.Cal_Trans_Angle.Stretch_Y);
+            appendInfo("标定板旋转参数Distortion_Y：" + Para_List.Parameter.Cal_Trans_Angle.Distortion_Y);
+            appendInfo("标定板旋转参数DeltaY：" + Para_List.Parameter.Cal_Trans_Angle.Delta_Y);
         }
 
         //提取坐标
@@ -562,14 +701,14 @@ namespace Laser_Build_1._0
             //定位矫正坐标
             GTS_Fun.Interpolation.Gts_Ready_Test(Cor_x, Cor_y);            
             //相机反馈的当前坐标
-            Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation_Test_00(1));//触发拍照 
+            Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation_Coordinate_Correct(1));//触发拍照 
             if (Cam.Length == 0)
             {
                 MessageBox.Show("相机坐标提取失败，请检查！！！");
                 return;
             }
             //当前平台坐标 对应的 标定板坐标
-            Cal_Actual_Point = Calibration.Get_Cal_Actual_Point(new Vector(Cor_x, Cor_y));
+            Cal_Actual_Point = Calibration.Get_Cal_Angle_Point(new Vector(Cor_x, Cor_y));
             //数据保存
             Result = new Vector(Cal_Actual_Point + Cam);//实际坐标
             Result = new Vector(Result.X - Cor_x,Result.Y - Cor_y);
@@ -604,7 +743,18 @@ namespace Laser_Build_1._0
         }
         private void Barrel_Distortion_Correct()
         {
-            Integrated.Rts_Gts_Cal_Rtc(Rtc_List_Data);
+            if (((Int16)(Para_List.Parameter.Rtc_Distortion_Data_Limit / Para_List.Parameter.Rtc_Distortion_Data_Interval)%2) != 0)
+            {
+                appendInfo(string.Format("振镜矫正范围除以打标间距：{0}不为偶数，禁止加工！！！", Para_List.Parameter.Rtc_Distortion_Data_Limit / Para_List.Parameter.Rtc_Distortion_Data_Interval));
+                return;
+            }
+            else
+            {
+                Rtc_List_Data.Clear();
+                Rtc_List_Data = new List<List<Interpolation_Data>>(Calibration.Generate_Rtc_Correct_Data(Para_List.Parameter.Rtc_Distortion_Data_Type, Para_List.Parameter.Rtc_Distortion_Data_Radius, Para_List.Parameter.Rtc_Distortion_Data_Interval, Para_List.Parameter.Rtc_Distortion_Data_Limit));
+                Integrated.Rts_Gts_Cal_Rtc(Rtc_List_Data);
+            }
+            
         }
         //标定板二次校准
         private void Calibration_Target_RE_Click(object sender, EventArgs e)
@@ -661,7 +811,7 @@ namespace Laser_Build_1._0
             //调用相机，获取对比的坐标信息
             Thread.Sleep(50);
             //相机反馈的当前坐标
-            Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation(1));//触发拍照 
+            Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation_Pixel_Correct(1));//触发拍照 
             if (Cam.Length == 0)
             {
                 MessageBox.Show("相机坐标提取失败，请检查！！！");
@@ -670,7 +820,7 @@ namespace Laser_Build_1._0
             //相机测算的实际偏差值:(相机反馈的当前坐标) - (相机中心坐标)
             Cam_Delta = new Vector(Cam.X - 243 * Para_List.Parameter.Cam_Reference, Cam.Y - 324 * Para_List.Parameter.Cam_Reference);
             //当前平台坐标 对应的 标定板坐标
-            Cal_Actual_Point =Calibration.Get_Cal_Actual_Point(new Vector(Cor_x, Cor_y));
+            Cal_Actual_Point =Calibration.Get_Cal_Angle_Point(new Vector(Cor_x, Cor_y));
             //数据保存
             Result = new Vector(Cal_Actual_Point.X - Cam_Delta.X - Cor_x, Cal_Actual_Point.Y - Cam_Delta.Y - Cor_y);//实际坐标
             //信息输出
@@ -707,7 +857,11 @@ namespace Laser_Build_1._0
                 Para_List.Parameter.Gts_Repeat = tmp;
             });
         }
-        //重新加载Gts 校准文件
+        /// <summary>
+        /// 重新加载Gts 校准文件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Load_Gts_AM_Click(object sender, EventArgs e)
         {
             GTS_Fun.Interpolation.Load_Affinity_Matrix();
@@ -721,20 +875,141 @@ namespace Laser_Build_1._0
         {
             Debug_Info_Display.Text = "";
         }
-        //测试HPsocket
-        HPSocket_Communication Hp_Tcp = new HPSocket_Communication();
+        //参数验证
         private void button3_Click(object sender, EventArgs e)
         {
-            Hp_Tcp.TCP_Start("127.0.0.1",6530);
+            //验证补偿前后坐标互转
+            //Vector Tmp1 = new Vector(Cor_x, Cor_y);
+            //Vector Tmp2 = Gts_Cal_Data_Resolve.Get_Affinity_Point(0, Tmp1.X, Tmp1.Y, GTS_Fun.Interpolation.affinity_Matrices);
+            //Vector Tmp3 = Gts_Cal_Data_Resolve.Get_Affinity_Point(1, Tmp2.X, Tmp2.Y, GTS_Fun.Interpolation.affinity_Matrices);
+            //MessageBox.Show(string.Format("原始({0},{1}),补偿后({2},{3}),补偿后反转({4},{5})", Tmp1.X, Tmp1.Y, Tmp2.X, Tmp2.Y, Tmp3.X, Tmp3.Y));
+            //List<List<Interpolation_Data>> Test = new List<List<Interpolation_Data>>(Calibration.Generate_Rtc_Correct_Data(1,1,2.5m,60));
+            //appendInfo("直线数量:" + (Test.Count - 1));
+            //for (int i = 0; i < Test.Count; i++)
+            //{
+            //    for (int j = 0; j < Test[i].Count; j++)
+            //    {
+            //        if (Test[i][j].Type == 15)
+            //        {
+            //            appendInfo(string.Format("起点({0},{1}),终点({2},{3})", Test[i][0].Rtc_x, Test[i][0].Rtc_y, Test[i][0].End_x, Test[i][0].End_y));                        
+            //        }
+            //    }
+            //}
+            //List<List<Interpolation_Data>> Test01 = new List<List<Interpolation_Data>>(Calibration.Generate_Rtc_Correct_Data(0, 1, 2.5m, 60));
+            //appendInfo("整圆数量:"+ (Test01.Count - 1));
+            //for (int i = 0; i < Test01.Count; i++)
+            //{
+            //    for (int j = 0; j < Test01[i].Count; j++)
+            //    {
+            //        if (Test01[i][j].Type == 11)
+            //        {
+            //            appendInfo(string.Format("圆心({0},{1}),起点({2},{3})", Test01[i][0].Center_x, Test01[i][0].Center_y, Test01[i][0].Rtc_x, Test01[i][0].Rtc_y));
+            //        }
+            //    }
+            //}
+            //采集生成校准文件的数据
+            //List<Vector> Test02 = new List<Vector>(Calibration.Rtc_Correct_Coordinate());
+            //for (int i = 0; i < Test02.Count; i++)
+            //{
+            //    appendInfo(string.Format("坐标({0},{1})", Test02[i].X, Test02[i].Y));
+            //}
+            //采集生成Rtc坐标系矫正的数据
+            List<Vector> Test02 = new List<Vector>(Calibration.Rtc_Correct_AFF_Coordinate());
+            for (int i = 0; i < Test02.Count; i++)
+            {
+                appendInfo(string.Format("坐标({0},{1})", Test02[i].X, Test02[i].Y));
+            }
+        }
+        //测试
+        private void Test_01_Click(object sender, EventArgs e)
+        {
+            Thread Test_Correct_thread = new Thread(Test_Correct);
+            Test_Correct_thread.Start();
+        }
+        private void Test_Correct()
+        {
+            Integrated.Rts_Gts_Cal_Rtc_Affinity(Rtc_List_Data);
+            //if (Calibration.Cal_Cam_Affinity_Test())
+            //{
+            //    MessageBox.Show("相机坐标系矫正完成！！！");
+            //}
+            //else
+            //{
+            //    MessageBox.Show("相机坐标系矫正失败！！！");
+            //}
+        }
+        /// <summary>
+        /// Rtc坐标系校准数据采集
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Rtc_Cor_Data_Acqu_Click(object sender, EventArgs e)
+        {
+            Thread Rtc_AFF_Correct_thread = new Thread(Rtc_AFF_Correct);
+            Rtc_AFF_Correct_thread.Start();
+        }
+        private void Rtc_AFF_Correct()
+        {
+            if ((((Int16)(Para_List.Parameter.Rtc_Calibration_X_Len / Para_List.Parameter.Rtc_Calibration_Cell) % 2) != 0) || (((Int16)(Para_List.Parameter.Rtc_Calibration_Y_Len / Para_List.Parameter.Rtc_Calibration_Cell) % 2) != 0))
+            {
+                MessageBox.Show(string.Format("振镜矫正范围除以打标间距：X-{0}或Y-{1} 不为偶数，数据采集终止！！！", Para_List.Parameter.Rtc_Calibration_X_Len / Para_List.Parameter.Rtc_Calibration_Cell, Para_List.Parameter.Rtc_Calibration_Y_Len / Para_List.Parameter.Rtc_Calibration_Cell));
+                return;
+            }
+            else
+            {
+                Rtc_List_Data.Clear();
+                Rtc_List_Data = new List<List<Interpolation_Data>>(Calibration.Generate_Rtc_AFF_Correct_Data(Para_List.Parameter.Rtc_Distortion_Data_Type, 0.8m, Para_List.Parameter.Rtc_Calibration_Cell, Para_List.Parameter.Rtc_Calibration_Y_Len));
+                Integrated.Rts_No_Gts_Yes_Correct(Rtc_List_Data);
+            }
+
         }
 
+        private void Rtc_Cor_Circle_Acqui_Click(object sender, EventArgs e)
+        {
+
+            Thread Rtc_Cor_Circle_thread = new Thread(Rtc_Cor_Circle);
+            Rtc_Cor_Circle_thread.Start();
+        }
+        private void Rtc_Cor_Circle()
+        {
+            Calibration.Rtc_Correct_AFF_Coordinate();
+        }
+       
         private void button4_Click(object sender, EventArgs e)
         {
-            Hp_Tcp.Send_Data(2);
+            Calibration.Get_Datas_Angle();
+        }
+        /// <summary>
+        /// 振镜不补偿，平台补偿
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Rtc_No_Gts_Yes_Click(object sender, EventArgs e)
+        {
+            Thread Rtc_No_Gts_Yes_thread = new Thread(Rtc_No_Gts_Yes_Test);
+            Rtc_No_Gts_Yes_thread.Start();
+        }
+        private void Rtc_No_Gts_Yes_Test()
+        {
+            Integrated.Rts_No_Gts_Yes_Correct(Rtc_List_Data);
+        }
+        //RTC矩阵补偿
+        private void button5_Click(object sender, EventArgs e)
+        {
+
+            Thread Rtc_Mat_Gts_Yes_thread = new Thread(Rtc_Mat_Gts_Yes);
+            Rtc_Mat_Gts_Yes_thread.Start();
+        }
+        private void Rtc_Mat_Gts_Yes()
+        {
+            Integrated.Rtc_Mat_Gts_Yes_Correct(Rtc_List_Data);
         }
 
-
-        //定位坐标点
+        ///// <summary>
+        /// 定位坐标点
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button21_Click(object sender, EventArgs e)
         {
             GTS_Fun.Interpolation.Gts_Ready(Cor_x, Cor_y);

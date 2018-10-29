@@ -43,10 +43,10 @@ namespace Laser_Version2._0
         public void TCP_Start(string ip,ushort port)
         {
             try
-            {
+            {                
                 if (client.Connect(ip, port))
                 {
-                    Log.Info("服务器 连接成功！！！");
+                    Log.Info("服务器 连接触发！！！");
                 }
                 else
                 {
@@ -124,7 +124,7 @@ namespace Laser_Version2._0
         HandleResult OnConnect(TcpClient sender)
         {
             // 已连接 到达一次
-            Log.Info(string.Format(" > [{0},OnConnect]", sender.ConnectionId));
+            Log.Info(string.Format("服务器连接成功！！！----> [{0},OnConnect]", sender.ConnectionId));
             return HandleResult.Ok;
         }
         /// <summary>
@@ -199,7 +199,7 @@ namespace Laser_Version2._0
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns></returns>
-        public Vector Get_Cam_Actual_Point(decimal x, decimal y)
+        public Vector Get_Coordinate_Corrrect_Point(decimal x, decimal y)
         {
             return new Vector(x * Para_List.Parameter.Cam_Trans_Affinity.Stretch_X + y * Para_List.Parameter.Cam_Trans_Affinity.Distortion_X + Para_List.Parameter.Cam_Trans_Affinity.Delta_X, y * Para_List.Parameter.Cam_Trans_Affinity.Stretch_Y + x * Para_List.Parameter.Cam_Trans_Affinity.Distortion_Y + Para_List.Parameter.Cam_Trans_Affinity.Delta_Y);
         }
@@ -208,7 +208,7 @@ namespace Laser_Version2._0
         /// </summary>
         /// <param name="order"></param>
         /// <returns></returns>
-        public Vector Get_Cam_Deviation_Test_00(int order)
+        public Vector Get_Cam_Deviation_Coordinate_Correct(int order)
         {
             Vector Result;
             //发送指令
@@ -218,7 +218,7 @@ namespace Laser_Version2._0
             //换算数据
             if (Rec_Ok && !(Receive_Cordinate.Length == 0))
             {
-                Result = new Vector(Get_Cam_Actual_Point(Receive_Cordinate.X, Receive_Cordinate.Y));
+                Result = new Vector(Get_Coordinate_Corrrect_Point(Receive_Cordinate.X, Receive_Cordinate.Y));
             }
             else
             {
@@ -233,7 +233,7 @@ namespace Laser_Version2._0
         /// </summary>
         /// <param name="order"></param>
         /// <returns></returns>
-        public Vector Get_Cam_Deviation(int order)
+        public Vector Get_Cam_Deviation_Pixel_Correct(int order)
         {
             Vector Result;
             //发送指令
@@ -258,7 +258,7 @@ namespace Laser_Version2._0
         /// </summary>
         /// <param name="order"></param>
         /// <returns></returns>
-        public Vector Get_Cam_Deviation_Test(int order)
+        public Vector Get_Cam_Actual_Pixel(int order)
         {
             Vector Result;
             //发送指令

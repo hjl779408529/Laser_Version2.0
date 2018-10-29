@@ -81,14 +81,11 @@ namespace Initialization
             Laser_Watt_Com.Receive_Event += new Receive_Delegate(Laser_Watt_00.Resolve_Com_Data);
             if (Para_List.Parameter.Laser_Watt_Com_No < Laser_Watt_Com.PortName.Count)
             {
-                if (Laser_Watt_Com.Open_Com(Para_List.Parameter.Laser_Watt_Com_No, 3))
-                {
-
-                }
+                Laser_Watt_Com.Open_Com(Para_List.Parameter.Laser_Watt_Com_No, 3);
             }
             else
             {
-                MessageBox.Show("激光控制器通讯串口端口编号异常，请在激光控制面板选择正确的串口编号！！！");
+                MessageBox.Show("激光功率计端口编号异常，请在激光功率计控制面板选择正确的串口编号！！！");
             }
             //加载功率 与 百分比校准文件
             Load_Watt_Percent_Relate();
@@ -122,7 +119,7 @@ namespace Initialization
         //Tcp通讯初始化
         public void Tcp_Initial() 
         {
-            T_Client.TCP_Start("127.0.0.1",6230);
+            T_Client.TCP_Start("127.0.0.1", Para_List.Parameter.Server_Port);
         }
         //laser 功率矫正初始化
 

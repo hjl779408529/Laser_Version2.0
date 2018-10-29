@@ -78,8 +78,8 @@ namespace Laser_Version2._0.UI
         ///
         public void Display_Watt(object sender, EventArgs e)
         {
-            Current_Laser_Watt.Text =Laser_Watt_Cal.Watt_To_Watt(Initial.Laser_Watt_00.Current_Watt / 1000m).ToString(4);
-            Laser_Percent.Text = Para_List.Parameter.PEC.ToString(4);
+            Current_Laser_Watt.Text =Laser_Watt_Cal.Watt_To_Watt(Initial.Laser_Watt_00.Current_Watt / 1000m).ToString(6);
+            Laser_Percent.Text = Para_List.Parameter.PEC.ToString(6);
         }
         /// <summary>
         /// 校准数据采集

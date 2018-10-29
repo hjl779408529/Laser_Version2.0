@@ -307,8 +307,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>xcopy "$(ProjectDir)bin\x64\$(ConfigurationName)\*.*" "\\Laser_desktop\程序\Program\$(ConfigurationName)\" /Y /S /E /EXCLUDE:D:\Visualstudio_Project\Laser\Laser_Program\10.12\Laser_Version2.0\bin\x64\Release\List_of_Exclude.txt</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>

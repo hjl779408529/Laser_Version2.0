@@ -68,10 +68,11 @@ namespace Prompt
     class Refresh
     {
         public static bool EXI1, EXI2, EXI3, EXI4, EXI5, EXI6, EXI7; //定义输入变量
-        public static bool EXO1, EXO2, EXO3, EXO4, EXO5, EXO6, EXO7, EXO8, EXO9, EXO10; //定义输出变量
-        public static bool Axis01_Limit_Up, Axis01_Limit_Down, Axis01_Home, Axis01_Alarm, Axis01_Alarm_Cl, Axis01_MC_Err, Axis01_EN, Axis01_Busy, Axis01_IO_Stop, Axis01_IO_EMG;//定义轴1的BOOL变量
-        public static bool Axis02_Limit_Up, Axis02_Limit_Down, Axis02_Home, Axis02_Alarm, Axis02_Alarm_Cl, Axis02_MC_Err, Axis02_EN, Axis02_Busy, Axis02_IO_Stop, Axis02_IO_EMG;//定义轴2的BOOL变量
-        public static short Cyc_control, Blow_control, Lamp_control, Yellow_lamp, Green_lamp, Red_lamp, Beeze_Control, Button1_Lamp, Button2_Lamp;//定义气缸、吹气、照明、灯塔黄、灯塔绿、灯塔红、蜂鸣、启动按钮1灯、启动按钮2灯控制字
+        public static bool EXO1, EXO2, EXO3, EXO4, EXO5, EXO6, EXO7, EXO8, EXO9, EXO10, EXO11, EXO12; //定义输出变量
+        public static bool Axis01_Limit_Up, Axis01_Limit_Down, Axis01_Home, Axis01_Alarm, Axis01_Alarm_Cl, Axis01_MC_Err, Axis01_EN, Axis01_Busy, Axis01_IO_Stop, Axis01_IO_EMG, Axis01_Posed;//定义轴1的BOOL变量
+        public static bool Axis02_Limit_Up, Axis02_Limit_Down, Axis02_Home, Axis02_Alarm, Axis02_Alarm_Cl, Axis02_MC_Err, Axis02_EN, Axis02_Busy, Axis02_IO_Stop, Axis02_IO_EMG, Axis02_Posed;//定义轴2的BOOL变量
+        public static short Cyc_control, Blow_control, Lamp_control, Yellow_lamp, Green_lamp, Red_lamp, Beeze_Control, Button1_Lamp, Button2_Lamp;//定义气缸、吹气、照明、灯塔黄、灯塔绿、灯塔红、蜂鸣、启动按钮1灯、
+        public static short Axis01_Home_Ex0_Control, Axis02_Home_Ex0_Control;//定义轴1、2回零触发
 
         //定义读取通用输出、输入的IO值
         public static int Exi_16bit, Exo_16bit;
@@ -80,6 +81,8 @@ namespace Prompt
         public static uint Axis01_Clk, Axis02_Clk;
         //定义原点开关状态
         public static int Axis_Home_Sta;
+        //定义到位信号状态
+        public static int Axis_Posed_Sta;
         //定义报警清除输出状态
         public static int Axis_Clear_Sta;
 
@@ -122,6 +125,9 @@ namespace Prompt
             //读取Axis_Home_Sta状态
             Gts_Return = MC.GT_GetDi(3, out Axis_Home_Sta);
             Log.Commandhandler("Refresh_Axis_Home_Sta--MC.GT_GetDi", Gts_Return);
+            //读取Axis_Posed_Sta状态
+            Gts_Return = MC.GT_GetDi(5, out Axis_Posed_Sta);
+            Log.Commandhandler("Refresh_Axis_Posed_Sta--MC.GT_GetDi", Gts_Return);
             //读取Axis_Clear_Sta状态
             Gts_Return = MC.GT_GetDo(11, out Axis_Clear_Sta);
             Log.Commandhandler("Refresh_Axis_Clear_Sta--MC.GT_GetDo", Gts_Return);
@@ -153,6 +159,8 @@ namespace Prompt
             EXI5 = (Exi_16bit & (1 << 5)) == 0;// 右门禁传感器
             EXI6 = (Exi_16bit & (1 << 6)) == 0;// 启动按钮1
             EXI7 = (Exi_16bit & (1 << 7)) == 0;// 启动按钮1
+            EXI6 = (Exi_16bit & (1 << 6)) == 0;// 启动按钮1
+            EXI7 = (Exi_16bit & (1 << 7)) == 0;// 启动按钮1   
 
             //输出按钮灯
             if (EXI6) { Button1_Lamp = 1; } else { Button1_Lamp = 0; };
@@ -171,12 +179,14 @@ namespace Prompt
             EXO7 = (Exo_16bit & (1 << 7)) == 0;// 吹气打开
             EXO8 = (Exo_16bit & (1 << 8)) == 0;// 照明灯
             EXO9 = (Exo_16bit & (1 << 9)) == 0;// 启动按钮1灯
-            EXO10 = (Exo_16bit & (1 << 10)) == 0;// 启动按钮2灯     
+            EXO10 = (Exo_16bit & (1 << 10)) == 0;// 启动按钮2灯 
+            EXO11 = (Exo_16bit & (1 << 11)) == 0;// X轴回零触发
+            EXO12 = (Exo_16bit & (1 << 12)) == 0;// Y轴回零触发
 
             //刷新Axis01 状态
             Axis01_Limit_Up = (Axis01_Sta & (1 << 5)) != 0;// Axis01轴正限位
             Axis01_Limit_Down = (Axis01_Sta & (1 << 6)) != 0;// Axis01轴负限位
-            Axis01_Home = (Axis_Home_Sta & 0x01) == 0;// Axis01轴原点
+            Axis01_Home = (Axis_Home_Sta & 0x01) != 0;// Axis01轴原点
             Axis01_Alarm = (Axis01_Sta & (1 << 1)) != 0;// Axis01轴报警
             Axis01_Alarm_Cl = (Axis_Clear_Sta & 0x01) == 0;//Axis01轴报警清除
             Axis01_MC_Err = (Axis01_Sta & (1 << 4)) != 0;// Axis01轴板卡报警(跟随误差越限)
@@ -184,11 +194,12 @@ namespace Prompt
             Axis01_Busy = (Axis01_Sta & (1 << 10)) != 0;// Axis01轴输出中
             Axis01_IO_Stop = (Axis01_Sta & (1 << 7)) != 0;// Axis01轴IO停止
             Axis01_IO_EMG = (Axis01_Sta & (1 << 8)) != 0;// Axis01轴IO急停
+            Axis01_Posed = (Axis_Posed_Sta & 0x01) != 0;// Axis01轴到位
 
             //刷新Axis02 状态
             Axis02_Limit_Up = (Axis02_Sta & (1 << 5)) != 0;// Axis02轴正限位
             Axis02_Limit_Down = (Axis02_Sta & (1 << 6)) != 0;// Axis02轴负限位
-            Axis02_Home = (Axis_Home_Sta & (1 << 1)) == 0;// Axis02轴原点
+            Axis02_Home = (Axis_Home_Sta & (1 << 1)) != 0;// Axis02轴原点
             Axis02_Alarm = (Axis02_Sta & (1 << 1)) != 0;// Axis02轴报警
             Axis02_Alarm_Cl = (Axis_Clear_Sta & (1 << 1)) == 0;//Axis02轴报警清除
             Axis02_MC_Err = (Axis02_Sta & (1 << 4)) != 0;// Axis02轴板卡报警(跟随误差越限)
@@ -196,6 +207,7 @@ namespace Prompt
             Axis02_Busy = (Axis02_Sta & (1 << 10)) != 0;// Axis02轴输出中
             Axis02_IO_Stop = (Axis02_Sta & (1 << 7)) != 0;// Axis02轴IO停止
             Axis02_IO_EMG = (Axis02_Sta & (1 << 8)) != 0;// Axis02轴IO急停
+            Axis02_Posed = (Axis_Posed_Sta & (1 << 1)) != 0; ;// Axis02轴到位
 
             //刷新轴原点状态
             if (Gts_Home_Flag)
@@ -203,6 +215,24 @@ namespace Prompt
                 Gts_Home_Flag =!(Axis01_Limit_Up || Axis01_Limit_Down || Axis01_Alarm || Axis01_MC_Err || Axis01_IO_EMG || Axis02_Limit_Up || Axis02_Limit_Down || Axis02_Alarm || Axis02_MC_Err || Axis02_IO_EMG || EXI1);//任意（轴限位、报警、使能关闭、急停），致使原点标志丢失
             }
 
+            //轴1回零触发            
+            if (Axis01_Home_Ex0_Control == 1)//轴1回零
+            {
+                Gts_Return = MC.GT_SetDoBit(12, 12, 0);
+            }
+            else
+            {
+                Gts_Return = MC.GT_SetDoBit(12, 12, 1);
+            }
+            //轴2回零触发  
+            if (Axis02_Home_Ex0_Control == 1)//轴2回零
+            {
+                Gts_Return = MC.GT_SetDoBit(12, 13, 0);
+            }
+            else
+            {
+                Gts_Return = MC.GT_SetDoBit(12, 13, 1);
+            }
             //输出控制 0-输出，1-关闭输出
             //Cyc_control, Blow_control, Lamp_control;//定义气缸、吹气、照明控制字
             //气缸控制

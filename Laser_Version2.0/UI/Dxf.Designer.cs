@@ -89,7 +89,12 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.Generate_Cal_Aquisition = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
+            this.Test_01 = new System.Windows.Forms.Button();
+            this.Rtc_Cor_Data_Acqu = new System.Windows.Forms.Button();
+            this.Rtc_Cor_Circle_Acqui = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
+            this.Rtc_No_Gts_Yes = new System.Windows.Forms.Button();
+            this.button5 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -170,7 +175,7 @@
             this.Debug_Info_Display.Location = new System.Drawing.Point(1036, 45);
             this.Debug_Info_Display.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Debug_Info_Display.Name = "Debug_Info_Display";
-            this.Debug_Info_Display.Size = new System.Drawing.Size(460, 705);
+            this.Debug_Info_Display.Size = new System.Drawing.Size(460, 898);
             this.Debug_Info_Display.TabIndex = 36;
             this.Debug_Info_Display.Text = "";
             this.Debug_Info_Display.DoubleClick += new System.EventHandler(this.Debug_Info_Display_DoubleClick);
@@ -384,7 +389,7 @@
             this.button20.Name = "button20";
             this.button20.Size = new System.Drawing.Size(154, 50);
             this.button20.TabIndex = 77;
-            this.button20.Text = "无坐标补偿加工";
+            this.button20.Text = "R不补偿_G不补偿";
             this.button20.UseVisualStyleBackColor = true;
             this.button20.Click += new System.EventHandler(this.button20_Click);
             // 
@@ -417,7 +422,7 @@
             this.button12.Name = "button12";
             this.button12.Size = new System.Drawing.Size(154, 50);
             this.button12.TabIndex = 96;
-            this.button12.Text = "计算标定板仿射参数";
+            this.button12.Text = "计算标定板旋转参数";
             this.button12.UseVisualStyleBackColor = true;
             this.button12.Click += new System.EventHandler(this.button12_Click);
             // 
@@ -734,9 +739,42 @@
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(154, 50);
             this.button3.TabIndex = 130;
-            this.button3.Text = "连接";
+            this.button3.Text = "参数验证";
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
+            // 
+            // Test_01
+            // 
+            this.Test_01.Location = new System.Drawing.Point(223, 700);
+            this.Test_01.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Test_01.Name = "Test_01";
+            this.Test_01.Size = new System.Drawing.Size(154, 50);
+            this.Test_01.TabIndex = 131;
+            this.Test_01.Text = "Rtc仿射补偿";
+            this.Test_01.UseVisualStyleBackColor = true;
+            this.Test_01.Click += new System.EventHandler(this.Test_01_Click);
+            // 
+            // Rtc_Cor_Data_Acqu
+            // 
+            this.Rtc_Cor_Data_Acqu.Location = new System.Drawing.Point(416, 700);
+            this.Rtc_Cor_Data_Acqu.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Rtc_Cor_Data_Acqu.Name = "Rtc_Cor_Data_Acqu";
+            this.Rtc_Cor_Data_Acqu.Size = new System.Drawing.Size(154, 50);
+            this.Rtc_Cor_Data_Acqu.TabIndex = 132;
+            this.Rtc_Cor_Data_Acqu.Text = "Rtc仿射矩阵加工";
+            this.Rtc_Cor_Data_Acqu.UseVisualStyleBackColor = true;
+            this.Rtc_Cor_Data_Acqu.Click += new System.EventHandler(this.Rtc_Cor_Data_Acqu_Click);
+            // 
+            // Rtc_Cor_Circle_Acqui
+            // 
+            this.Rtc_Cor_Circle_Acqui.Location = new System.Drawing.Point(609, 700);
+            this.Rtc_Cor_Circle_Acqui.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Rtc_Cor_Circle_Acqui.Name = "Rtc_Cor_Circle_Acqui";
+            this.Rtc_Cor_Circle_Acqui.Size = new System.Drawing.Size(154, 50);
+            this.Rtc_Cor_Circle_Acqui.TabIndex = 134;
+            this.Rtc_Cor_Circle_Acqui.Text = "Rtc仿射矩阵采集";
+            this.Rtc_Cor_Circle_Acqui.UseVisualStyleBackColor = true;
+            this.Rtc_Cor_Circle_Acqui.Click += new System.EventHandler(this.Rtc_Cor_Circle_Acqui_Click);
             // 
             // button4
             // 
@@ -744,17 +782,44 @@
             this.button4.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(154, 50);
-            this.button4.TabIndex = 131;
-            this.button4.Text = "发送";
+            this.button4.TabIndex = 136;
+            this.button4.Text = "重处理数据";
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
+            // 
+            // Rtc_No_Gts_Yes
+            // 
+            this.Rtc_No_Gts_Yes.Location = new System.Drawing.Point(223, 767);
+            this.Rtc_No_Gts_Yes.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Rtc_No_Gts_Yes.Name = "Rtc_No_Gts_Yes";
+            this.Rtc_No_Gts_Yes.Size = new System.Drawing.Size(154, 50);
+            this.Rtc_No_Gts_Yes.TabIndex = 137;
+            this.Rtc_No_Gts_Yes.Text = "R不补偿_G补偿";
+            this.Rtc_No_Gts_Yes.UseVisualStyleBackColor = true;
+            this.Rtc_No_Gts_Yes.Click += new System.EventHandler(this.Rtc_No_Gts_Yes_Click);
+            // 
+            // button5
+            // 
+            this.button5.Location = new System.Drawing.Point(416, 767);
+            this.button5.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(154, 50);
+            this.button5.TabIndex = 138;
+            this.button5.Text = "R矩阵补偿_G补偿";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
             // Dxf
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1532, 769);
+            this.ClientSize = new System.Drawing.Size(1532, 962);
+            this.Controls.Add(this.button5);
+            this.Controls.Add(this.Rtc_No_Gts_Yes);
             this.Controls.Add(this.button4);
+            this.Controls.Add(this.Rtc_Cor_Circle_Acqui);
+            this.Controls.Add(this.Rtc_Cor_Data_Acqu);
+            this.Controls.Add(this.Test_01);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.Generate_Cal_Aquisition);
             this.Controls.Add(this.groupBox1);
@@ -862,6 +927,11 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Button Generate_Cal_Aquisition;
         private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button Test_01;
+        private System.Windows.Forms.Button Rtc_Cor_Data_Acqu;
+        private System.Windows.Forms.Button Rtc_Cor_Circle_Acqui;
         private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.Button Rtc_No_Gts_Yes;
+        private System.Windows.Forms.Button button5;
     }
 }

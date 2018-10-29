@@ -246,6 +246,8 @@ namespace Laser_Version2._0
                 Reset_Laser.Enabled = true;//启用复位按钮
                 Watt_Confirm.Enabled = true;//启用功率写入按钮
                 Frequence_Confirm.Enabled = true;//启用频率写入按钮
+                Re_connect.Enabled = true;//启用串口开关按钮
+
             }
             else
             {
@@ -255,6 +257,7 @@ namespace Laser_Version2._0
                 Reset_Laser.Enabled = true;//启用复位按钮
                 Watt_Confirm.Enabled = true;//启用功率写入按钮
                 Frequence_Confirm.Enabled = true;//启用频率写入按钮
+                Re_connect.Enabled = true;//启用串口开关按钮
             }
         }
         //一键开机 程序
@@ -272,7 +275,7 @@ namespace Laser_Version2._0
             Reset_Laser.Enabled = false;//禁用复位按钮
             Watt_Confirm.Enabled = false;//禁用功率写入按钮
             Frequence_Confirm.Enabled = false;//禁用频率写入按钮
-
+            Re_connect.Enabled = false;//禁用串口开关按钮
             /**************Seed Ldd***************/
             //读取Seed电流
             Initial.Laser_Operation_00.Read("00", "12");
@@ -443,6 +446,7 @@ namespace Laser_Version2._0
             Reset_Laser.Enabled = false;//禁用复位按钮
             Watt_Confirm.Enabled = false;//禁用功率写入按钮
             Frequence_Confirm.Enabled = false;//禁用频率写入按钮
+            Re_connect.Enabled = false;//禁用串口开关按钮
 
             /**************AMP2 Ldd***************/
             //读取AMP2电流
@@ -680,6 +684,7 @@ namespace Laser_Version2._0
                 Reset_Laser.Enabled = true;//启用复位按钮
                 Watt_Confirm.Enabled = true;//启用功率写入按钮
                 Frequence_Confirm.Enabled = true;//启用频率写入按钮
+                Re_connect.Enabled = true;//启用串口开关按钮
             }
             else
             {
@@ -689,6 +694,7 @@ namespace Laser_Version2._0
                 Reset_Laser.Enabled = true;//启用复位按钮
                 Watt_Confirm.Enabled = true;//启用功率写入按钮
                 Frequence_Confirm.Enabled = true;//启用频率写入按钮
+                Re_connect.Enabled = true;//启用串口开关按钮
             }
         }
     }

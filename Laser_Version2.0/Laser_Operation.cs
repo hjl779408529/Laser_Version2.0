@@ -150,7 +150,8 @@ namespace Laser_Version2._0
         }
         public void Resolve_Com_Data()
         {
-            byte[] Rec_Data = Initialization.Initial.Laser_Control_Com.Receive_Byte;
+            byte[] Rec_Data = new byte[Initialization.Initial.Laser_Control_Com.Receive_Byte.Length];
+            Rec_Data = (byte[])Initialization.Initial.Laser_Control_Com.Receive_Byte.Clone();
             //清空数据
             Resolve_Rec.Empty();
             //数据拆分

@@ -28,8 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.label1 = new System.Windows.Forms.Label();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.Correct_Cam_Cor = new System.Windows.Forms.Button();
             this.Disconnect_Tcp = new System.Windows.Forms.Button();
             this.Re_Connect = new System.Windows.Forms.Button();
@@ -41,7 +39,7 @@
             this.label21 = new System.Windows.Forms.Label();
             this.textBox19 = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.Mark_Group = new System.Windows.Forms.GroupBox();
             this.Re_Cali_Mark = new System.Windows.Forms.Button();
             this.button6 = new System.Windows.Forms.Button();
             this.Set_txt_markY4 = new System.Windows.Forms.TextBox();
@@ -63,59 +61,31 @@
             this.Set_txt_markY1 = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.Set_txt_valueK = new System.Windows.Forms.TextBox();
-            this.groupBox1.SuspendLayout();
+            this.Correct_Rtc_Cor = new System.Windows.Forms.Button();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.label9 = new System.Windows.Forms.Label();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.Acquisation_Rtc_Correct = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
-            this.groupBox2.SuspendLayout();
+            this.Mark_Group.SuspendLayout();
+            this.groupBox3.SuspendLayout();
+            this.groupBox4.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(18, 52);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(53, 18);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "K 值:";
-            // 
-            // groupBox1
-            // 
-            this.groupBox1.Controls.Add(this.Correct_Cam_Cor);
-            this.groupBox1.Controls.Add(this.Disconnect_Tcp);
-            this.groupBox1.Controls.Add(this.Re_Connect);
-            this.groupBox1.Controls.Add(this.button5);
-            this.groupBox1.Controls.Add(this.numericUpDown1);
-            this.groupBox1.Controls.Add(this.button4);
-            this.groupBox1.Controls.Add(this.label20);
-            this.groupBox1.Controls.Add(this.textBox18);
-            this.groupBox1.Controls.Add(this.label21);
-            this.groupBox1.Controls.Add(this.textBox19);
-            this.groupBox1.Controls.Add(this.label7);
-            this.groupBox1.Controls.Add(this.groupBox2);
-            this.groupBox1.Controls.Add(this.Set_txt_valueK);
-            this.groupBox1.Controls.Add(this.label1);
-            this.groupBox1.Location = new System.Drawing.Point(14, 14);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.groupBox1.Size = new System.Drawing.Size(650, 696);
-            this.groupBox1.TabIndex = 1;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "系统参数";
             // 
             // Correct_Cam_Cor
             // 
-            this.Correct_Cam_Cor.Location = new System.Drawing.Point(252, 488);
+            this.Correct_Cam_Cor.Location = new System.Drawing.Point(238, 38);
             this.Correct_Cam_Cor.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Correct_Cam_Cor.Name = "Correct_Cam_Cor";
-            this.Correct_Cam_Cor.Size = new System.Drawing.Size(195, 52);
+            this.Correct_Cam_Cor.Size = new System.Drawing.Size(205, 52);
             this.Correct_Cam_Cor.TabIndex = 101;
-            this.Correct_Cam_Cor.Text = "矫正相机坐标系";
+            this.Correct_Cam_Cor.Text = "矫正相机坐标系偏转角";
             this.Correct_Cam_Cor.UseVisualStyleBackColor = true;
             this.Correct_Cam_Cor.Click += new System.EventHandler(this.Correct_Cam_Cor_Click);
             // 
             // Disconnect_Tcp
             // 
-            this.Disconnect_Tcp.Location = new System.Drawing.Point(385, 628);
+            this.Disconnect_Tcp.Location = new System.Drawing.Point(153, 45);
             this.Disconnect_Tcp.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Disconnect_Tcp.Name = "Disconnect_Tcp";
             this.Disconnect_Tcp.Size = new System.Drawing.Size(109, 52);
@@ -126,7 +96,7 @@
             // 
             // Re_Connect
             // 
-            this.Re_Connect.Location = new System.Drawing.Point(252, 628);
+            this.Re_Connect.Location = new System.Drawing.Point(20, 45);
             this.Re_Connect.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Re_Connect.Name = "Re_Connect";
             this.Re_Connect.Size = new System.Drawing.Size(109, 52);
@@ -137,7 +107,7 @@
             // 
             // button5
             // 
-            this.button5.Location = new System.Drawing.Point(518, 628);
+            this.button5.Location = new System.Drawing.Point(503, 45);
             this.button5.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(109, 52);
@@ -148,9 +118,10 @@
             // 
             // numericUpDown1
             // 
-            this.numericUpDown1.Location = new System.Drawing.Point(548, 572);
+            this.numericUpDown1.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.numericUpDown1.Location = new System.Drawing.Point(425, 54);
             this.numericUpDown1.Maximum = new decimal(new int[] {
-            2,
+            10,
             0,
             0,
             0});
@@ -160,7 +131,7 @@
             0,
             0});
             this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(48, 28);
+            this.numericUpDown1.Size = new System.Drawing.Size(48, 35);
             this.numericUpDown1.TabIndex = 98;
             this.numericUpDown1.Value = new decimal(new int[] {
             1,
@@ -171,19 +142,19 @@
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(252, 557);
+            this.button4.Location = new System.Drawing.Point(238, 182);
             this.button4.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(195, 52);
+            this.button4.Size = new System.Drawing.Size(205, 52);
             this.button4.TabIndex = 8;
-            this.button4.Text = "矫正振镜与ORG的偏差";
+            this.button4.Text = "计算振镜与ORG的距离";
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
             // label20
             // 
             this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(25, 612);
+            this.label20.Location = new System.Drawing.Point(12, 178);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(206, 18);
             this.label20.TabIndex = 97;
@@ -191,7 +162,7 @@
             // 
             // textBox18
             // 
-            this.textBox18.Location = new System.Drawing.Point(53, 646);
+            this.textBox18.Location = new System.Drawing.Point(40, 208);
             this.textBox18.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBox18.Name = "textBox18";
             this.textBox18.Size = new System.Drawing.Size(150, 28);
@@ -201,7 +172,7 @@
             // label21
             // 
             this.label21.AutoSize = true;
-            this.label21.Location = new System.Drawing.Point(25, 492);
+            this.label21.Location = new System.Drawing.Point(12, 101);
             this.label21.Name = "label21";
             this.label21.Size = new System.Drawing.Size(206, 18);
             this.label21.TabIndex = 95;
@@ -209,7 +180,7 @@
             // 
             // textBox19
             // 
-            this.textBox19.Location = new System.Drawing.Point(53, 527);
+            this.textBox19.Location = new System.Drawing.Point(40, 132);
             this.textBox19.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.textBox19.Name = "textBox19";
             this.textBox19.Size = new System.Drawing.Size(150, 28);
@@ -219,45 +190,46 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(367, 50);
+            this.label7.Location = new System.Drawing.Point(39, 31);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(107, 18);
+            this.label7.Size = new System.Drawing.Size(152, 18);
             this.label7.TabIndex = 5;
-            this.label7.Text = "(毫米/像素)";
+            this.label7.Text = "像素K值 mm/pixel";
             // 
-            // groupBox2
+            // Mark_Group
             // 
-            this.groupBox2.Controls.Add(this.Re_Cali_Mark);
-            this.groupBox2.Controls.Add(this.button6);
-            this.groupBox2.Controls.Add(this.Set_txt_markY4);
-            this.groupBox2.Controls.Add(this.Set_txt_markX4);
-            this.groupBox2.Controls.Add(this.label8);
-            this.groupBox2.Controls.Add(this.button3);
-            this.groupBox2.Controls.Add(this.button2);
-            this.groupBox2.Controls.Add(this.button1);
-            this.groupBox2.Controls.Add(this.Set_Btn_Mark1);
-            this.groupBox2.Controls.Add(this.Set_txt_markX1);
-            this.groupBox2.Controls.Add(this.Set_txt_markY3);
-            this.groupBox2.Controls.Add(this.label2);
-            this.groupBox2.Controls.Add(this.Set_txt_markX3);
-            this.groupBox2.Controls.Add(this.label5);
-            this.groupBox2.Controls.Add(this.Set_txt_markY2);
-            this.groupBox2.Controls.Add(this.label6);
-            this.groupBox2.Controls.Add(this.Set_txt_markX2);
-            this.groupBox2.Controls.Add(this.label3);
-            this.groupBox2.Controls.Add(this.Set_txt_markY1);
-            this.groupBox2.Controls.Add(this.label4);
-            this.groupBox2.Location = new System.Drawing.Point(0, 85);
-            this.groupBox2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.groupBox2.Size = new System.Drawing.Size(650, 373);
-            this.groupBox2.TabIndex = 4;
-            this.groupBox2.TabStop = false;
+            this.Mark_Group.Controls.Add(this.Re_Cali_Mark);
+            this.Mark_Group.Controls.Add(this.button6);
+            this.Mark_Group.Controls.Add(this.Set_txt_markY4);
+            this.Mark_Group.Controls.Add(this.Set_txt_markX4);
+            this.Mark_Group.Controls.Add(this.label8);
+            this.Mark_Group.Controls.Add(this.button3);
+            this.Mark_Group.Controls.Add(this.button2);
+            this.Mark_Group.Controls.Add(this.button1);
+            this.Mark_Group.Controls.Add(this.Set_Btn_Mark1);
+            this.Mark_Group.Controls.Add(this.Set_txt_markX1);
+            this.Mark_Group.Controls.Add(this.Set_txt_markY3);
+            this.Mark_Group.Controls.Add(this.label2);
+            this.Mark_Group.Controls.Add(this.Set_txt_markX3);
+            this.Mark_Group.Controls.Add(this.label5);
+            this.Mark_Group.Controls.Add(this.Set_txt_markY2);
+            this.Mark_Group.Controls.Add(this.label6);
+            this.Mark_Group.Controls.Add(this.Set_txt_markX2);
+            this.Mark_Group.Controls.Add(this.label3);
+            this.Mark_Group.Controls.Add(this.Set_txt_markY1);
+            this.Mark_Group.Controls.Add(this.label4);
+            this.Mark_Group.Location = new System.Drawing.Point(36, 157);
+            this.Mark_Group.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.Mark_Group.Name = "Mark_Group";
+            this.Mark_Group.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.Mark_Group.Size = new System.Drawing.Size(650, 325);
+            this.Mark_Group.TabIndex = 4;
+            this.Mark_Group.TabStop = false;
+            this.Mark_Group.Text = "Mark参数";
             // 
             // Re_Cali_Mark
             // 
-            this.Re_Cali_Mark.Location = new System.Drawing.Point(401, 301);
+            this.Re_Cali_Mark.Location = new System.Drawing.Point(401, 258);
             this.Re_Cali_Mark.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Re_Cali_Mark.Name = "Re_Cali_Mark";
             this.Re_Cali_Mark.Size = new System.Drawing.Size(195, 52);
@@ -268,7 +240,7 @@
             // 
             // button6
             // 
-            this.button6.Location = new System.Drawing.Point(545, 229);
+            this.button6.Location = new System.Drawing.Point(545, 205);
             this.button6.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.button6.Name = "button6";
             this.button6.Size = new System.Drawing.Size(91, 28);
@@ -279,7 +251,7 @@
             // 
             // Set_txt_markY4
             // 
-            this.Set_txt_markY4.Location = new System.Drawing.Point(367, 229);
+            this.Set_txt_markY4.Location = new System.Drawing.Point(367, 205);
             this.Set_txt_markY4.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Set_txt_markY4.Name = "Set_txt_markY4";
             this.Set_txt_markY4.Size = new System.Drawing.Size(148, 28);
@@ -288,7 +260,7 @@
             // 
             // Set_txt_markX4
             // 
-            this.Set_txt_markX4.Location = new System.Drawing.Point(169, 229);
+            this.Set_txt_markX4.Location = new System.Drawing.Point(169, 205);
             this.Set_txt_markX4.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Set_txt_markX4.Name = "Set_txt_markX4";
             this.Set_txt_markX4.Size = new System.Drawing.Size(148, 28);
@@ -298,7 +270,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(15, 235);
+            this.label8.Location = new System.Drawing.Point(15, 211);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(152, 18);
             this.label8.TabIndex = 8;
@@ -306,7 +278,7 @@
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(544, 180);
+            this.button3.Location = new System.Drawing.Point(544, 156);
             this.button3.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(91, 28);
@@ -317,7 +289,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(544, 133);
+            this.button2.Location = new System.Drawing.Point(544, 109);
             this.button2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(91, 28);
@@ -328,7 +300,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(544, 85);
+            this.button1.Location = new System.Drawing.Point(544, 61);
             this.button1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(91, 28);
@@ -339,7 +311,7 @@
             // 
             // Set_Btn_Mark1
             // 
-            this.Set_Btn_Mark1.Location = new System.Drawing.Point(53, 301);
+            this.Set_Btn_Mark1.Location = new System.Drawing.Point(53, 258);
             this.Set_Btn_Mark1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Set_Btn_Mark1.Name = "Set_Btn_Mark1";
             this.Set_Btn_Mark1.Size = new System.Drawing.Size(195, 52);
@@ -350,7 +322,7 @@
             // 
             // Set_txt_markX1
             // 
-            this.Set_txt_markX1.Location = new System.Drawing.Point(168, 85);
+            this.Set_txt_markX1.Location = new System.Drawing.Point(168, 61);
             this.Set_txt_markX1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Set_txt_markX1.Name = "Set_txt_markX1";
             this.Set_txt_markX1.Size = new System.Drawing.Size(148, 28);
@@ -359,7 +331,7 @@
             // 
             // Set_txt_markY3
             // 
-            this.Set_txt_markY3.Location = new System.Drawing.Point(366, 180);
+            this.Set_txt_markY3.Location = new System.Drawing.Point(366, 156);
             this.Set_txt_markY3.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Set_txt_markY3.Name = "Set_txt_markY3";
             this.Set_txt_markY3.Size = new System.Drawing.Size(148, 28);
@@ -369,7 +341,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(14, 90);
+            this.label2.Location = new System.Drawing.Point(14, 66);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(152, 18);
             this.label2.TabIndex = 2;
@@ -377,7 +349,7 @@
             // 
             // Set_txt_markX3
             // 
-            this.Set_txt_markX3.Location = new System.Drawing.Point(168, 180);
+            this.Set_txt_markX3.Location = new System.Drawing.Point(168, 156);
             this.Set_txt_markX3.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Set_txt_markX3.Name = "Set_txt_markX3";
             this.Set_txt_markX3.Size = new System.Drawing.Size(148, 28);
@@ -387,7 +359,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(231, 43);
+            this.label5.Location = new System.Drawing.Point(231, 30);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(26, 18);
             this.label5.TabIndex = 2;
@@ -395,7 +367,7 @@
             // 
             // Set_txt_markY2
             // 
-            this.Set_txt_markY2.Location = new System.Drawing.Point(366, 133);
+            this.Set_txt_markY2.Location = new System.Drawing.Point(366, 109);
             this.Set_txt_markY2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Set_txt_markY2.Name = "Set_txt_markY2";
             this.Set_txt_markY2.Size = new System.Drawing.Size(148, 28);
@@ -405,7 +377,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(433, 43);
+            this.label6.Location = new System.Drawing.Point(433, 30);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(17, 18);
             this.label6.TabIndex = 2;
@@ -413,7 +385,7 @@
             // 
             // Set_txt_markX2
             // 
-            this.Set_txt_markX2.Location = new System.Drawing.Point(168, 133);
+            this.Set_txt_markX2.Location = new System.Drawing.Point(168, 109);
             this.Set_txt_markX2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Set_txt_markX2.Name = "Set_txt_markX2";
             this.Set_txt_markX2.Size = new System.Drawing.Size(148, 28);
@@ -423,7 +395,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(14, 139);
+            this.label3.Location = new System.Drawing.Point(14, 115);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(152, 18);
             this.label3.TabIndex = 2;
@@ -431,7 +403,7 @@
             // 
             // Set_txt_markY1
             // 
-            this.Set_txt_markY1.Location = new System.Drawing.Point(366, 85);
+            this.Set_txt_markY1.Location = new System.Drawing.Point(366, 61);
             this.Set_txt_markY1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Set_txt_markY1.Name = "Set_txt_markY1";
             this.Set_txt_markY1.Size = new System.Drawing.Size(148, 28);
@@ -441,7 +413,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(14, 186);
+            this.label4.Location = new System.Drawing.Point(14, 162);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(152, 18);
             this.label4.TabIndex = 2;
@@ -449,38 +421,104 @@
             // 
             // Set_txt_valueK
             // 
-            this.Set_txt_valueK.Location = new System.Drawing.Point(93, 48);
+            this.Set_txt_valueK.Location = new System.Drawing.Point(40, 58);
             this.Set_txt_valueK.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Set_txt_valueK.Name = "Set_txt_valueK";
-            this.Set_txt_valueK.Size = new System.Drawing.Size(247, 28);
+            this.Set_txt_valueK.Size = new System.Drawing.Size(150, 28);
             this.Set_txt_valueK.TabIndex = 1;
             this.Set_txt_valueK.TextChanged += new System.EventHandler(this.Set_txt_valueK_TextChanged);
+            // 
+            // Correct_Rtc_Cor
+            // 
+            this.Correct_Rtc_Cor.Location = new System.Drawing.Point(238, 110);
+            this.Correct_Rtc_Cor.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.Correct_Rtc_Cor.Name = "Correct_Rtc_Cor";
+            this.Correct_Rtc_Cor.Size = new System.Drawing.Size(205, 52);
+            this.Correct_Rtc_Cor.TabIndex = 102;
+            this.Correct_Rtc_Cor.Text = "矫正振镜坐标系偏转角";
+            this.Correct_Rtc_Cor.UseVisualStyleBackColor = true;
+            this.Correct_Rtc_Cor.Click += new System.EventHandler(this.Correct_Rtc_Cor_Click);
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.Acquisation_Rtc_Correct);
+            this.groupBox3.Controls.Add(this.button4);
+            this.groupBox3.Controls.Add(this.Correct_Rtc_Cor);
+            this.groupBox3.Controls.Add(this.label20);
+            this.groupBox3.Controls.Add(this.label7);
+            this.groupBox3.Controls.Add(this.Correct_Cam_Cor);
+            this.groupBox3.Controls.Add(this.textBox18);
+            this.groupBox3.Controls.Add(this.label21);
+            this.groupBox3.Controls.Add(this.Set_txt_valueK);
+            this.groupBox3.Controls.Add(this.textBox19);
+            this.groupBox3.Location = new System.Drawing.Point(36, 506);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(650, 252);
+            this.groupBox3.TabIndex = 103;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "偏差矫正";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label9.Location = new System.Drawing.Point(300, 59);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(118, 24);
+            this.label9.TabIndex = 104;
+            this.label9.Text = "触发代码:";
+            // 
+            // groupBox4
+            // 
+            this.groupBox4.Controls.Add(this.label9);
+            this.groupBox4.Controls.Add(this.numericUpDown1);
+            this.groupBox4.Controls.Add(this.Disconnect_Tcp);
+            this.groupBox4.Controls.Add(this.button5);
+            this.groupBox4.Controls.Add(this.Re_Connect);
+            this.groupBox4.Location = new System.Drawing.Point(36, 19);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(650, 121);
+            this.groupBox4.TabIndex = 105;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Text = "相机操作";
+            // 
+            // Acquisation_Rtc_Correct
+            // 
+            this.Acquisation_Rtc_Correct.Location = new System.Drawing.Point(457, 38);
+            this.Acquisation_Rtc_Correct.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.Acquisation_Rtc_Correct.Name = "Acquisation_Rtc_Correct";
+            this.Acquisation_Rtc_Correct.Size = new System.Drawing.Size(178, 52);
+            this.Acquisation_Rtc_Correct.TabIndex = 103;
+            this.Acquisation_Rtc_Correct.Text = "采集振镜校准数据";
+            this.Acquisation_Rtc_Correct.UseVisualStyleBackColor = true;
+            this.Acquisation_Rtc_Correct.Click += new System.EventHandler(this.Acquisation_Rtc_Correct_Click);
             // 
             // ParameterSet
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(694, 723);
-            this.Controls.Add(this.groupBox1);
+            this.ClientSize = new System.Drawing.Size(711, 773);
+            this.Controls.Add(this.groupBox4);
+            this.Controls.Add(this.groupBox3);
+            this.Controls.Add(this.Mark_Group);
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "ParameterSet";
             this.Text = "ParameterSet";
             this.Load += new System.EventHandler(this.ParameterSet_Load);
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
+            this.Mark_Group.ResumeLayout(false);
+            this.Mark_Group.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
+            this.groupBox4.ResumeLayout(false);
+            this.groupBox4.PerformLayout();
             this.ResumeLayout(false);
 
         }
 
         #endregion
-
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.TextBox Set_txt_valueK;
-        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.GroupBox Mark_Group;
         private System.Windows.Forms.TextBox Set_txt_markY3;
         private System.Windows.Forms.TextBox Set_txt_markX3;
         private System.Windows.Forms.TextBox Set_txt_markY2;
@@ -512,5 +550,10 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Button Re_Cali_Mark;
         private System.Windows.Forms.Button Correct_Cam_Cor;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.Button Correct_Rtc_Cor;
+        private System.Windows.Forms.GroupBox groupBox4;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Button Acquisation_Rtc_Correct;
     }
 }

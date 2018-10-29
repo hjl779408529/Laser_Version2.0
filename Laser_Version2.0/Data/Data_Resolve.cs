@@ -117,11 +117,12 @@ namespace Laser_Build_1._0
                     Temp_Entity_Data.End_y = Convert.ToDecimal(dxf.Arcs[i].EndPoint.Y);
                     //起始和终止角度提取
                     Temp_Entity_Data.Cir_Start_Angle = Convert.ToDecimal(dxf.Arcs[i].StartAngle);
+                    Temp_Entity_Data.Cir_End_Angle = Convert.ToDecimal(dxf.Arcs[i].EndAngle);
+                    //角度处理
                     if (Temp_Entity_Data.Cir_Start_Angle >= 359.99m)
                     {
                         Temp_Entity_Data.Cir_Start_Angle = 0.0m;
-                    }
-                    Temp_Entity_Data.Cir_End_Angle = Convert.ToDecimal(dxf.Arcs[i].EndAngle);
+                    }                    
                     if (Temp_Entity_Data.Cir_End_Angle <= 0.01m)
                     {
                         Temp_Entity_Data.Cir_End_Angle = 360.0m;
@@ -737,7 +738,7 @@ namespace Laser_Build_1._0
                                 Temp_Data.Center_Start_x = Temp_Data.Center_x - Temp_Data.Start_x;
                                 Temp_Data.Center_Start_y = Temp_Data.Center_y - Temp_Data.Start_y;                                
                                 //计算圆弧角度
-                                Temp_Data.Angle = Arc_Line_Datas[i].Cir_End_Angle - Arc_Line_Datas[i].Cir_Start_Angle;
+                                Temp_Data.Angle = (Arc_Line_Datas[i].Cir_End_Angle - Arc_Line_Datas[i].Cir_Start_Angle);
                                 //圆弧方向
                                 Temp_Data.Circle_dir = 0;
                                 //圆弧圆心
@@ -806,7 +807,7 @@ namespace Laser_Build_1._0
                     }
 
                     //寻找结束点失败，意味着重新开始新的 线段或圆弧
-                    if ((Arc_Line_Datas.Count != 0) && (Num != 0) && (Num == Arc_Line_Datas.Count))
+                    if ((Arc_Line_Datas.Count != 0) && (Num !=0) && (Num == Arc_Line_Datas.Count))
                     {
                         //整合数据生成代码 当前结束的封闭图形加工数据
                         Result.Add(new List<Interpolation_Data>(Temp_List_Data));//追加数据
@@ -837,10 +838,8 @@ namespace Laser_Build_1._0
                             Temp_Data.End_x = Arc_Line_Datas[0].Start_x;
                             Temp_Data.End_y = Arc_Line_Datas[0].Start_y;
                         }
-
                         //提交进入Arc_Data
                         Single_Data.Add(new Interpolation_Data(Temp_Data));
-
                         //整合数据生成代码
                         Temp_List_Data.Add(new Interpolation_Data(Temp_Data));//追加数据
                         Result.Add(new List<Interpolation_Data>(Temp_List_Data));//追加数据
@@ -856,7 +855,6 @@ namespace Laser_Build_1._0
                         //清空数据
                         Temp_List_Data.Clear();
                     }
-
                 } while (Arc_Line_Datas.Count > 0);//实体Line_Arc数据未清空完
             }
             //返回结果
@@ -1404,8 +1402,7 @@ namespace Laser_Build_1._0
                 //获取封闭图形中心坐标
                 Trail_Center_X = (In_Data[i].Max(o => o.End_x) + In_Data[i].Min(o => o.End_x)) / 2m;//RTC坐标X基准
                 Trail_Center_Y = (In_Data[i].Max(o => o.End_y) + In_Data[i].Min(o => o.End_y)) / 2m;//RTC坐标Y基准
-
-                if ((In_Data[i].Count > 0) && (In_Data[i].Count < 2)) //二级层，整合元素数量小于2，说明数量为1
+                if ((In_Data[i].Count > 0) && (In_Data[i].Count == 1)) //二级层，整合元素数量小于2，说明数量为1
                 {                    
                     for (j = 0; j < In_Data[i].Count; j++)
                     {
@@ -1494,6 +1491,14 @@ namespace Laser_Build_1._0
                                         Temp_Interpolation_List_Data.Clear();
                                     }                                    
                                 }
+                            }
+                            else if (i == In_Data.Count - 1)//最后一段数据
+                            {
+                                //追加返回值
+                                Result.Add(new List<Interpolation_Data>(In_Data[i]));
+                                //数据清空
+                                Temp_Data.Empty();
+                                Temp_Interpolation_List_Data.Clear();
                             }
                         }
                         else if (In_Data[i][j].Type == 2)// 圆弧  圆弧暂不处理
@@ -2073,58 +2078,57 @@ namespace Laser_Build_1._0
                             //直线、整圆拆分，整理成GTS和RTC加工数据
                             if (In_Data[i][j].Type == 1)//直线
                             {
-                                if (In_Data[i][j].Lift_flag == 1)//抬刀标志
-                                {
+                                //if (In_Data[i][j].Lift_flag == 1)//抬刀标志
+                                //{
                                     Result.Add(new List<Interpolation_Data>(In_Data[i]));//直接复制进入返回结果数值
-                                }
-                                else
-                                {
-                                    //数据计算
-                                    Delta_X = Convert.ToDecimal(Math.Abs(In_Data[i].Max(o => o.End_x) - In_Data[i].Min(o => o.End_x)));//X坐标极值范围
-                                    Delta_Y = Convert.ToDecimal(Math.Abs(In_Data[i].Max(o => o.End_y) - In_Data[i].Min(o => o.End_y)));//Y坐标极值范围
-                                   //获取封闭图形中心坐标
-                                    Rtc_Cal_X = (In_Data[i].Max(o => o.End_x) + In_Data[i].Min(o => o.End_x)) / 2m;//RTC坐标X基准
-                                    Rtc_Cal_Y = (In_Data[i].Max(o => o.End_y) + In_Data[i].Min(o => o.End_y)) / 2m;//RTC坐标Y基准
-                                    //范围判断
-                                    if ((Delta_X > Para_List.Parameter.Rtc_Limit.X) || (Delta_Y > Para_List.Parameter.Rtc_Limit.Y))//X、Y坐标极值范围大于等于48mm，由GTS加工，否则由RTC加工
-                                    {
-                                        Result.Add(new List<Interpolation_Data>(In_Data[i]));//直接复制进入返回结果数值
-                                    }
-                                    else
-                                    {
-                                        //数据清空
-                                        Temp_Data.Empty();
-                                        //数据赋值
-                                        Temp_Data = In_Data[i][j];
-                                        //强制抬刀标志：0
-                                        Temp_Data.Lift_flag = 0;
-                                        //强制加工类型为RTC
-                                        Temp_Data.Work = 20;
-                                        //RTC加工，GTS平台配合坐标
-                                        if (j == 0)
-                                        {
-                                            //GTS平台配合坐标
-                                            Temp_Data.Gts_x = Rtc_Cal_X;
-                                            Temp_Data.Gts_y = Rtc_Cal_Y;
-                                            //Rtc定位 激光加工起点坐标
-                                            Temp_Data.Rtc_x = In_Data[i][j].Start_x - Rtc_Cal_X;
-                                            Temp_Data.Rtc_y = In_Data[i][j].Start_y - Rtc_Cal_Y;
-                                        }
-                                        //RTC mark_abs直线
-                                        Temp_Data.Type = 15;
-                                        //坐标转换 将坐标转换为RTC坐标系坐标
-                                        Temp_Data.End_x = In_Data[i][j].End_x - Rtc_Cal_X;
-                                        Temp_Data.End_y = In_Data[i][j].End_y - Rtc_Cal_Y;
-                                        //追加修改的数据
-                                        Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
-                                        Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
-                                    }
-                                }
-
+                                //}
+                                //else
+                                //{
+                                //    //数据计算
+                                //    Delta_X = Convert.ToDecimal(Math.Abs(In_Data[i].Max(o => o.End_x) - In_Data[i].Min(o => o.End_x)));//X坐标极值范围
+                                //    Delta_Y = Convert.ToDecimal(Math.Abs(In_Data[i].Max(o => o.End_y) - In_Data[i].Min(o => o.End_y)));//Y坐标极值范围
+                                //   //获取封闭图形中心坐标
+                                //    Rtc_Cal_X = (In_Data[i].Max(o => o.End_x) + In_Data[i].Min(o => o.End_x)) / 2m;//RTC坐标X基准
+                                //    Rtc_Cal_Y = (In_Data[i].Max(o => o.End_y) + In_Data[i].Min(o => o.End_y)) / 2m;//RTC坐标Y基准
+                                //    //范围判断
+                                //    if ((Delta_X > Para_List.Parameter.Rtc_Limit.X) || (Delta_Y > Para_List.Parameter.Rtc_Limit.Y))//X、Y坐标极值范围大于等于48mm，由GTS加工，否则由RTC加工
+                                //    {
+                                //        Result.Add(new List<Interpolation_Data>(In_Data[i]));//直接复制进入返回结果数值
+                                //    }
+                                //    else
+                                //    {
+                                //        //数据清空
+                                //        Temp_Data.Empty();
+                                //        //数据赋值
+                                //        Temp_Data = In_Data[i][j];
+                                //        //强制抬刀标志：0
+                                //        Temp_Data.Lift_flag = 0;
+                                //        //强制加工类型为RTC
+                                //        Temp_Data.Work = 20;
+                                //        //RTC加工，GTS平台配合坐标
+                                //        if (j == 0)
+                                //        {
+                                //            //GTS平台配合坐标
+                                //            Temp_Data.Gts_x = Rtc_Cal_X;
+                                //            Temp_Data.Gts_y = Rtc_Cal_Y;
+                                //            //Rtc定位 激光加工起点坐标
+                                //            Temp_Data.Rtc_x = In_Data[i][j].Start_x - Rtc_Cal_X;
+                                //            Temp_Data.Rtc_y = In_Data[i][j].Start_y - Rtc_Cal_Y;
+                                //        }
+                                //        //RTC mark_abs直线
+                                //        Temp_Data.Type = 15;
+                                //        //坐标转换 将坐标转换为RTC坐标系坐标
+                                //        Temp_Data.End_x = In_Data[i][j].End_x - Rtc_Cal_X;
+                                //        Temp_Data.End_y = In_Data[i][j].End_y - Rtc_Cal_Y;
+                                //        //追加修改的数据
+                                //        Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
+                                //        Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
+                                //    }
+                                //}
                             }
                             else if (In_Data[i][j].Type == 2)// 圆弧
                             {
-                                if (Temp_Data.Circle_radius >= 20)//圆弧半径大于等于20mm
+                                if (In_Data[i][j].Circle_radius >= 20)//圆弧半径大于等于20mm
                                 {
                                     Result.Add(new List<Interpolation_Data>(In_Data[i]));//直接复制进入返回结果数值
                                 }
@@ -2223,10 +2227,10 @@ namespace Laser_Build_1._0
                         //数据计算
                         Delta_X = Convert.ToDecimal(Math.Abs(In_Data[i].Max(o => o.End_x) - In_Data[i].Min(o => o.End_x)));//X坐标极值范围
                         Delta_Y = Convert.ToDecimal(Math.Abs(In_Data[i].Max(o => o.End_y) - In_Data[i].Min(o => o.End_y)));//Y坐标极值范围
-                                                                                                                           //获取封闭图形中心坐标
+                        //获取封闭图形中心坐标
                         Rtc_Cal_X = (In_Data[i].Max(o => o.End_x) + In_Data[i].Min(o => o.End_x)) / 2m;//RTC坐标X基准
                         Rtc_Cal_Y = (In_Data[i].Max(o => o.End_y) + In_Data[i].Min(o => o.End_y)) / 2m;//RTC坐标Y基准
-                                                                                                       //范围判断
+                        //范围判断
                         if ((Delta_X > Para_List.Parameter.Rtc_Limit.X) || (Delta_Y > Para_List.Parameter.Rtc_Limit.Y))//X、Y坐标极值范围大于等于48mm，由GTS加工，否则由RTC加工
                         {
                             //不考虑圆弧半径大小，全部由Gts加工
@@ -2264,19 +2268,6 @@ namespace Laser_Build_1._0
                                         //先计算圆心与切点的直线
                                         if (m > 0)
                                         {
-                                            //圆弧起点 与 圆心 的直线参数
-                                            decimal k1 = (Temp_Data.Center_y - In_Data[i][m - 1].End_y) / (Temp_Data.Center_x - In_Data[i][m - 1].End_x);
-                                            decimal b1 = Temp_Data.Center_y - k1 * Temp_Data.Center_x;
-                                            //计算起点偏移点
-                                            decimal x1 = Temp_Data.Center_x + 2;
-                                            decimal y1 = x1 * k1 + b1;
-                                            //圆弧终点 与 圆心 的直线参数
-                                            decimal k2 = (Temp_Data.Center_y - Temp_Data.End_y) / (Temp_Data.Center_x - Temp_Data.End_x);
-                                            decimal b2 = Temp_Data.Center_y - k2 * Temp_Data.Center_x;
-                                            //计算终点偏移点
-                                            decimal x2 = Temp_Data.Center_x + 2;
-                                            decimal y2 = x2 * k2 + b2;
-
                                             //生成Rtc加工数据
                                             //RTC arc_abs圆弧
                                             Temp_Data.Type = 11;
@@ -2322,18 +2313,6 @@ namespace Laser_Build_1._0
                                         {
                                             if (i > 0)
                                             {
-                                                //圆弧起点 与 圆心 的直线参数
-                                                decimal k1 = (Temp_Data.Center_y - In_Data[i - 1][In_Data[i - 1].Count - 1].End_y) / (Temp_Data.Center_x - In_Data[i - 1][In_Data[i - 1].Count - 1].End_x);
-                                                decimal b1 = Temp_Data.Center_y - k1 * Temp_Data.Center_x;
-                                                //计算起点偏移点
-                                                decimal x1 = Temp_Data.Center_x + 2;
-                                                decimal y1 = x1 * k1 + b1;
-                                                //圆弧终点 与 圆心 的直线参数
-                                                decimal k2 = (Temp_Data.Center_y - Temp_Data.End_y) / (Temp_Data.Center_x - Temp_Data.End_x);
-                                                decimal b2 = Temp_Data.Center_y - k2 * Temp_Data.Center_x;
-                                                //计算终点偏移点
-                                                decimal x2 = Temp_Data.Center_x + 2;
-                                                decimal y2 = x2 * k2 + b2;
 
                                                 //生成Rtc加工数据
                                                 //RTC arc_abs圆弧
@@ -2394,7 +2373,6 @@ namespace Laser_Build_1._0
                                 }
 
                             }
-
                         }
                         else
                         {
@@ -2437,7 +2415,7 @@ namespace Laser_Build_1._0
                                     }
                                     else if (In_Data[i][j].Circle_dir == 0)
                                     {
-                                        Temp_Data.Angle = -In_Data[i][j].Angle;
+                                        Temp_Data.Angle = In_Data[i][j].Angle;
                                     }
                                 }
                                 //坐标转换 将坐标转换为RTC坐标系坐标
@@ -2451,7 +2429,7 @@ namespace Laser_Build_1._0
                     }
                 }
             }
-            else//加工覆盖范围48X48之内，完全RTC加工
+            else//加工覆盖范围48X48之内，完全RTC加工    角度取反暂时不允许使用
             {
                 //计算封闭图形中心坐标
                 Rtc_Cal_X = (Range_XY.X_Max + Range_XY.X_Min) / 2m;//RTC坐标X基准
@@ -2470,16 +2448,38 @@ namespace Laser_Build_1._0
                             {
                                 if (In_Data[i][j].Lift_flag == 1)//抬刀标志
                                 {
-                                    Result.Add(new List<Interpolation_Data>(In_Data[i]));//直接复制进入返回结果数值
-                                }
-                                else
-                                {   
                                     //数据清空
                                     Temp_Data.Empty();
                                     //数据赋值
                                     Temp_Data = In_Data[i][j];
-                                    //强制抬刀标志：0
-                                    Temp_Data.Lift_flag = 0;
+                                    //强制加工类型为RTC
+                                    Temp_Data.Work = 20;
+                                    //RTC加工，GTS平台配合坐标
+                                    if (j == 0)
+                                    {
+                                        //GTS平台配合坐标
+                                        Temp_Data.Gts_x = Rtc_Cal_X;
+                                        Temp_Data.Gts_y = Rtc_Cal_Y;
+                                        //Rtc定位 激光加工起点坐标
+                                        Temp_Data.Rtc_x = 0;
+                                        Temp_Data.Rtc_y = 0;
+                                    }
+                                    //RTC jump_abs直线
+                                    Temp_Data.Type = 13;
+                                    //坐标转换 将坐标转换为RTC坐标系坐标
+                                    Temp_Data.End_x = In_Data[i][j].End_x - Rtc_Cal_X;
+                                    Temp_Data.End_y = In_Data[i][j].End_y - Rtc_Cal_Y;
+                                    //追加修改的数据
+                                    Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
+                                    Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
+                                    //Result.Add(new List<Interpolation_Data>(In_Data[i]));//直接复制进入返回结果数值
+                                }
+                                else
+                                {
+                                    //数据清空
+                                    Temp_Data.Empty();
+                                    //数据赋值
+                                    Temp_Data = In_Data[i][j];
                                     //强制加工类型为RTC
                                     Temp_Data.Work = 20;
                                     //RTC加工，GTS平台配合坐标
@@ -2500,100 +2500,85 @@ namespace Laser_Build_1._0
                                     //追加修改的数据
                                     Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
                                     Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
-                                }
-
+                                }                                
                             }
                             else if (In_Data[i][j].Type == 2)// 圆弧
-                            {
-                                if (Temp_Data.Circle_radius >= 20)//圆弧半径大于等于20mm
+                            {                                
+                                //数据清空
+                                Temp_Data.Empty();
+                                //生成Rtc加工数据
+                                Temp_Data = In_Data[i][j];
+                                //RTC arc_abs圆弧
+                                Temp_Data.Type = 11;
+                                //强制抬刀标志：0
+                                Temp_Data.Lift_flag = 0;
+                                //强制加工类型为RTC
+                                Temp_Data.Work = 20;
+                                //RTC加工，GTS平台配合坐标
+                                Temp_Data.Gts_x = Rtc_Cal_X;
+                                Temp_Data.Gts_y = Rtc_Cal_Y;
+                                //RTC 圆弧加工圆心坐标转换
+                                Temp_Data.Center_x = In_Data[i][j].Center_x - Temp_Data.Gts_x;
+                                Temp_Data.Center_y = In_Data[i][j].Center_y - Temp_Data.Gts_y;
+                                //Rtc定位 激光加工起点坐标
+                                Temp_Data.Rtc_x = In_Data[i][j].Start_x - Temp_Data.Gts_x;
+                                Temp_Data.Rtc_y = In_Data[i][j].Start_y - Temp_Data.Gts_y;                                    
+                                //坐标转换 将坐标转换为RTC坐标系坐标
+                                Temp_Data.End_x = In_Data[i][j].End_x - Temp_Data.Gts_x;
+                                Temp_Data.End_y = In_Data[i][j].End_y - Temp_Data.Gts_y;
+                                //角度处理
+                                if (In_Data[i][j].Circle_dir == 1)
                                 {
-                                    Result.Add(new List<Interpolation_Data>(In_Data[i]));//直接复制进入返回结果数值
+                                    Temp_Data.Angle = In_Data[i][j].Angle;
                                 }
-                                else
+                                else if (In_Data[i][j].Circle_dir == 0)
                                 {
-                                    //数据清空
-                                    Temp_Data.Empty();
-                                    //生成Rtc加工数据
-                                    Temp_Data = In_Data[i][j];
-                                    //RTC arc_abs圆弧
-                                    Temp_Data.Type = 11;
-                                    //强制抬刀标志：0
-                                    Temp_Data.Lift_flag = 0;
-                                    //强制加工类型为RTC
-                                    Temp_Data.Work = 20;
-                                    //RTC加工，GTS平台配合坐标
-                                    Temp_Data.Gts_x = Rtc_Cal_X;
-                                    Temp_Data.Gts_y = Rtc_Cal_Y;
-                                    //RTC 圆弧加工圆心坐标转换
-                                    Temp_Data.Center_x = In_Data[i][j].Center_x - Temp_Data.Gts_x;
-                                    Temp_Data.Center_y = In_Data[i][j].Center_y - Temp_Data.Gts_y;
-                                    //Rtc定位 激光加工起点坐标
-                                    Temp_Data.Rtc_x = In_Data[i][j].Start_x - Temp_Data.Gts_x;
-                                    Temp_Data.Rtc_y = In_Data[i][j].Start_y - Temp_Data.Gts_y;                                    
-                                    //坐标转换 将坐标转换为RTC坐标系坐标
-                                    Temp_Data.End_x = In_Data[i][j].End_x - Temp_Data.Gts_x;
-                                    Temp_Data.End_y = In_Data[i][j].End_y - Temp_Data.Gts_y;
-                                    //追加修改的数据
-                                    Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
-                                    Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
-                                    //清空数据
-                                    Temp_Data.Empty();
-                                    Temp_Interpolation_List_Data.Clear();
-
-                                    //追加修改的数据
-                                    Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
-                                    Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
-                                    //清空数据
-                                    Temp_Data.Empty();
-                                    Temp_Interpolation_List_Data.Clear();
+                                    Temp_Data.Angle = In_Data[i][j].Angle;
                                 }
-
+                                //追加修改的数据
+                                Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
+                                Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
+                                //清空数据
+                                Temp_Data.Empty();
+                                Temp_Interpolation_List_Data.Clear();
                             }
                             else if (In_Data[i][j].Type == 3)//整圆
-                            {
-                                //判断整圆大小
-                                if (In_Data[i][j].Circle_radius >= 24) //整圆半径大于24mm，GTS加工
-                                {
-                                    Result.Add(new List<Interpolation_Data>(In_Data[i]));//直接复制进入返回结果数值
-                                }
-                                else //整圆半径小于24mm，RTC加工
-                                {
-                                    //数据赋值
-                                    Temp_Data = In_Data[i][j];
-                                    //RTC arc_abs圆弧
-                                    Temp_Data.Type = 11;
-                                    //强制抬刀标志：0
-                                    Temp_Data.Lift_flag = 0;
-                                    //强制加工类型为RTC
-                                    Temp_Data.Work = 20;
-                                    //RTC加工，GTS平台配合坐标
-                                    Temp_Data.Gts_x = Rtc_Cal_X;
-                                    Temp_Data.Gts_y = Rtc_Cal_Y;
-                                    //RTC 圆弧加工圆心坐标转换
-                                    Temp_Data.Center_x = In_Data[i][j].Center_x - Temp_Data.Gts_x;
-                                    Temp_Data.Center_y = In_Data[i][j].Center_y - Temp_Data.Gts_y;
-                                    //RTC加工切入点
-                                    Temp_Data.End_x = Temp_Data.Center_x;
-                                    Temp_Data.End_y = Temp_Data.Center_y + In_Data[i][j].Circle_radius;
-                                    //RTC加工整圆角度
-                                    // arc angle in ° as a 64 - bit IEEE floating point value
-                                    // (positive angle values correspond to clockwise angles);
-                                    // allowed range: [–3600.0° … +3600.0°] (±10 full circles);
-                                    // out-of-range values will be edge-clipped.
-                                    Temp_Data.Angle = 370;//这个参数得看RTC手册，整圆的旋转角度
+                            {                                
+                                //数据赋值
+                                Temp_Data = In_Data[i][j];
+                                //RTC arc_abs圆弧
+                                Temp_Data.Type = 11;
+                                //强制抬刀标志：0
+                                Temp_Data.Lift_flag = 0;
+                                //强制加工类型为RTC
+                                Temp_Data.Work = 20;
+                                //RTC加工，GTS平台配合坐标
+                                Temp_Data.Gts_x = Rtc_Cal_X;
+                                Temp_Data.Gts_y = Rtc_Cal_Y;
+                                //RTC 圆弧加工圆心坐标转换
+                                Temp_Data.Center_x = In_Data[i][j].Center_x - Temp_Data.Gts_x;
+                                Temp_Data.Center_y = In_Data[i][j].Center_y - Temp_Data.Gts_y;
+                                //RTC加工切入点
+                                Temp_Data.End_x = Temp_Data.Center_x;
+                                Temp_Data.End_y = Temp_Data.Center_y + In_Data[i][j].Circle_radius;
+                                //RTC加工整圆角度
+                                // arc angle in ° as a 64 - bit IEEE floating point value
+                                // (positive angle values correspond to clockwise angles);
+                                // allowed range: [–3600.0° … +3600.0°] (±10 full circles);
+                                // out-of-range values will be edge-clipped.
+                                Temp_Data.Angle = 370;//这个参数得看RTC手册，整圆的旋转角度
 
-                                    //Rtc定位 激光加工起点坐标
-                                    Temp_Data.Rtc_x = Temp_Data.Center_x;
-                                    Temp_Data.Rtc_y = Temp_Data.Center_y + In_Data[i][j].Circle_radius;
+                                //Rtc定位 激光加工起点坐标
+                                Temp_Data.Rtc_x = Temp_Data.Center_x;
+                                Temp_Data.Rtc_y = Temp_Data.Center_y + In_Data[i][j].Circle_radius;
 
-                                    //追加修改的数据
-                                    Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
-                                }
+                                //追加修改的数据
+                                Temp_Interpolation_List_Data.Add(new Interpolation_Data(Temp_Data));
                                 Result.Add(new List<Interpolation_Data>(Temp_Interpolation_List_Data));
                             }
                         }
                     }
-                    else if (In_Data[i].Count >= 2) //二级层，整合元素数量大于等于2，说明封闭图形
+                    else if (In_Data[i].Count >= 2) //二级层，整合元素数量大于等于2
                     {
                         for (j = 0; j < In_Data[i].Count; j++)
                         {
@@ -2633,8 +2618,8 @@ namespace Laser_Build_1._0
                                     Temp_Data.Angle = In_Data[i][j].Angle;
                                 }
                                 else if (In_Data[i][j].Circle_dir == 0)
-                                {
-                                    Temp_Data.Angle = -In_Data[i][j].Angle;
+                                {                                   
+                                    Temp_Data.Angle = In_Data[i][j].Angle;
                                 }
                             }
                             //坐标转换 将坐标转换为RTC坐标系坐标
@@ -2874,7 +2859,7 @@ namespace Laser_Build_1._0
             List<List<Interpolation_Data>> Result = new List<List<Interpolation_Data>>();//返回值
             List<Interpolation_Data> Temp_Interpolation_List_Data = new List<Interpolation_Data>();//二级层
             Interpolation_Data Temp_Data = new Interpolation_Data();//一级层  
-            decimal Gts_X = 100, Gts_Y = 100;//X、Y坐标
+            decimal Gts_X = Para_List.Parameter.Base_Gts.X, Gts_Y = Para_List.Parameter.Base_Gts.Y;//X、Y坐标
             //decimal Radius = 1.0m;//半径
             //decimal Interval = 3.0m;//间距  
             //初始清除

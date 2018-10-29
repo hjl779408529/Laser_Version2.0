@@ -7,6 +7,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -235,29 +236,29 @@ namespace Laser_Version2._0
             Set_txt_markY3.Text = Para_List.Parameter.Mark3.Y.ToString();
             Set_txt_markX4.Text = Para_List.Parameter.Mark4.X.ToString();
             Set_txt_markY4.Text = Para_List.Parameter.Mark4.Y.ToString();
-            textBox19.Text = Para_List.Parameter.Rtc_Org.X.ToString();
-            textBox18.Text = Para_List.Parameter.Rtc_Org.Y.ToString();
+            textBox19.Text = Para_List.Parameter.Rtc_Org.X.ToString(6);
+            textBox18.Text = Para_List.Parameter.Rtc_Org.Y.ToString(6);
             numericUpDown1.Value = (short)Intrigue;
         }       
         //定位mark点1
         private void button1_Click(object sender, EventArgs e)
         {
-            Calibration.Mark(Para_List.Parameter.Mark1);
+            Calibration.Mark_Correct(Para_List.Parameter.Mark1);
         }
         //定位mark点2
         private void button2_Click(object sender, EventArgs e)
         {
-            Calibration.Mark(Para_List.Parameter.Mark2);
+            Calibration.Mark_Correct(Para_List.Parameter.Mark2);
         }
         //定位mark点3
         private void button3_Click(object sender, EventArgs e)
         {
-            Calibration.Mark(Para_List.Parameter.Mark3);
+            Calibration.Mark_Correct(Para_List.Parameter.Mark3);
         }
         //定位mark点4
         private void button6_Click(object sender, EventArgs e)
         {
-            Calibration.Mark(Para_List.Parameter.Mark4);
+            Calibration.Mark_Correct(Para_List.Parameter.Mark4);
         }
         //振镜与ORG 中心差值X/mm
         private void textBox19_TextChanged(object sender, EventArgs e)
@@ -283,13 +284,15 @@ namespace Laser_Version2._0
         private void button4_Click(object sender, EventArgs e)
         {
             Calibration.Calibrate_RTC_ORG();
-            textBox19.Text = Para_List.Parameter.Rtc_Org.X.ToString(4);
-            textBox18.Text = Para_List.Parameter.Rtc_Org.Y.ToString(4);
+            textBox19.Text = Para_List.Parameter.Rtc_Org.X.ToString(6);
+            textBox18.Text = Para_List.Parameter.Rtc_Org.Y.ToString(6);
         }
         //触发拍照
         private void button5_Click(object sender, EventArgs e)
         {
-            Initialization.Initial.T_Client.Get_Cam_Deviation(Intrigue);//触发拍照 
+            Vector Tmp = Initialization.Initial.T_Client.Get_Cam_Actual_Pixel(Intrigue);//触发拍照 
+            Vector Cor_Data = Initialization.Initial.T_Client.Get_Coordinate_Corrrect_Point(Tmp.X, Tmp.Y);
+            MessageBox.Show(string.Format("相机坐标：({0},{1})，实际坐标：({2},{3})", Tmp.X, Tmp.Y, Cor_Data.X, Cor_Data.Y));
         }
         //Cam_Intrigue_Num
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
@@ -299,14 +302,18 @@ namespace Laser_Version2._0
         //Re_Connect_Tcp
         private void Re_Connect_Click(object sender, EventArgs e)
         {
-            Initialization.Initial.T_Client.TCP_Start("127.0.0.1",6230);
+            Initialization.Initial.T_Client.TCP_Start("127.0.0.1", Para_List.Parameter.Server_Port);
         }
         //Disconnect_Tcp
         private void Disconnect_Tcp_Click(object sender, EventArgs e)
         {
             Initialization.Initial.T_Client.Stop_Connect();
         }
-        //矫正相机坐标系
+        /// <summary>
+        /// 矫正相机坐标系偏转角
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Correct_Cam_Cor_Click(object sender, EventArgs e)
         {
             if (Calibration.Cal_Cam_Affinity())
@@ -317,6 +324,29 @@ namespace Laser_Version2._0
             {
                 MessageBox.Show("相机坐标系矫正失败！！！");
             }
+        }
+        /// <summary>
+        /// 矫正振镜坐标系偏转角
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Correct_Rtc_Cor_Click(object sender, EventArgs e)
+        {
+            Calibration.Get_Rtc_Coordinate_Affinity();
+        }
+        /// <summary>
+        /// 采集振镜矫正数据
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Acquisation_Rtc_Correct_Click(object sender, EventArgs e)
+        {
+            Thread Get_Rtc_Data_thread = new Thread(Get_Rtc_Data);
+            Get_Rtc_Data_thread.Start();
+        }
+        private void Get_Rtc_Data()
+        {
+            Calibration.Rtc_Correct_Coordinate();
         }
     }
 }

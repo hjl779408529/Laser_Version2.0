@@ -89,6 +89,7 @@ namespace Laser_Build_1._0
                     if (Prompt.Refresh.Axis01_Busy) { button14.BackColor = Color.Green; } else { button14.BackColor = SystemColors.Control; }//Axis01轴输出中
                     //if (Prompt.Refresh.Axis01_IO_Stop  ) { buttonx.BackColor = Color.Green;  } else { buttonx.BackColor = SystemColors.Control; }//Axis01轴IO停止
                     //if (Prompt.Refresh.Axis01_IO_EMG) { buttonx.BackColor = Color.Green;  } else { buttonx.BackColor = SystemColors.Control; }//Axis01轴IO急停
+                    if (Prompt.Refresh.Axis01_Posed) { Axis_Posed.BackColor = Color.Green; } else { Axis_Posed.BackColor = SystemColors.Control; }//Axis01轴到位
 
                     //位置指示
                     label12.Text = Convert.ToString(Convert.ToDecimal(Prompt.Refresh.Axis01_prfPos) / Para_List.Parameter.Gts_Pos_reference);
@@ -139,6 +140,7 @@ namespace Laser_Build_1._0
                     if (Prompt.Refresh.Axis02_Busy) { button14.BackColor = Color.Green; } else { button14.BackColor = SystemColors.Control; }//Axis02轴输出中
                     //if (Prompt.Refresh.Axis02_IO_Stop  ) { buttonx.BackColor = Color.Green;  } else { buttonx.BackColor = SystemColors.Control; }//Axis02轴IO停止
                     //if (Prompt.Refresh.Axis02_IO_EMG) { buttonx.BackColor = Color.Green;  } else { buttonx.BackColor = SystemColors.Control; }//Axis02轴IO急停
+                    if (Prompt.Refresh.Axis02_Posed) { Axis_Posed.BackColor = Color.Green; } else { Axis_Posed.BackColor = SystemColors.Control; }//Axis02轴到位
 
                     //位置指示
                     label12.Text = Convert.ToString(Convert.ToDecimal(Prompt.Refresh.Axis02_prfPos) / Para_List.Parameter.Gts_Pos_reference);
@@ -352,14 +354,30 @@ namespace Laser_Build_1._0
             {
                 if (Prompt.Refresh.Axis01_EN)
                 {
-                    GTS_Fun.Axis_Home.Home(1);
+                    //GTS_Fun.Axis_Home.Home_Upper_Monitor(1);
+                    if (GTS_Fun.Axis_Home.Axis01_Home_Down_Motor() == 0)
+                    {
+                        MessageBox.Show("X轴归零完成！！！");
+                    }
+                    else
+                    {
+                        MessageBox.Show("X轴归零失败！！！");
+                    }
                 }
             }
             else if (Axis_No == 2)
             {
                 if (Prompt.Refresh.Axis02_EN)
                 {
-                    GTS_Fun.Axis_Home.Home(2);
+                    //GTS_Fun.Axis_Home.Home_Upper_Monitor(2);
+                    if (GTS_Fun.Axis_Home.Axis02_Home_Down_Motor() == 0)
+                    {
+                        MessageBox.Show("Y轴归零完成！！！");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Y轴归零失败！！！");
+                    }
                 }
             }
         }

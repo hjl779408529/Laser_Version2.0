@@ -25,10 +25,12 @@ namespace Laser_Build_1._0
             //运动控制卡初始化
             Initialization.Initial Laser_initial = new Initialization.Initial();
             Laser_initial.Common_Initial();//公共初始化
-            Laser_initial.Gts_Initial();//工控卡初始化
-            Laser_initial.Rtc_Initial();//振镜初始化
+            Thread.Sleep(200);
             Laser_initial.RS232_Initial();//RS232初始化
             Laser_initial.Tcp_Initial();//TCP初始化
+            Laser_initial.Gts_Initial();//工控卡初始化
+            Laser_initial.Rtc_Initial();//振镜初始化
+            
             //运动控制卡IO监视
             Prompt.Refresh Gts_IO_RE = new Prompt.Refresh();
             System.Timers.Timer Gts_IO_Refresh_Timer = new System.Timers.Timer(10);//10ms刷新一次         

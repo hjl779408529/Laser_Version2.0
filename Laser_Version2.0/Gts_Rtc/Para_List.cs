@@ -147,10 +147,14 @@ namespace Para_List
         private static Affinity_Matrix trans_affinity = new Affinity_Matrix();
         //标定板的仿射变换参数
         private static Affinity_Matrix cal_trans_affinity = new Affinity_Matrix();
+        //标定板的旋转变换参数
+        private static Affinity_Matrix cal_trans_angle = new Affinity_Matrix();
         //相机坐标系的仿射变换参数
         private static Affinity_Matrix cam_trans_affinity = new Affinity_Matrix();
         //振镜坐标系的仿射变换参数
-        private static Affinity_Matrix rtc_trans_affinity = new Affinity_Matrix(); 
+        private static Affinity_Matrix rtc_trans_affinity = new Affinity_Matrix();
+        //振镜坐标系的旋转变换参数
+        private static Affinity_Matrix rtc_trans_angle = new Affinity_Matrix();
         //刀具补偿
         private static decimal cutter_radius = 0.5m; //刀具半径
         private static Int16 cutter_type = 0; //刀具补偿类型 0-不补偿、1-钻孔、2-落料
@@ -170,6 +174,16 @@ namespace Para_List
         private static decimal mark_reference;
         private static UInt16 split_block_x;
         private static UInt16 split_block_y;
+        //Tcp Socket
+        private static string server_ip = "127.0.0.1";
+        private static ushort server_port = 6230;
+        //Rtc 桶形畸变加工数据 参数
+        private static ushort rtc_distortion_data_type = 1;
+        private static decimal rtc_distortion_data_radius = 1.0m;
+        private static decimal rtc_distortion_data_interval = 2.5m;
+        private static decimal rtc_distortion_data_limit = 62.5m;
+        //平台配合振镜数据生成 的基准点
+        private static Vector base_gts = new Vector(100, 100);
 
         public static decimal Gts_Vel_reference { get => gts_vel_reference; set => gts_vel_reference = value; }
         public static decimal Gts_Acc_reference { get => gts_acc_reference; set => gts_acc_reference = value; }
@@ -269,8 +283,10 @@ namespace Para_List
         public static Vector Mark_Dxf4 { get => mark_dxf4; set => mark_dxf4 = value; }
         public static Affinity_Matrix Trans_Affinity { get => trans_affinity; set => trans_affinity = value; }
         public static Affinity_Matrix Cal_Trans_Affinity { get => cal_trans_affinity; set => cal_trans_affinity = value; }
+        public static Affinity_Matrix Cal_Trans_Angle { get => cal_trans_angle; set => cal_trans_angle = value; }
         public static Affinity_Matrix Cam_Trans_Affinity { get => cam_trans_affinity; set => cam_trans_affinity = value; }
         public static Affinity_Matrix Rtc_Trans_Affinity { get => rtc_trans_affinity; set => rtc_trans_affinity = value; }
+        public static Affinity_Matrix Rtc_Trans_Angle { get => rtc_trans_angle; set => rtc_trans_angle = value; }
         public static decimal Cutter_Radius { get => cutter_radius; set => cutter_radius = value; }
         public static Int16 Cutter_Type { get => cutter_type; set => cutter_type = value; }        
         public static Vector Rtc_Limit { get => rtc_limit; set => rtc_limit = value; }
@@ -285,6 +301,13 @@ namespace Para_List
         public static decimal Mark_Reference { get => mark_reference; set => mark_reference = value; }
         public static UInt16 Split_Block_X { get => split_block_x; set => split_block_x = value; }
         public static UInt16 Split_Block_Y { get => split_block_y; set => split_block_y = value; }
+        public static string Server_Ip { get => server_ip; set => server_ip = value; }
+        public static ushort Server_Port { get => server_port; set => server_port = value; }
+        public static ushort Rtc_Distortion_Data_Type { get => rtc_distortion_data_type; set => rtc_distortion_data_type = value; }
+        public static decimal Rtc_Distortion_Data_Radius { get => rtc_distortion_data_radius; set => rtc_distortion_data_radius = value; }
+        public static decimal Rtc_Distortion_Data_Interval { get => rtc_distortion_data_interval; set => rtc_distortion_data_interval = value; }
+        public static decimal Rtc_Distortion_Data_Limit { get => rtc_distortion_data_limit; set => rtc_distortion_data_limit = value; }
+        public static Vector Base_Gts { get => base_gts; set => base_gts = value; }
         //公开构造函数
         public Parameter() { }
     }
@@ -419,10 +442,14 @@ namespace Para_List
         private Affinity_Matrix trans_affinity;
         //标定板的仿射变换参数
         private Affinity_Matrix cal_trans_affinity;
+        //标定板的旋转变换参数
+        private Affinity_Matrix cal_trans_angle;
         //相机坐标系的仿射变换参数
         private Affinity_Matrix cam_trans_affinity;
         //振镜坐标系的仿射变换参数
-        private Affinity_Matrix rtc_trans_affinity;        
+        private Affinity_Matrix rtc_trans_affinity;
+        //振镜坐标系的仿射变换参数
+        private Affinity_Matrix rtc_trans_angle;
         //刀具补偿
         private decimal cutter_radius = 0.5m; //刀具半径
         private Int16 cutter_type = 0; //刀具补偿类型 0-不补偿、1-钻孔、2-落料
@@ -438,9 +465,19 @@ namespace Para_List
         private decimal pec;
         //Mark矫正 与 不矫正
         private UInt16 calibration_type; //0--无Mark矫正，1--Mark矫正
-        private static decimal mark_reference;
-        private static UInt16 split_block_x;
-        private static UInt16 split_block_y;
+        private decimal mark_reference;
+        private UInt16 split_block_x;
+        private UInt16 split_block_y;
+        //Tcp Socket
+        private string server_ip = null;
+        private ushort server_port;
+        //Rtc 桶形畸变加工数据 参数
+        private ushort rtc_distortion_data_type;
+        private decimal rtc_distortion_data_radius;
+        private decimal rtc_distortion_data_interval;
+        private decimal rtc_distortion_data_limit;
+        //平台配合振镜数据生成 的基准点
+        private static Vector base_gts = new Vector(100, 100);
         public decimal Gts_Vel_reference { get => gts_vel_reference; set => gts_vel_reference = value; }
         public decimal Gts_Acc_reference { get => gts_acc_reference; set => gts_acc_reference = value; }
         public decimal Gts_Pos_reference { get => gts_pos_reference; set => gts_pos_reference = value; }
@@ -538,8 +575,10 @@ namespace Para_List
         public Vector Mark_Dxf4 { get => mark_dxf4; set => mark_dxf4 = value; }
         public Affinity_Matrix Trans_Affinity { get => trans_affinity; set => trans_affinity = value; }
         public Affinity_Matrix Cal_Trans_Affinity { get => cal_trans_affinity; set => cal_trans_affinity = value; }
+        public Affinity_Matrix Cal_Trans_Angle { get => cal_trans_angle; set => cal_trans_angle = value; }
         public Affinity_Matrix Cam_Trans_Affinity { get => cam_trans_affinity; set => cam_trans_affinity = value; }
         public Affinity_Matrix Rtc_Trans_Affinity { get => rtc_trans_affinity; set => rtc_trans_affinity = value; }
+        public Affinity_Matrix Rtc_Trans_Angle { get => rtc_trans_angle; set => rtc_trans_angle = value; }
         public decimal Cutter_Radius { get => cutter_radius; set => cutter_radius = value; }
         public Int16 Cutter_Type { get => cutter_type; set => cutter_type = value; }
         public Vector Rtc_Limit { get => rtc_limit; set => rtc_limit = value; }
@@ -554,6 +593,13 @@ namespace Para_List
         public decimal Mark_Reference { get => mark_reference; set => mark_reference = value; }
         public UInt16 Split_Block_X { get => split_block_x; set => split_block_x = value; }
         public UInt16 Split_Block_Y { get => split_block_y; set => split_block_y = value; }
+        public string Server_Ip { get => server_ip; set => server_ip = value; }
+        public ushort Server_Port { get => server_port; set => server_port = value; }
+        public ushort Rtc_Distortion_Data_Type { get => rtc_distortion_data_type; set => rtc_distortion_data_type = value; }
+        public decimal Rtc_Distortion_Data_Radius { get => rtc_distortion_data_radius; set => rtc_distortion_data_radius = value; }
+        public decimal Rtc_Distortion_Data_Interval { get => rtc_distortion_data_interval; set => rtc_distortion_data_interval = value; }
+        public decimal Rtc_Distortion_Data_Limit { get => rtc_distortion_data_limit; set => rtc_distortion_data_limit = value; }
+        public Vector Base_Gts { get => base_gts; set => base_gts = value; }
         //构造函数
         public Parameter_RW() { }
     } 
@@ -561,7 +607,10 @@ namespace Para_List
     public class Serialize_Parameter
     {
 
-        //参数保存
+        /// <summary>
+        /// 参数文件序列化保存
+        /// </summary>
+        /// <param name="txtFile"></param>
         public static void Serialize(string txtFile)
         {
             //中转当前参数
@@ -665,8 +714,10 @@ namespace Para_List
                 Mark_Dxf4 = Para_List.Parameter.Mark_Dxf4,
                 Trans_Affinity = Para_List.Parameter.Trans_Affinity,
                 Cal_Trans_Affinity = Para_List.Parameter.Cal_Trans_Affinity,
+                Cal_Trans_Angle = Para_List.Parameter.Cal_Trans_Angle,
                 Cam_Trans_Affinity = Para_List.Parameter.Cam_Trans_Affinity,
                 Rtc_Trans_Affinity = Para_List.Parameter.Rtc_Trans_Affinity,
+                Rtc_Trans_Angle = Para_List.Parameter.Rtc_Trans_Angle,
                 Cutter_Radius = Para_List.Parameter.Cutter_Radius,
                 Cutter_Type = Para_List.Parameter.Cutter_Type,
                 Rtc_Limit = Para_List.Parameter.Rtc_Limit,
@@ -680,7 +731,14 @@ namespace Para_List
                 Calibration_Type = Para_List.Parameter.Calibration_Type,
                 Mark_Reference = Para_List.Parameter.Mark_Reference,
                 Split_Block_X = Para_List.Parameter.Split_Block_X,
-                Split_Block_Y = Para_List.Parameter.Split_Block_Y
+                Split_Block_Y = Para_List.Parameter.Split_Block_Y,
+                Server_Ip = Para_List.Parameter.Server_Ip,
+                Server_Port = Para_List.Parameter.Server_Port,
+                Rtc_Distortion_Data_Type = Para_List.Parameter.Rtc_Distortion_Data_Type,
+                Rtc_Distortion_Data_Radius = Para_List.Parameter.Rtc_Distortion_Data_Radius,
+                Rtc_Distortion_Data_Interval = Para_List.Parameter.Rtc_Distortion_Data_Interval,
+                Rtc_Distortion_Data_Limit = Para_List.Parameter.Rtc_Distortion_Data_Limit,
+                Base_Gts = Para_List.Parameter.Base_Gts
             };
 
             //二进制 序列化
@@ -694,28 +752,33 @@ namespace Para_List
             */
             //xml 序列化
             string File_Path = @"./\Config/" + txtFile;
-            using (FileStream fs = new FileStream(File_Path, FileMode.Create, FileAccess.ReadWrite))
+            using (FileStream fs = new FileStream(File_Path, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
             {
                 XmlSerializer bf = new XmlSerializer(typeof(Parameter_RW));
                 bf.Serialize(fs, parameter);
+                fs.Close();
             }
 
         }
-
-        //反序列化
+        /// <summary>
+        /// 参数文件反序列化
+        /// </summary>
+        /// <param name="fileName"></param>
         public static void Reserialize(string fileName)
         {
             //读取文件
             string File_Path = @"./\Config/" + fileName;
             if (File.Exists(File_Path))
             {
-                using (FileStream fs = new FileStream(File_Path, FileMode.Open, FileAccess.Read))
+                using (FileStream fs = new FileStream(File_Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     //二进制 反序列化
                     //BinaryFormatter bf = new BinaryFormatter();
                     //xml 反序列化
                     XmlSerializer bf = new XmlSerializer(typeof(Parameter_RW));
                     Parameter_RW parameter = (Parameter_RW)bf.Deserialize(fs);
+                    fs.Close();
+
                     //参数写入当前设备参数
                     Para_List.Parameter.Gts_Vel_reference = parameter.Gts_Vel_reference;
                     Para_List.Parameter.Gts_Acc_reference = parameter.Gts_Vel_reference * 1000m;
@@ -814,8 +877,10 @@ namespace Para_List
                     Para_List.Parameter.Mark_Dxf4 = parameter.Mark_Dxf4;
                     Para_List.Parameter.Trans_Affinity = parameter.Trans_Affinity;
                     Para_List.Parameter.Cal_Trans_Affinity = parameter.Cal_Trans_Affinity;
+                    Para_List.Parameter.Cal_Trans_Angle = parameter.Cal_Trans_Angle;
                     Para_List.Parameter.Cam_Trans_Affinity = parameter.Cam_Trans_Affinity;
                     Para_List.Parameter.Rtc_Trans_Affinity = parameter.Rtc_Trans_Affinity;
+                    Para_List.Parameter.Rtc_Trans_Angle = parameter.Rtc_Trans_Angle;
                     Para_List.Parameter.Cutter_Radius = parameter.Cutter_Radius;
                     Para_List.Parameter.Cutter_Type = parameter.Cutter_Type;
                     Para_List.Parameter.Rtc_Limit = parameter.Rtc_Limit;
@@ -830,6 +895,13 @@ namespace Para_List
                     Para_List.Parameter.Mark_Reference = parameter.Mark_Reference;
                     Para_List.Parameter.Split_Block_X = parameter.Split_Block_X;
                     Para_List.Parameter.Split_Block_Y = parameter.Split_Block_Y;
+                    Para_List.Parameter.Server_Ip = parameter.Server_Ip;
+                    Para_List.Parameter.Server_Port = parameter.Server_Port;
+                    Para_List.Parameter.Rtc_Distortion_Data_Type = parameter.Rtc_Distortion_Data_Type;
+                    Para_List.Parameter.Rtc_Distortion_Data_Radius = parameter.Rtc_Distortion_Data_Radius;
+                    Para_List.Parameter.Rtc_Distortion_Data_Interval = parameter.Rtc_Distortion_Data_Interval;
+                    Para_List.Parameter.Rtc_Distortion_Data_Limit = parameter.Rtc_Distortion_Data_Limit;
+                    Para_List.Parameter.Base_Gts = parameter.Base_Gts;
                 }
             }
         }
