@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Laser_Build_1._0;
@@ -95,7 +96,7 @@ namespace RTC_Fun
             RTC5Wrap.set_firstpulse_killer(Convert.ToUInt32(Para_List.Parameter.First_Pulse_Killer * Para_List.Parameter.Rtc_Period_Reference));
 
             //activates the home jump mode (for the X and Y axes) and defines the home position
-            RTC5Wrap.home_position(Convert.ToInt32(Para_List.Parameter.Rtc_Home.Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Para_List.Parameter.Rtc_Home.X * Para_List.Parameter.Rtc_XPos_Reference));
+            RTC5Wrap.home_position(Convert.ToInt32(Para_List.Parameter.Rtc_Home.Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Para_List.Parameter.Rtc_Home.X * Para_List.Parameter.Rtc_Pos_Reference));
 
             // Turn on the optical pump source and wait for 2 seconds.
             // (The following assumes that signal ANALOG OUT1 of the
@@ -155,7 +156,7 @@ namespace RTC_Fun
             // Transmit the following list commands to the list buffer.
             RTC5Wrap.set_start_list(1u);
             // Wait for Para_List.Parameter.Warmup_Time seconds
-            RTC5Wrap.long_delay(Convert.ToUInt32(Para_List.Parameter.Warmup_Time / Para_List.Parameter.Scanner_Delay_Reference));
+            //RTC5Wrap.long_delay(Convert.ToUInt32(Para_List.Parameter.Warmup_Time / Para_List.Parameter.Scanner_Delay_Reference));
             RTC5Wrap.set_laser_pulses(
                 Convert.ToUInt32(Para_List.Parameter.Laser_Half_Period * Para_List.Parameter.Rtc_Period_Reference),    // half of the laser signal period.
                 Convert.ToUInt32(Para_List.Parameter.Laser_Pulse_Width * Para_List.Parameter.Rtc_Period_Reference));  // pulse widths of signal LASER1.
@@ -187,6 +188,16 @@ namespace RTC_Fun
         {
             //释放Rtc5_dll
             RTC5Wrap.free_rtc5_dll();
+        }
+        /// <summary>
+        /// 加载校准文件
+        /// </summary>
+        public static bool Load_Correct_File()
+        {
+            Free();
+            Thread.Sleep(1000);
+            Reset();
+            return true;
         }
     }
 
@@ -299,7 +310,7 @@ namespace RTC_Fun
             // Transmit the following list commands to the list buffer.
             RTC5Wrap.set_start_list(List_No);
             //修正当前位置00
-            RTC5Wrap.jump_abs(-Convert.ToInt32(Para_List.Parameter.Rtc_Home.Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Para_List.Parameter.Rtc_Home.X * Para_List.Parameter.Rtc_XPos_Reference));
+            RTC5Wrap.jump_abs(-Convert.ToInt32(Para_List.Parameter.Rtc_Home.Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Para_List.Parameter.Rtc_Home.X * Para_List.Parameter.Rtc_Pos_Reference));
             //设置List结束位置
             RTC5Wrap.set_end_of_list();
             //启动执行
@@ -312,7 +323,7 @@ namespace RTC_Fun
             } while (Busy != 0U);
 
             //移动光点
-            RTC5Wrap.goto_xy(-Convert.ToInt32(Para_List.Parameter.Rtc_Home.Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Para_List.Parameter.Rtc_Home.X * Para_List.Parameter.Rtc_XPos_Reference));
+            RTC5Wrap.goto_xy(-Convert.ToInt32(Para_List.Parameter.Rtc_Home.Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Para_List.Parameter.Rtc_Home.X * Para_List.Parameter.Rtc_Pos_Reference));
         }
         /// <summary>
         /// 关闭激光，移动激光聚焦点至加工起始位置
@@ -333,7 +344,7 @@ namespace RTC_Fun
             // Transmit the following list commands to the list buffer.
             RTC5Wrap.set_start_list(List_No);
             //修正当前位置00
-            RTC5Wrap.jump_abs(-Convert.ToInt32(y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(x * Para_List.Parameter.Rtc_XPos_Reference));
+            RTC5Wrap.jump_abs(-Convert.ToInt32(y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(x * Para_List.Parameter.Rtc_Pos_Reference));
             //设置List结束位置
             RTC5Wrap.set_end_of_list();
             //启动执行
@@ -345,7 +356,7 @@ namespace RTC_Fun
                 RTC5Wrap.get_status(out Busy, out uint Position);
             } while (Busy != 0U);
             //goto 指定点
-            RTC5Wrap.goto_xy(-Convert.ToInt32(y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(x * Para_List.Parameter.Rtc_XPos_Reference));
+            RTC5Wrap.goto_xy(-Convert.ToInt32(y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(x * Para_List.Parameter.Rtc_Pos_Reference));
         }
         /// <summary>
         /// X方向相对位移
@@ -369,11 +380,11 @@ namespace RTC_Fun
             //生成数据            
             if (Control == 4)//jump_rel
             {
-                RTC5Wrap.jump_rel(0, Convert.ToInt32(Distance * Para_List.Parameter.Rtc_XPos_Reference));
+                RTC5Wrap.jump_rel(0, Convert.ToInt32(Distance * Para_List.Parameter.Rtc_Pos_Reference));
             }
             else if (Control == 6)//mark_rel
             {
-                RTC5Wrap.mark_rel(0, Convert.ToInt32(Distance * Para_List.Parameter.Rtc_XPos_Reference));
+                RTC5Wrap.mark_rel(0, Convert.ToInt32(Distance * Para_List.Parameter.Rtc_Pos_Reference));
             }
             //设置List结束位置
             RTC5Wrap.set_end_of_list();
@@ -410,11 +421,11 @@ namespace RTC_Fun
             //生成数据            
             if (Control == 4)//jump_rel
             {
-                RTC5Wrap.jump_rel(-Convert.ToInt32(Distance * Para_List.Parameter.Rtc_YPos_Reference), 0);
+                RTC5Wrap.jump_rel(-Convert.ToInt32(Distance * Para_List.Parameter.Rtc_Pos_Reference), 0);
             }
             else if (Control == 6)//mark_rel
             {
-                RTC5Wrap.mark_rel(-Convert.ToInt32(Distance * Para_List.Parameter.Rtc_YPos_Reference), 0);
+                RTC5Wrap.mark_rel(-Convert.ToInt32(Distance * Para_List.Parameter.Rtc_Pos_Reference), 0);
             }
             //设置List结束位置
             RTC5Wrap.set_end_of_list();
@@ -452,11 +463,11 @@ namespace RTC_Fun
             //生成数据            
             if (Control == 4)//jump_rel
             {
-                RTC5Wrap.jump_rel(-Convert.ToInt32(y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(x * Para_List.Parameter.Rtc_XPos_Reference));
+                RTC5Wrap.jump_rel(-Convert.ToInt32(y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(x * Para_List.Parameter.Rtc_Pos_Reference));
             }
             else if (Control == 6)//mark_rel
             {
-                RTC5Wrap.mark_rel(-Convert.ToInt32(y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(x * Para_List.Parameter.Rtc_XPos_Reference));
+                RTC5Wrap.mark_rel(-Convert.ToInt32(y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(x * Para_List.Parameter.Rtc_Pos_Reference));
             }
             //设置List结束位置
             RTC5Wrap.set_end_of_list();
@@ -490,34 +501,34 @@ namespace RTC_Fun
             //RTC5Wrap.set_start_list(List_No);
 
             //初始Jump到启动点位
-            RTC5Wrap.jump_abs(Convert.ToInt32(-Rtc_Datas[0].Rtc_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Rtc_Datas[0].Rtc_x * Para_List.Parameter.Rtc_XPos_Reference));
+            RTC5Wrap.jump_abs(Convert.ToInt32(-Rtc_Datas[0].Rtc_y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Rtc_Datas[0].Rtc_x * Para_List.Parameter.Rtc_Pos_Reference));
 
             //生成数据
             foreach (var o in Rtc_Datas)
             {
                 if (o.Type == 11)//arc_abs 绝对圆弧
                 {
-                    RTC5Wrap.arc_abs(Convert.ToInt32(-o.Center_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(o.Center_x * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToDouble(o.Angle));
+                    RTC5Wrap.arc_abs(Convert.ToInt32(-o.Center_y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(o.Center_x * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToDouble(o.Angle));
                 }
                 else if (o.Type == 12)//arc_rel
                 {
-                    RTC5Wrap.arc_rel(Convert.ToInt32(-o.Center_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(o.Center_x * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToDouble(o.Angle));
+                    RTC5Wrap.arc_rel(Convert.ToInt32(-o.Center_y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(o.Center_x * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToDouble(o.Angle));
                 }
                 else if (o.Type == 13)//jump_abs
                 {
-                    RTC5Wrap.jump_abs(Convert.ToInt32(-o.End_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_XPos_Reference));
+                    RTC5Wrap.jump_abs(Convert.ToInt32(-o.End_y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_Pos_Reference));
                 }
                 else if (o.Type == 14)//jump_rel
                 {
-                    RTC5Wrap.jump_rel(Convert.ToInt32(-o.End_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_XPos_Reference));
+                    RTC5Wrap.jump_rel(Convert.ToInt32(-o.End_y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_Pos_Reference));
                 }
                 else if (o.Type == 15)//mark_abs
                 {
-                    RTC5Wrap.mark_abs(Convert.ToInt32(-o.End_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_XPos_Reference));
+                    RTC5Wrap.mark_abs(Convert.ToInt32(-o.End_y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_Pos_Reference));
                 }
                 else if (o.Type == 16)//mark_rel
                 {
-                    RTC5Wrap.mark_rel(Convert.ToInt32(-o.End_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_XPos_Reference));
+                    RTC5Wrap.mark_rel(Convert.ToInt32(-o.End_y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_Pos_Reference));
                 }
             }
             //结束Jump到启动点位
@@ -555,34 +566,34 @@ namespace RTC_Fun
             //RTC5Wrap.set_start_list(List_No);
 
             //初始Jump到启动点位
-            RTC5Wrap.jump_abs(Convert.ToInt32(Rtc_Datas[0].Rtc_x * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToInt32(Rtc_Datas[0].Rtc_y * Para_List.Parameter.Rtc_YPos_Reference));
+            RTC5Wrap.jump_abs(Convert.ToInt32(Rtc_Datas[0].Rtc_x * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Rtc_Datas[0].Rtc_y * Para_List.Parameter.Rtc_Pos_Reference));
 
             //生成数据
             foreach (var o in Rtc_Datas)
             {
                 if (o.Type == 11)//arc_abs 绝对圆弧
                 {
-                    RTC5Wrap.arc_abs(Convert.ToInt32(o.Center_x * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToInt32(o.Center_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToDouble(o.Angle));
+                    RTC5Wrap.arc_abs(Convert.ToInt32(o.Center_x * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(o.Center_y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToDouble(o.Angle));
                 }
                 else if (o.Type == 12)//arc_rel
                 {
-                    RTC5Wrap.arc_rel(Convert.ToInt32(o.Center_x * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToInt32(o.Center_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToDouble(o.Angle));
+                    RTC5Wrap.arc_rel(Convert.ToInt32(o.Center_x * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(o.Center_y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToDouble(o.Angle));
                 }
                 else if (o.Type == 13)//jump_abs
                 {
-                    RTC5Wrap.jump_abs(Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToInt32(o.End_y * Para_List.Parameter.Rtc_YPos_Reference));
+                    RTC5Wrap.jump_abs(Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(o.End_y * Para_List.Parameter.Rtc_Pos_Reference));
                 }
                 else if (o.Type == 14)//jump_rel
                 {
-                    RTC5Wrap.jump_rel(Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToInt32(o.End_y * Para_List.Parameter.Rtc_YPos_Reference));
+                    RTC5Wrap.jump_rel(Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(o.End_y * Para_List.Parameter.Rtc_Pos_Reference));
                 }
                 else if (o.Type == 15)//mark_abs
                 {
-                    RTC5Wrap.mark_abs(Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToInt32(o.End_y * Para_List.Parameter.Rtc_YPos_Reference));
+                    RTC5Wrap.mark_abs(Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(o.End_y * Para_List.Parameter.Rtc_Pos_Reference));
                 }
                 else if (o.Type == 16)//mark_rel
                 {
-                    RTC5Wrap.mark_rel(Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToInt32(o.End_y * Para_List.Parameter.Rtc_YPos_Reference));
+                    RTC5Wrap.mark_rel(Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(o.End_y * Para_List.Parameter.Rtc_Pos_Reference));
                 }
             }
             //结束Jump到启动点位
@@ -652,7 +663,7 @@ namespace RTC_Fun
             
 #if !DEBUG
             //初始Jump到启动点位
-            RTC5Wrap.jump_abs(Convert.ToInt32(-Tmp_R0_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_R0_X * Para_List.Parameter.Rtc_XPos_Reference));
+            RTC5Wrap.jump_abs(Convert.ToInt32(-Tmp_R0_Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Tmp_R0_X * Para_List.Parameter.Rtc_Pos_Reference));
 #endif
             //生成数据
             foreach (var o in Rtc_Datas)
@@ -680,27 +691,27 @@ namespace RTC_Fun
 #if !DEBUG
                 if (o.Type == 11)//arc_abs 绝对圆弧
                 {
-                    RTC5Wrap.arc_abs(Convert.ToInt32(-Tmp_Center_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_Center_X * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToDouble(o.Angle));
+                    RTC5Wrap.arc_abs(Convert.ToInt32(-Tmp_Center_Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Tmp_Center_X * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToDouble(o.Angle));
                 }
                 else if (o.Type == 12)//arc_rel
                 {
-                    RTC5Wrap.arc_rel(Convert.ToInt32(-Tmp_Center_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_Center_X * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToDouble(o.Angle));
+                    RTC5Wrap.arc_rel(Convert.ToInt32(-Tmp_Center_Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Tmp_Center_X * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToDouble(o.Angle));
                 }
                 else if (o.Type == 13)//jump_abs
                 {
-                    RTC5Wrap.jump_abs(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_XPos_Reference));
+                    RTC5Wrap.jump_abs(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_Pos_Reference));
                 }
                 else if (o.Type == 14)//jump_rel
                 {
-                    RTC5Wrap.jump_rel(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_XPos_Reference));
+                    RTC5Wrap.jump_rel(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_Pos_Reference));
                 }
                 else if (o.Type == 15)//mark_abs
                 {
-                    RTC5Wrap.mark_abs(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_XPos_Reference));
+                    RTC5Wrap.mark_abs(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_Pos_Reference));
                 }
                 else if (o.Type == 16)//mark_rel
                 {
-                    RTC5Wrap.mark_rel(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_XPos_Reference));
+                    RTC5Wrap.mark_rel(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_Pos_Reference));
                 }
 #endif
             }
@@ -756,7 +767,7 @@ namespace RTC_Fun
 
 #if !DEBUG
             //初始Jump到启动点位
-            RTC5Wrap.jump_abs(Convert.ToInt32(-Tmp_R0_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_R0_X * Para_List.Parameter.Rtc_XPos_Reference));
+            RTC5Wrap.jump_abs(Convert.ToInt32(-Tmp_R0_Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Tmp_R0_X * Para_List.Parameter.Rtc_Pos_Reference));
             
 #endif
             //生成数据
@@ -773,27 +784,27 @@ namespace RTC_Fun
 #if !DEBUG
                 if (o.Type == 11)//arc_abs 绝对圆弧
                 {
-                    RTC5Wrap.arc_abs(Convert.ToInt32(-Tmp_Center_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_Center_X * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToDouble(o.Angle));
+                    RTC5Wrap.arc_abs(Convert.ToInt32(-Tmp_Center_Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Tmp_Center_X * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToDouble(o.Angle));
                 }
                 else if (o.Type == 12)//arc_rel
                 {
-                    RTC5Wrap.arc_rel(Convert.ToInt32(-Tmp_Center_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_Center_X * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToDouble(o.Angle));
+                    RTC5Wrap.arc_rel(Convert.ToInt32(-Tmp_Center_Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Tmp_Center_X * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToDouble(o.Angle));
                 }
                 else if (o.Type == 13)//jump_abs
                 {
-                    RTC5Wrap.jump_abs(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_XPos_Reference));
+                    RTC5Wrap.jump_abs(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_Pos_Reference));
                 }
                 else if (o.Type == 14)//jump_rel
                 {
-                    RTC5Wrap.jump_rel(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_XPos_Reference));
+                    RTC5Wrap.jump_rel(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_Pos_Reference));
                 }
                 else if (o.Type == 15)//mark_abs
                 {
-                    RTC5Wrap.mark_abs(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_XPos_Reference));
+                    RTC5Wrap.mark_abs(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_Pos_Reference));
                 }
                 else if (o.Type == 16)//mark_rel
                 {
-                    RTC5Wrap.mark_rel(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_XPos_Reference));
+                    RTC5Wrap.mark_rel(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_Pos_Reference));
                 }
 #endif
             }
@@ -848,7 +859,7 @@ namespace RTC_Fun
 
 #if !DEBUG
             //初始Jump到启动点位
-            RTC5Wrap.jump_abs(Convert.ToInt32(-Tmp_R0_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_R0_X * Para_List.Parameter.Rtc_XPos_Reference));
+            RTC5Wrap.jump_abs(Convert.ToInt32(-Tmp_R0_Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Tmp_R0_X * Para_List.Parameter.Rtc_Pos_Reference));
 
 #endif
             //生成数据
@@ -863,27 +874,27 @@ namespace RTC_Fun
 #if !DEBUG
                 if (o.Type == 11)//arc_abs 绝对圆弧
                 {
-                    RTC5Wrap.arc_abs(Convert.ToInt32(-Tmp_Center_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_Center_X * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToDouble(o.Angle));
+                    RTC5Wrap.arc_abs(Convert.ToInt32(-Tmp_Center_Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Tmp_Center_X * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToDouble(o.Angle));
                 }
                 else if (o.Type == 12)//arc_rel
                 {
-                    RTC5Wrap.arc_rel(Convert.ToInt32(-Tmp_Center_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_Center_X * Para_List.Parameter.Rtc_XPos_Reference), Convert.ToDouble(o.Angle));
+                    RTC5Wrap.arc_rel(Convert.ToInt32(-Tmp_Center_Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Tmp_Center_X * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToDouble(o.Angle));
                 }
                 else if (o.Type == 13)//jump_abs
                 {
-                    RTC5Wrap.jump_abs(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_XPos_Reference));
+                    RTC5Wrap.jump_abs(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_Pos_Reference));
                 }
                 else if (o.Type == 14)//jump_rel
                 {
-                    RTC5Wrap.jump_rel(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_XPos_Reference));
+                    RTC5Wrap.jump_rel(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_Pos_Reference));
                 }
                 else if (o.Type == 15)//mark_abs
                 {
-                    RTC5Wrap.mark_abs(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_XPos_Reference));
+                    RTC5Wrap.mark_abs(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_Pos_Reference));
                 }
                 else if (o.Type == 16)//mark_rel
                 {
-                    RTC5Wrap.mark_rel(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_XPos_Reference));
+                    RTC5Wrap.mark_rel(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_Pos_Reference));
                 }
 #endif
             }
@@ -933,11 +944,11 @@ namespace RTC_Fun
 #if !DEBUG
                 if (o.Type == 13)//jump_abs
                 {
-                    RTC5Wrap.jump_abs(Convert.ToInt32(-o.End_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_XPos_Reference));
+                    RTC5Wrap.jump_abs(Convert.ToInt32(-o.End_y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_Pos_Reference));
                 }
                 else if (o.Type == 14)//jump_rel
                 {
-                    RTC5Wrap.jump_rel(Convert.ToInt32(-o.End_y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_XPos_Reference));
+                    RTC5Wrap.jump_rel(Convert.ToInt32(-o.End_y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(o.End_x * Para_List.Parameter.Rtc_Pos_Reference));
                 }
 #endif
             }
@@ -994,11 +1005,11 @@ namespace RTC_Fun
 #if !DEBUG
                 if (o.Type == 13)//jump_abs
                 {
-                    RTC5Wrap.jump_abs(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_XPos_Reference));
+                    RTC5Wrap.jump_abs(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_Pos_Reference));
                 }
                 else if (o.Type == 14)//jump_rel
                 {
-                    RTC5Wrap.jump_rel(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_XPos_Reference));
+                    RTC5Wrap.jump_rel(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_Pos_Reference));
                 }
 #endif
             }
@@ -1054,11 +1065,11 @@ namespace RTC_Fun
 #if !DEBUG
                 if (o.Type == 13)//jump_abs
                 {
-                    RTC5Wrap.jump_abs(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_XPos_Reference));
+                    RTC5Wrap.jump_abs(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_Pos_Reference));
                 }
                 else if (o.Type == 14)//jump_rel
                 {
-                    RTC5Wrap.jump_rel(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_YPos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_XPos_Reference));
+                    RTC5Wrap.jump_rel(Convert.ToInt32(-Tmp_End_Y * Para_List.Parameter.Rtc_Pos_Reference), Convert.ToInt32(Tmp_End_X * Para_List.Parameter.Rtc_Pos_Reference));
                 }
 #endif
             }

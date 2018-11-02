@@ -57,6 +57,7 @@
             this.button9 = new System.Windows.Forms.Button();
             this.button10 = new System.Windows.Forms.Button();
             this.Laser_Watt_Button = new System.Windows.Forms.Button();
+            this.Camera_Form = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -315,11 +316,23 @@
             this.Laser_Watt_Button.UseVisualStyleBackColor = true;
             this.Laser_Watt_Button.Click += new System.EventHandler(this.Laser_Watt_Button_Click);
             // 
+            // Camera_Form
+            // 
+            this.Camera_Form.Location = new System.Drawing.Point(76, 436);
+            this.Camera_Form.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Camera_Form.Name = "Camera_Form";
+            this.Camera_Form.Size = new System.Drawing.Size(140, 46);
+            this.Camera_Form.TabIndex = 21;
+            this.Camera_Form.Text = "Camera";
+            this.Camera_Form.UseVisualStyleBackColor = true;
+            this.Camera_Form.Click += new System.EventHandler(this.Camera_Form_Click);
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1344, 712);
+            this.Controls.Add(this.Camera_Form);
             this.Controls.Add(this.Laser_Watt_Button);
             this.Controls.Add(this.button10);
             this.Controls.Add(this.button9);
@@ -376,6 +389,7 @@
         private System.Windows.Forms.ToolStripMenuItem Menu_ParameterSet;
         private System.Windows.Forms.Button button10;
         private System.Windows.Forms.Button Laser_Watt_Button;
+        private System.Windows.Forms.Button Camera_Form;
     }
 }
 

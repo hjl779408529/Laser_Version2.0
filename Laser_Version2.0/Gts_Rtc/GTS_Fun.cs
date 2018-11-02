@@ -19,24 +19,36 @@ namespace GTS_Fun
     class Factory
     {
         //定义GTS函数调用返回值
-        private static short Com_Return;
+        private static short Gts_Return;
         /// <summary>
         /// Gts控制卡初始化
         /// </summary>
         public static void Reset()
         {           
             //复位运动控制器
-            Com_Return = MC.GT_Reset();
-            Log.Commandhandler("Gts_Initial---GT_Reset", Com_Return);
+            Gts_Return = MC.GT_Reset();
+            Log.Commandhandler("Gts_Initial---GT_Reset", Gts_Return);
+            //延时
+            Thread.Sleep(200);
             //配置运动控制器
-            Com_Return = MC.GT_LoadConfig("Axis.cfg");
-            Log.Commandhandler("Gts_Initial--GT_LoadConfig", Com_Return);
+            Gts_Return = MC.GT_LoadConfig("Axis.cfg");
+            Log.Commandhandler("Gts_Initial--GT_LoadConfig", Gts_Return);
             //清除各轴的报警和限位
-            Com_Return = MC.GT_ClrSts(1, 4);
-            Log.Commandhandler("Gts_Initial--清除各轴的报警和限位", Com_Return);
+            Gts_Return = MC.GT_ClrSts(1, 4);
+            Log.Commandhandler("Gts_Initial--清除各轴的报警和限位", Gts_Return);
             //轴使能
-            Com_Return = MC.GT_AxisOn(1);
-            Com_Return = MC.GT_AxisOn(2);
+            Gts_Return = MC.GT_AxisOn(1);
+            Gts_Return = MC.GT_AxisOn(2);
+            //延时
+            Thread.Sleep(200);
+
+            //设置X轴误差带
+            Gts_Return = MC.GT_SetAxisBand(1, Para_List.Parameter.Axis_X_Band, 4 * Para_List.Parameter.Axis_X_Time);//20-0.1um,4*2-250us
+            Log.Commandhandler("X轴到位误差带", Gts_Return);
+
+            //设置Y轴误差带
+            Gts_Return = MC.GT_SetAxisBand(2, Para_List.Parameter.Axis_Y_Band, 4 * Para_List.Parameter.Axis_Y_Time);//20-0.1um,4*2-250us
+            Log.Commandhandler("Y轴到位误差带", Gts_Return);
         }
         /// <summary>
         /// 关闭Gts控制卡
@@ -44,8 +56,8 @@ namespace GTS_Fun
         public static void Free()
         {
             //关闭运动控制器
-            Com_Return = MC.GT_Close();
-            Log.Commandhandler("Gts_Initial---GT_Close", Com_Return);
+            Gts_Return = MC.GT_Close();
+            Log.Commandhandler("Gts_Initial---GT_Close", Gts_Return);
         }
     }        
     //回原点
@@ -956,6 +968,12 @@ namespace GTS_Fun
         /// </summary>
         public static void Interpolation_Start()
         {
+            //设置X轴误差带
+            Gts_Return = MC.GT_SetAxisBand(1, Para_List.Parameter.Axis_X_Band, 4 * Para_List.Parameter.Axis_X_Time);//20-0.1um,4*2-250us
+            Log.Commandhandler("X轴到位误差带", Gts_Return);
+            //设置Y轴误差带
+            Gts_Return = MC.GT_SetAxisBand(2, Para_List.Parameter.Axis_Y_Band, 4 * Para_List.Parameter.Axis_Y_Time);//20-0.1um,4*2-250us
+            Log.Commandhandler("Y轴到位误差带", Gts_Return);
 
             //缓存区延时指令
             Gts_Return = MC.GT_BufDelay(1, 2, 0);//2ms
@@ -986,14 +1004,14 @@ namespace GTS_Fun
                 Thread.Sleep(100);
             } while (run == 1);
 
-            //到位检测
-            do
-            {                
-                //延时
-                Thread.Sleep(100);
-            } while (!Prompt.Refresh.Axis01_Posed || !(Prompt.Refresh.Axis02_Posed));
+            ////到位检测
+            //do
+            //{                
+            //    //延时
+            //    Thread.Sleep(100);
+            //} while (!Prompt.Refresh.Axis01_Posed || !(Prompt.Refresh.Axis02_Posed));
             //延时
-            Thread.Sleep(200);
+            Thread.Sleep(Para_List.Parameter.Posed_Time);
         }
         /// <summary>
         /// 停止轴运动

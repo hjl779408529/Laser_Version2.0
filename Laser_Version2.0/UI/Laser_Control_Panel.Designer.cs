@@ -44,7 +44,6 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.Com_List = new System.Windows.Forms.ComboBox();
-            this.label6 = new System.Windows.Forms.Label();
             this.Re_connect = new System.Windows.Forms.Button();
             this.Laser_Frequence_Set_Value = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
@@ -60,6 +59,7 @@
             this.Seed_Set_Current = new System.Windows.Forms.TextBox();
             this.label11 = new System.Windows.Forms.Label();
             this.Com_Status = new System.Windows.Forms.PictureBox();
+            this.Refresh_List = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -230,16 +230,6 @@
             this.Com_List.TabIndex = 15;
             this.Com_List.SelectedIndexChanged += new System.EventHandler(this.Com_List_SelectedIndexChanged);
             // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label6.Location = new System.Drawing.Point(303, 31);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(80, 18);
-            this.label6.TabIndex = 16;
-            this.label6.Text = "通讯端口";
-            // 
             // Re_connect
             // 
             this.Re_connect.Location = new System.Drawing.Point(413, 66);
@@ -398,15 +388,26 @@
             this.Com_Status.TabIndex = 17;
             this.Com_Status.TabStop = false;
             // 
+            // Refresh_List
+            // 
+            this.Refresh_List.Location = new System.Drawing.Point(261, 22);
+            this.Refresh_List.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Refresh_List.Name = "Refresh_List";
+            this.Refresh_List.Size = new System.Drawing.Size(122, 35);
+            this.Refresh_List.TabIndex = 30;
+            this.Refresh_List.Text = "更新列表";
+            this.Refresh_List.UseVisualStyleBackColor = true;
+            this.Refresh_List.Click += new System.EventHandler(this.Refresh_List_Click);
+            // 
             // Laser_Control_Panel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(832, 719);
+            this.Controls.Add(this.Refresh_List);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.Com_Status);
             this.Controls.Add(this.Re_connect);
-            this.Controls.Add(this.label6);
             this.Controls.Add(this.Com_List);
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.groupBox2);
@@ -446,7 +447,6 @@
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.ComboBox Com_List;
-        private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Button Re_connect;
         private System.Windows.Forms.PictureBox Com_Status;
         private System.Windows.Forms.TextBox Amp1_Current;
@@ -463,5 +463,6 @@
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.TextBox Seed_Set_Current;
         private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Button Refresh_List;
     }
 }

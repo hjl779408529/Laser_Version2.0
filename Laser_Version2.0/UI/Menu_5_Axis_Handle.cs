@@ -89,10 +89,12 @@ namespace Laser_Build_1._0
                     if (Prompt.Refresh.Axis01_Busy) { button14.BackColor = Color.Green; } else { button14.BackColor = SystemColors.Control; }//Axis01轴输出中
                     //if (Prompt.Refresh.Axis01_IO_Stop  ) { buttonx.BackColor = Color.Green;  } else { buttonx.BackColor = SystemColors.Control; }//Axis01轴IO停止
                     //if (Prompt.Refresh.Axis01_IO_EMG) { buttonx.BackColor = Color.Green;  } else { buttonx.BackColor = SystemColors.Control; }//Axis01轴IO急停
-                    if (Prompt.Refresh.Axis01_Posed) { Axis_Posed.BackColor = Color.Green; } else { Axis_Posed.BackColor = SystemColors.Control; }//Axis01轴到位
-
-                    //位置指示
+                    if (Prompt.Refresh.Axis01_Motor_Posed) { Axis_Motor_Posed.BackColor = Color.Green; } else { Axis_Motor_Posed.BackColor = SystemColors.Control; }//Axis01轴 Motor到位
+                    if (Prompt.Refresh.Axis01_Upper_Posed) { Axis_Upper_Posed.BackColor = Color.Green; } else { Axis_Upper_Posed.BackColor = SystemColors.Control; }//Axis01轴 Upper到位
+                    //规划位置指示
                     label12.Text = Convert.ToString(Convert.ToDecimal(Prompt.Refresh.Axis01_prfPos) / Para_List.Parameter.Gts_Pos_reference);
+                    //实际位置指示
+                    label23.Text = Convert.ToString(Convert.ToDecimal(Prompt.Refresh.Axis01_encPos) / Para_List.Parameter.Gts_Pos_reference);
                     //加速度指示
                     label13.Text = Convert.ToString(Convert.ToDecimal(Prompt.Refresh.Axis01_acc) * Para_List.Parameter.Gts_Acc_reference);
                     //减速度指示
@@ -140,10 +142,13 @@ namespace Laser_Build_1._0
                     if (Prompt.Refresh.Axis02_Busy) { button14.BackColor = Color.Green; } else { button14.BackColor = SystemColors.Control; }//Axis02轴输出中
                     //if (Prompt.Refresh.Axis02_IO_Stop  ) { buttonx.BackColor = Color.Green;  } else { buttonx.BackColor = SystemColors.Control; }//Axis02轴IO停止
                     //if (Prompt.Refresh.Axis02_IO_EMG) { buttonx.BackColor = Color.Green;  } else { buttonx.BackColor = SystemColors.Control; }//Axis02轴IO急停
-                    if (Prompt.Refresh.Axis02_Posed) { Axis_Posed.BackColor = Color.Green; } else { Axis_Posed.BackColor = SystemColors.Control; }//Axis02轴到位
+                    if (Prompt.Refresh.Axis02_Motor_Posed) { Axis_Motor_Posed.BackColor = Color.Green; } else { Axis_Motor_Posed.BackColor = SystemColors.Control; }//Axis02轴 Motor到位
+                    if (Prompt.Refresh.Axis02_Upper_Posed) { Axis_Upper_Posed.BackColor = Color.Green; } else { Axis_Upper_Posed.BackColor = SystemColors.Control; }//Axis02轴 Upper到位
 
-                    //位置指示
+                    //规划位置指示
                     label12.Text = Convert.ToString(Convert.ToDecimal(Prompt.Refresh.Axis02_prfPos) / Para_List.Parameter.Gts_Pos_reference);
+                    //实际位置指示
+                    label23.Text = Convert.ToString(Convert.ToDecimal(Prompt.Refresh.Axis02_encPos) / Para_List.Parameter.Gts_Pos_reference);
                     //加速度指示
                     label13.Text = Convert.ToString(Convert.ToDecimal(Prompt.Refresh.Axis02_acc) * Para_List.Parameter.Gts_Acc_reference);
                     //减速度指示

@@ -175,22 +175,35 @@ namespace Laser_Build_1._0
                     {
                         for (j = 0; j < dxf.LwPolylines[i].Vertexes.Count; j++)
                         {
-                            Temp_Entity_Data.Type = 1;//直线插补
-                            //起点计算
-                            Temp_Entity_Data.Start_x = Convert.ToDecimal(dxf.LwPolylines[i].Vertexes[j].Position.X);
-                            Temp_Entity_Data.Start_y = Convert.ToDecimal(dxf.LwPolylines[i].Vertexes[j].Position.Y);
+                            
                             if (j <= dxf.LwPolylines[i].Vertexes.Count - 2)
                             {
-                                Temp_Entity_Data.End_x = Convert.ToDecimal(dxf.LwPolylines[i].Vertexes[j + 1].Position.X);
-                                Temp_Entity_Data.End_y = Convert.ToDecimal(dxf.LwPolylines[i].Vertexes[j + 1].Position.Y);
+                                if (!(dxf.LwPolylines[i].Vertexes[j].Position.X == dxf.LwPolylines[i].Vertexes[j + 1].Position.X) || !(dxf.LwPolylines[i].Vertexes[j].Position.Y == dxf.LwPolylines[i].Vertexes[j + 1].Position.Y))
+                                {
+                                    Temp_Entity_Data.Type = 1;//直线插补
+                                    ///起点计算
+                                    Temp_Entity_Data.Start_x = Convert.ToDecimal(dxf.LwPolylines[i].Vertexes[j].Position.X);
+                                    Temp_Entity_Data.Start_y = Convert.ToDecimal(dxf.LwPolylines[i].Vertexes[j].Position.Y);
+                                    Temp_Entity_Data.End_x = Convert.ToDecimal(dxf.LwPolylines[i].Vertexes[j + 1].Position.X);
+                                    Temp_Entity_Data.End_y = Convert.ToDecimal(dxf.LwPolylines[i].Vertexes[j + 1].Position.Y);
+                                    //提交进入LwPolylines_Entity_Data
+                                    Temp_List.Add(new Entity_Data(Temp_Entity_Data));
+                                }                               
                             }
                             else if (j == (dxf.LwPolylines[i].Vertexes.Count - 1))
                             {
-                                Temp_Entity_Data.End_x = Convert.ToDecimal(dxf.LwPolylines[i].Vertexes[0].Position.X);
-                                Temp_Entity_Data.End_y = Convert.ToDecimal(dxf.LwPolylines[i].Vertexes[0].Position.Y);
-                            }
-                            //提交进入LwPolylines_Entity_Data
-                            Temp_List.Add(new Entity_Data(Temp_Entity_Data));
+                                if (!(dxf.LwPolylines[i].Vertexes[0].Position.X == dxf.LwPolylines[i].Vertexes[j].Position.X) || !(dxf.LwPolylines[i].Vertexes[0].Position.Y == dxf.LwPolylines[i].Vertexes[j].Position.Y))
+                                {
+                                    Temp_Entity_Data.Type = 1;//直线插补
+                                    ///起点计算
+                                    Temp_Entity_Data.Start_x = Convert.ToDecimal(dxf.LwPolylines[i].Vertexes[j].Position.X);
+                                    Temp_Entity_Data.Start_y = Convert.ToDecimal(dxf.LwPolylines[i].Vertexes[j].Position.Y);
+                                    Temp_Entity_Data.End_x = Convert.ToDecimal(dxf.LwPolylines[i].Vertexes[0].Position.X);
+                                    Temp_Entity_Data.End_y = Convert.ToDecimal(dxf.LwPolylines[i].Vertexes[0].Position.Y);
+                                    //提交进入LwPolylines_Entity_Data
+                                    Temp_List.Add(new Entity_Data(Temp_Entity_Data));
+                                }                                
+                            }                            
                             Temp_Entity_Data.Empty();
                         }
                         //追加一个LW
@@ -3048,65 +3061,9 @@ namespace Laser_Build_1._0
                 return false;
             }
         }
-        //将取得的仿射变换系数转换为，全局参数变量
-        public void Convert_Affinity_Rate(Affinity_Rate Rate)
-        {
-            Para_List.Parameter.Arc_Compensation_A = Rate.Angle;//角度
-            Para_List.Parameter.Delta =new Vector(Rate.Delta_X, Rate.Delta_Y);//坐标偏移
-        }
-        //角度补偿 放置角度，偏移量　Entity数据处理　
-        public List<Interpolation_Data> Compensation_Seperate(List<Interpolation_Data> In_Data)
-        {
-            Para_List.Parameter.Arc_Compensation_R = Convert.ToDecimal(Math.PI) * (Para_List.Parameter.Arc_Compensation_A / 180.0m);
-            decimal Cos_Arc = Convert.ToDecimal(Math.Cos(Convert.ToDouble(Para_List.Parameter.Arc_Compensation_R)));
-            decimal Sin_Arc = Convert.ToDecimal(Math.Sin(Convert.ToDouble(Para_List.Parameter.Arc_Compensation_R)));
-
-            List<Interpolation_Data> Result = new List<Interpolation_Data>();
-            Interpolation_Data Temp_interpolation_Data = new Interpolation_Data();
-            for (int i = 0; i < In_Data.Count; i++)
-            {
-
-                //数据处理
-                Temp_interpolation_Data.Empty();
-                Temp_interpolation_Data = In_Data[i];
-                Temp_interpolation_Data.End_x = In_Data[i].End_x * Cos_Arc - In_Data[i].End_y * Sin_Arc + Para_List.Parameter.Delta.X;//坐标原点的坐标X
-                Temp_interpolation_Data.End_y = In_Data[i].End_y * Cos_Arc + In_Data[i].End_x * Sin_Arc + Para_List.Parameter.Delta.Y;//坐标原点的坐标Y
-                Temp_interpolation_Data.Center_Start_x = In_Data[i].Center_Start_x * Cos_Arc - In_Data[i].Center_Start_y * Sin_Arc;
-                Temp_interpolation_Data.Center_Start_y = In_Data[i].Center_Start_y * Cos_Arc + In_Data[i].Center_Start_x * Sin_Arc;
-
-                Result.Add(Temp_interpolation_Data);
-            }
-            return Result;
-        }
-        //角度补偿 放置角度，偏移量　整合数据处理　
-        public List<List<Interpolation_Data>> Compensation_Integrate(List<List<Interpolation_Data>> In_Data)
-        {
-            Para_List.Parameter.Arc_Compensation_R = Convert.ToDecimal(Math.PI) * (Para_List.Parameter.Arc_Compensation_A / 180.0m);
-            decimal Cos_Arc = Convert.ToDecimal(Math.Cos(Convert.ToDouble(Para_List.Parameter.Arc_Compensation_R)));
-            decimal Sin_Arc = Convert.ToDecimal(Math.Sin(Convert.ToDouble(Para_List.Parameter.Arc_Compensation_R)));
-
-            List<List<Interpolation_Data>> Result = new List<List<Interpolation_Data>>();//返回值
-            List<Interpolation_Data> Temp_interpolation_List_Data = new List<Interpolation_Data>();//二级层
-            Interpolation_Data Temp_interpolation_Data = new Interpolation_Data();//一级层            
-
-            for (int i = 0; i < In_Data.Count; i++)
-            {
-                Temp_interpolation_List_Data.Clear();
-                for (int j = 0; j < In_Data[i].Count; j++)
-                {
-                    //数据处理
-                    Temp_interpolation_Data.Empty();
-                    Temp_interpolation_Data = In_Data[i][j];
-                    Temp_interpolation_Data.End_x = In_Data[i][j].End_x * Cos_Arc - In_Data[i][j].End_y * Sin_Arc + Para_List.Parameter.Delta.X;//相对于坐标原点的坐标X
-                    Temp_interpolation_Data.End_y = In_Data[i][j].End_y * Cos_Arc + In_Data[i][j].End_x * Sin_Arc + Para_List.Parameter.Delta.Y;//相对于坐标原点的坐标Y
-                    Temp_interpolation_Data.Center_Start_x = In_Data[i][j].Center_Start_x * Cos_Arc - In_Data[i][j].Center_Start_y * Sin_Arc;
-                    Temp_interpolation_Data.Center_Start_y = In_Data[i][j].Center_Start_y * Cos_Arc + In_Data[i][j].Center_Start_x * Sin_Arc;
-                    Temp_interpolation_List_Data.Add(Temp_interpolation_Data);
-                }
-                Result.Add(new List<Interpolation_Data>(Temp_interpolation_List_Data));
-            }
-            return Result;
-        }
+        
+       
+        
         //角度补偿 放置角度，偏移量　Entity数据处理　自定义仿射变换系数
         public List<Interpolation_Data> Compensation_Seperate(List<Interpolation_Data> In_Data, Affinity_Rate Rate)
         {

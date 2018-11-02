@@ -18,12 +18,10 @@ namespace Prompt
         {
             string Log_Component = command + "--------" + Convert.ToString(error);
             // 如果指令执行返回值为非0，说明指令执行错误，向屏幕输出错误结果
-            /*
             if (error != 0)
             {
                 C_log.Error(Log_Component);
             }
-            */
             /*else
             {
                 C_log.Info(Log_Component);
@@ -69,8 +67,8 @@ namespace Prompt
     {
         public static bool EXI1, EXI2, EXI3, EXI4, EXI5, EXI6, EXI7; //定义输入变量
         public static bool EXO1, EXO2, EXO3, EXO4, EXO5, EXO6, EXO7, EXO8, EXO9, EXO10, EXO11, EXO12; //定义输出变量
-        public static bool Axis01_Limit_Up, Axis01_Limit_Down, Axis01_Home, Axis01_Alarm, Axis01_Alarm_Cl, Axis01_MC_Err, Axis01_EN, Axis01_Busy, Axis01_IO_Stop, Axis01_IO_EMG, Axis01_Posed;//定义轴1的BOOL变量
-        public static bool Axis02_Limit_Up, Axis02_Limit_Down, Axis02_Home, Axis02_Alarm, Axis02_Alarm_Cl, Axis02_MC_Err, Axis02_EN, Axis02_Busy, Axis02_IO_Stop, Axis02_IO_EMG, Axis02_Posed;//定义轴2的BOOL变量
+        public static bool Axis01_Limit_Up, Axis01_Limit_Down, Axis01_Home, Axis01_Alarm, Axis01_Alarm_Cl, Axis01_MC_Err, Axis01_EN, Axis01_Busy, Axis01_IO_Stop, Axis01_IO_EMG, Axis01_Motor_Posed, Axis01_Upper_Posed;//定义轴1的BOOL变量
+        public static bool Axis02_Limit_Up, Axis02_Limit_Down, Axis02_Home, Axis02_Alarm, Axis02_Alarm_Cl, Axis02_MC_Err, Axis02_EN, Axis02_Busy, Axis02_IO_Stop, Axis02_IO_EMG, Axis02_Motor_Posed, Axis02_Upper_Posed;//定义轴2的BOOL变量
         public static short Cyc_control, Blow_control, Lamp_control, Yellow_lamp, Green_lamp, Red_lamp, Beeze_Control, Button1_Lamp, Button2_Lamp;//定义气缸、吹气、照明、灯塔黄、灯塔绿、灯塔红、蜂鸣、启动按钮1灯、
         public static short Axis01_Home_Ex0_Control, Axis02_Home_Ex0_Control;//定义轴1、2回零触发
 
@@ -88,6 +86,8 @@ namespace Prompt
 
         //定义当前位置
         public static double Axis01_prfPos, Axis02_prfPos;
+        //定义实际位置
+        public static double Axis01_encPos, Axis02_encPos;
         //定义当前速度
         public static double Axis01_vel, Axis02_vel;
         //定义当前加减速度
@@ -135,6 +135,10 @@ namespace Prompt
             //读取规划位置
             Gts_Return = MC.GT_GetPrfPos(1, out Axis01_prfPos, 1, out Axis01_Clk);
             Gts_Return = MC.GT_GetPrfPos(2, out Axis02_prfPos, 1, out Axis02_Clk);
+
+            //读取实际位置
+            Gts_Return = MC.GT_GetAxisEncPos(1, out Axis01_encPos, 1, out Axis01_Clk);
+            Gts_Return = MC.GT_GetAxisEncPos(2, out Axis02_encPos, 1, out Axis02_Clk);
 
             //读取当前速度
             Gts_Return = MC.GT_GetVel(1, out Axis01_vel);
@@ -194,8 +198,8 @@ namespace Prompt
             Axis01_Busy = (Axis01_Sta & (1 << 10)) != 0;// Axis01轴输出中
             Axis01_IO_Stop = (Axis01_Sta & (1 << 7)) != 0;// Axis01轴IO停止
             Axis01_IO_EMG = (Axis01_Sta & (1 << 8)) != 0;// Axis01轴IO急停
-            Axis01_Posed = (Axis_Posed_Sta & 0x01) != 0;// Axis01轴到位
-
+            Axis01_Motor_Posed = (Axis_Posed_Sta & 0x01) != 0;// Axis01轴 电机到位
+            Axis01_Upper_Posed = (Axis01_Sta & (1 << 11)) != 0;// Axis01轴 上位机到位
             //刷新Axis02 状态
             Axis02_Limit_Up = (Axis02_Sta & (1 << 5)) != 0;// Axis02轴正限位
             Axis02_Limit_Down = (Axis02_Sta & (1 << 6)) != 0;// Axis02轴负限位
@@ -207,8 +211,8 @@ namespace Prompt
             Axis02_Busy = (Axis02_Sta & (1 << 10)) != 0;// Axis02轴输出中
             Axis02_IO_Stop = (Axis02_Sta & (1 << 7)) != 0;// Axis02轴IO停止
             Axis02_IO_EMG = (Axis02_Sta & (1 << 8)) != 0;// Axis02轴IO急停
-            Axis02_Posed = (Axis_Posed_Sta & (1 << 1)) != 0; ;// Axis02轴到位
-
+            Axis02_Motor_Posed = (Axis_Posed_Sta & (1 << 1)) != 0; ;// Axis02轴 电机到位
+            Axis02_Upper_Posed = (Axis02_Sta & (1 << 11)) != 0;// Axis02轴 上位机到位
             //刷新轴原点状态
             if (Gts_Home_Flag)
             {

@@ -697,5 +697,19 @@ namespace Laser_Version2._0
                 Re_connect.Enabled = true;//启用串口开关按钮
             }
         }
+        /// <summary>
+        /// 更新串口列表
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Refresh_List_Click(object sender, EventArgs e)
+        {
+            //刷新列表
+            Initialization.Initial.Laser_Control_Com.Refresh_Com_List();
+            //初始化通讯端口列表
+            Com_List.Items.Clear();
+            Com_List.Items.AddRange(Initialization.Initial.Laser_Control_Com.PortName.ToArray());
+            
+        }
     }
 }

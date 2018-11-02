@@ -502,7 +502,6 @@ namespace Laser_Build_1._0
             DataTable Calibration_Data_Acquisition = CSV_RW.OpenCSV(@"./\Config/Calibration_Data_Acquisition.csv");
             //建立变量
             Vector Cam = new Vector();//相机反馈的当前坐标
-            Vector Cam_Delta = new Vector(); //(相机反馈的当前坐标) - (相机中心坐标)
             Vector Cal_Actual_Point = new Vector();//当前平台坐标 对应的 标定板坐标
             int i = 0, j = 0;
             //2.5mm步距进行数据提取和整合，使用INC指令
@@ -519,12 +518,11 @@ namespace Laser_Build_1._0
                         Cam = new Vector(x0,y0);
                     }                    
                     //相机测算的实际偏差值:(相机反馈的当前坐标) - (相机中心坐标)
-                    Cam_Delta = new Vector(Cam.X, Cam.Y);
                     //当前平台坐标 对应的 标定板坐标
                     Cal_Actual_Point = Get_Cal_Angle_Point(new Vector(j * Para_List.Parameter.Gts_Calibration_Cell, i * Para_List.Parameter.Gts_Calibration_Cell));
                     //数据保存
-                    Temp_Correct_Data.Xo = Cal_Actual_Point.X - Cam_Delta.X;//相机实际X坐标
-                    Temp_Correct_Data.Yo = Cal_Actual_Point.Y - Cam_Delta.Y;//相机实际Y坐标
+                    Temp_Correct_Data.Xo = Cal_Actual_Point.X + Cam.X;//相机实际X坐标
+                    Temp_Correct_Data.Yo = Cal_Actual_Point.Y + Cam.Y;//相机实际Y坐标
                     Temp_Correct_Data.Xm = j * Para_List.Parameter.Gts_Calibration_Cell;//平台电机 理论X坐标
                     Temp_Correct_Data.Ym = i * Para_List.Parameter.Gts_Calibration_Cell;//平台电机 理论Y坐标
                     //添加进入List
@@ -607,7 +605,7 @@ namespace Laser_Build_1._0
             //建立变量
             List<Correct_Data> Result = new List<Correct_Data>();
             Correct_Data Temp_Correct_Data = new Correct_Data();
-            ////标定板数据采集
+            //标定板数据采集
             DataTable Calibration_Data_Acquisition = new DataTable();
             Calibration_Data_Acquisition.Columns.Add("理论定位点X坐标", typeof(decimal));
             Calibration_Data_Acquisition.Columns.Add("理论定位点Y坐标", typeof(decimal));
@@ -726,77 +724,6 @@ namespace Laser_Build_1._0
             //数据矫正完成
         }
         /// <summary>
-        /// 计算标定板仿射变换参数
-        /// </summary>
-        /// <returns></returns>
-        public static bool Cal_Calibration_Affinity_Matrix()
-        {
-            //不能使用平台坐标
-            //建立变量
-            Affinity_Matrix Result = new Affinity_Matrix();
-            //定义仿射变换数组 
-            Mat mat = new Mat(new Size(3, 2), Emgu.CV.CvEnum.DepthType.Cv32F, 1); //2行 3列 的矩阵
-            //定义点位数组
-            PointF[] srcTri = new PointF[3];//标准数据
-            PointF[] dstTri = new PointF[3];//差异化数据 
-            double[] temp_array;
-            //定位点位计算标定板偏差
-            Vector[] Cali_Mark_Src = new Vector[3] { new Vector(0, 0), new Vector(350, 0), new Vector(350, 350) };
-            Vector[] Cali_Mark_Dst = new Vector[3] { new Vector(0, 0), new Vector(350, 0), new Vector(350, 350) };
-            Vector Cam = new Vector();
-            Vector Tem_Mark = new Vector();
-            Vector Coordinate = new Vector();
-            //标定板数据计算
-            for (int i = 0;i< Cali_Mark_Dst.Length; i++)
-            {
-                do
-                {
-                    //定位到标定板数据实际点位i
-                    Mark(Cali_Mark_Dst[i]);
-                    //调用相机，获取对比的坐标信息
-                    Thread.Sleep(500);//延时500ms
-                    Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation_Coordinate_Correct(1));//触发拍照 
-                    if (Cam.Length == 0)
-                    {
-                        MessageBox.Show("相机坐标数据提取错误，请检查！！！");
-                        return false;
-                    }
-                    Coordinate = GTS_Fun.Interpolation.Get_Coordinate(0);
-                    Tem_Mark = new Vector(Coordinate - Cam);//计算偏移 
-                    //反馈回标定板数据实际点位i
-                    Cali_Mark_Dst[i] = new Vector(Tem_Mark);
-                } while (!Differ_Deviation(Cam,Para_List.Parameter.Pos_Tolerance));                             
-            }
-            //数据提取
-            //标准数据
-            srcTri[0] = new PointF((float)(Cali_Mark_Src[0].X), (float)(Cali_Mark_Src[0].Y));
-            srcTri[1] = new PointF((float)(Cali_Mark_Src[1].X), (float)(Cali_Mark_Src[1].Y));
-            srcTri[2] = new PointF((float)(Cali_Mark_Src[2].X), (float)(Cali_Mark_Src[2].Y));
-            //仿射数据
-            dstTri[0] = new PointF((float)(Cali_Mark_Dst[0].X), (float)(Cali_Mark_Dst[0].Y));
-            dstTri[1] = new PointF((float)(Cali_Mark_Dst[1].X), (float)(Cali_Mark_Dst[1].Y));
-            dstTri[2] = new PointF((float)(Cali_Mark_Dst[2].X), (float)(Cali_Mark_Dst[2].Y));
-            //计算仿射变换矩阵
-            mat = CvInvoke.GetAffineTransform(srcTri, dstTri);
-            //提取矩阵数据
-            temp_array = mat.GetDoubleArray();
-            //获取仿射变换参数
-            Result = Gts_Cal_Data_Resolve.Array_To_Affinity(temp_array);
-            //获取仿射变换参数
-            Para_List.Parameter.Cal_Trans_Affinity = new Affinity_Matrix(Result);
-            //追加进入仿射变换List
-            return true;
-        }
-        /// <summary>
-        /// 计算标定板仿射变换后坐标值
-        /// </summary>
-        /// <param name="src"></param>
-        /// <returns></returns>
-        public static Vector Get_Cal_Actual_Point(Vector src)
-        {
-            return new Vector(src.X * Para_List.Parameter.Cal_Trans_Affinity.Stretch_X + src.Y * Para_List.Parameter.Cal_Trans_Affinity.Distortion_X + Para_List.Parameter.Cal_Trans_Affinity.Delta_X, src.Y * Para_List.Parameter.Cal_Trans_Affinity.Stretch_Y + src.X * Para_List.Parameter.Cal_Trans_Affinity.Distortion_Y + Para_List.Parameter.Cal_Trans_Affinity.Delta_Y);
-        }
-        /// <summary>
         /// 计算标定板旋转变换参数
         /// </summary>
         /// <returns></returns>
@@ -811,6 +738,12 @@ namespace Laser_Build_1._0
             Vector Cam = new Vector();
             Vector Tem_Mark = new Vector();
             double[] temp_array;
+            //标定板数据采集
+            DataTable Calibration_Board_Angle = new DataTable();
+            Calibration_Board_Angle.Columns.Add("理论定位点X坐标", typeof(decimal));
+            Calibration_Board_Angle.Columns.Add("理论定位点Y坐标", typeof(decimal));
+            Calibration_Board_Angle.Columns.Add("相机采集X坐标", typeof(decimal));
+            Calibration_Board_Angle.Columns.Add("相机采集Y坐标", typeof(decimal));
             //标定板数据计算
             for (int i = 0; i < Cali_Mark.Length; i++)
             {
@@ -827,7 +760,10 @@ namespace Laser_Build_1._0
                 }                
                 //反馈回标定板数据实际点位i
                 Cali_Mark[i] = new Vector(Tem_Mark + Cam);
-            }             
+                //数据保存
+                Calibration_Board_Angle.Rows.Add(new object[] { Cali_Mark[i].X, Cali_Mark[i].Y, Cam.X, Cam.Y });
+
+            }
             Mat rotateMat = new Mat();//定义旋转变换数组
             double angle = -(Math.Atan((double)((Cali_Mark[1].Y - Cali_Mark[0].Y) / (Cali_Mark[1].X - Cali_Mark[0].X))) * 180) / Math.PI;//旋转角度
             double scale = 1.0;//缩放因子
@@ -839,6 +775,8 @@ namespace Laser_Build_1._0
             Result = Gts_Cal_Data_Resolve.Array_To_Affinity(temp_array);
             //获取仿射变换参数
             Para_List.Parameter.Cal_Trans_Angle = new Affinity_Matrix(Result);
+            //保存数据
+            CSV_RW.SaveCSV(Calibration_Board_Angle, "Calibration_Board_Angle_Data");
             //追加进入仿射变换List
             return true;
         }
@@ -858,7 +796,7 @@ namespace Laser_Build_1._0
         /// <param name="type"></param>
         /// type - 0 初次校准
         /// type - 1 re_cal
-        public static void Calibrate_Mark(int type)
+        public static bool Calibrate_Mark(int type)
         {
             //建立变量
             Vector Cam = new Vector();
@@ -890,17 +828,17 @@ namespace Laser_Build_1._0
                 do
                 {
                     //定位到Mark点
-                    Mark(Mark_Datas[i]);
+                    Mark_Correct(Mark_Datas[i]);
                     //调用相机，获取对比的坐标信息
                     Thread.Sleep(200);//延时200ms
-                    Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation_Coordinate_Correct(2));//触发拍照 
+                    Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation_Coordinate_Correct(Para_List.Parameter.Camera_Mark_Type));//触发拍照 
                     if (Cam.Length == 0)
                     {
                          MessageBox.Show("相机坐标提取失败，请检查！！！");
-                        return;
+                        return false;
                     }
                     //获取坐标系平台坐标
-                    Coodinate_Point = new Vector(GTS_Fun.Interpolation.Get_Coordinate(0));
+                    Coodinate_Point = new Vector(GTS_Fun.Interpolation.Get_Coordinate(1));
                     //计算偏移
                     Tem_Mark = new Vector(Coodinate_Point - Cam);
                     //反馈回Mark点
@@ -911,11 +849,11 @@ namespace Laser_Build_1._0
                     if (Counting >= 20)
                     {
                         MessageBox.Show(string.Format("Mark{0} 寻找失败!!!",i+1));
-                        return;
+                        return false;
                     }
                 } while (!Differ_Deviation(Cam, Para_List.Parameter.Pos_Tolerance));
                 //获取理论坐标
-                Mark_Datas[i] = Gts_Cal_Data_Resolve.Get_Affinity_Point(1, Mark_Datas[i].X, Mark_Datas[i].Y, GTS_Fun.Interpolation.affinity_Matrices);
+                Mark_Datas[i] = new Vector(GTS_Fun.Interpolation.Get_Coordinate(1));
             }
             //cal Affinity matrics data 
             Para_List.Parameter.Trans_Affinity =new Affinity_Matrix(Gts_Cal_Data_Resolve.Cal_Affinity(Mark_Datas));
@@ -935,7 +873,8 @@ namespace Laser_Build_1._0
                 Prompt.Log.Info(String.Format("Mark4 验证NG！！！，X坐标偏差：{0}，Y坐标偏差：{1}", Mark4_dif.X, Mark4_dif.Y));
                 MessageBox.Show(String.Format("Mark4 验证NG！！！，X坐标偏差：{0}，Y坐标偏差：{1}", Mark4_dif.X, Mark4_dif.Y));
             }
-
+            //返回
+            return true;
         }
         /// <summary>
         /// 判别误差范围之内
@@ -957,10 +896,10 @@ namespace Laser_Build_1._0
         /// <summary>
         /// 矫正 振镜与ORG的距离
         /// </summary>
-        public static void Calibrate_RTC_ORG()
+        public static bool Calibrate_RTC_ORG()
         {
             //生成RTC扫圆轨迹
-            List<List<Interpolation_Data>> Calibrate_Data = Generate_Org_Rtc_Data(1.0m, 2.0m);
+            List<List<Interpolation_Data>> Calibrate_Data = Generate_Org_Rtc_Data(0.4m, 2.0m);
             //执行
             Integrated.Rts_Gts(Calibrate_Data);                   
             //建立变量
@@ -973,33 +912,34 @@ namespace Laser_Build_1._0
             do
             {
                 //定位到ORG矫正点
-                Mark(Tem_Mark);
+                Mark_Correct(Tem_Mark);
                 //调用相机，获取对比的坐标信息
-                Thread.Sleep(500);//延时200ms
-                //Main.T_Client
-                Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation_Coordinate_Correct(1));//触发拍照 
+                Thread.Sleep(500);
+                Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation_Pixel_Correct(2));//触发拍照 
                 if (Cam.Length == 0)
                 {
                     MessageBox.Show("相机坐标提取失败，请检查！！！");
-                    return;
+                    return false;
                 }
+                Cam = new Vector(Cam.X - 243 * Para_List.Parameter.Cam_Reference, Cam.Y - 324 * Para_List.Parameter.Cam_Reference);
                 //获取坐标系平台坐标
-                Coodinate_Point = new Vector(GTS_Fun.Interpolation.Get_Coordinate(0));
+                Coodinate_Point = new Vector(GTS_Fun.Interpolation.Get_Coordinate(1));
                 //计算偏移
-                Tem_Mark = new Vector(Coodinate_Point - Cam);
+                Tem_Mark = new Vector(Coodinate_Point + Cam);
                 //自增
                 Counting++;
                 if (Counting>=10)
                 {
-                    return;
+                    return false;
                 }
+
             } while (!Differ_Deviation(Cam, Para_List.Parameter.Pos_Tolerance));
             //获取实际坐标值            
-            Coodinate_Point = new Vector(GTS_Fun.Interpolation.Get_Coordinate(0));//获取坐标系平台坐标
+            Coodinate_Point = new Vector(GTS_Fun.Interpolation.Get_Coordinate(1));//获取坐标系平台坐标
             Tem_Mark = new Vector(Coodinate_Point + Cam);
-            Tem_Mark = Gts_Cal_Data_Resolve.Get_Affinity_Point(1, Tem_Mark.X, Tem_Mark.Y, GTS_Fun.Interpolation.affinity_Matrices);
             Para_List.Parameter.Rtc_Org = new Vector(Tem_Mark - Para_List.Parameter.Base_Gts);
             //数据矫正完成
+            return true;
         }
         /// <summary>
         /// 生成RTC 与 原点距离矫正 数据
@@ -1106,7 +1046,7 @@ namespace Laser_Build_1._0
         {
             //生成打标数据
             //生成RTC扫圆轨迹
-            List<List<Interpolation_Data>> Calibrate_Data = Generate_Org_Rtc_Data(0.5m, 2.0m);
+            List<List<Interpolation_Data>> Calibrate_Data = Generate_Org_Rtc_Data(0.4m, 2.0m);
             //执行打标数据
             Integrated.Rts_Gts(Calibrate_Data);
 
@@ -1119,8 +1059,8 @@ namespace Laser_Build_1._0
             PointF[] dstTri = new PointF[3];//差异化数据 
             double[] temp_array;
             //定位点位计算标定板偏差
-            Vector[] Cali_Mark_Src = new Vector[3] { new Vector(0, 0), new Vector(0, 1.5m), new Vector(1.5m, 0) };
-            Vector[] Cali_Mark_Dst = new Vector[3] { new Vector(0, 0), new Vector(0, 1.5m), new Vector(1.5m, 0) };
+            Vector[] Cali_Mark_Src = new Vector[3] { new Vector(0, 0), new Vector(0, 2.0m), new Vector(1.5m, 0) };
+            Vector[] Cali_Mark_Dst = new Vector[3] { new Vector(0, 0), new Vector(0, 2.0m), new Vector(1.5m, 0) };
 
             //矫正坐标中心对齐
             Vector Cam = new Vector();
@@ -1129,10 +1069,10 @@ namespace Laser_Build_1._0
             UInt16 Counting = 0;
             //相对位移标定相机坐标系
             for (int i =0;i< Cali_Mark_Src.Length;i++)
-            {
-                Tem_Mark = new Vector(Cali_Mark_Src[i] + Para_List.Parameter.Rtc_Org + Para_List.Parameter.Base_Gts);
+            {                
                 if (i==0)
                 {
+                    Tem_Mark = new Vector(Cali_Mark_Src[i] + Para_List.Parameter.Rtc_Org + Para_List.Parameter.Base_Gts);
                     do
                     {
                         //定位矫正点
@@ -1160,7 +1100,7 @@ namespace Laser_Build_1._0
                     } while (!Differ_Deviation(Cam, Para_List.Parameter.Pos_Tolerance));
 
                     //获取坐标对齐mark的像素坐标
-                    Thread.Sleep(2000);
+                    Thread.Sleep(1000);
                     Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Actual_Pixel(2));//触发拍照 
                     if (Cam.Length == 0)
                     {
@@ -1172,10 +1112,39 @@ namespace Laser_Build_1._0
                 }
                 else
                 {
-                    //定位坐标
-                    Mark(Cali_Mark_Src[i] + Para_List.Parameter.Rtc_Org + Para_List.Parameter.Base_Gts);
+                    Tem_Mark = new Vector(new Vector(0,0) + Para_List.Parameter.Rtc_Org + Para_List.Parameter.Base_Gts);
+                    do
+                    {
+                        //定位矫正点
+                        Mark(Tem_Mark);
+                        //调用相机，获取对比的坐标信息
+                        Thread.Sleep(1000);
+                        Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation_Pixel_Correct(2));//触发拍照 
+                        if (Cam.Length == 0)
+                        {
+                            MessageBox.Show("相机坐标提取失败，请检查！！！");
+                            return false;
+                        }
+                        Cam = new Vector(Cam.X - 243 * Para_List.Parameter.Cam_Reference, Cam.Y - 324 * Para_List.Parameter.Cam_Reference);
+                        //获取坐标系平台坐标
+                        Coodinate_Point = new Vector(GTS_Fun.Interpolation.Get_Coordinate(0));
+                        //计算偏移
+                        Tem_Mark = new Vector(Coodinate_Point + Cam);
+                        //自增
+                        Counting++;
+                        if (Counting >= 10)
+                        {
+                            MessageBox.Show("相机坐标系中心对齐失败！！！");
+                            return false;
+                        }
+                    } while (!Differ_Deviation(Cam, Para_List.Parameter.Pos_Tolerance));
+
+                    //进行位移
+                    Coodinate_Point = new Vector(GTS_Fun.Interpolation.Get_Coordinate(0));
+                    Tem_Mark = new Vector(Coodinate_Point + Cali_Mark_Src[i]);
+                    Mark(Tem_Mark);
                     //调用相机，获取对比的坐标信息
-                    Thread.Sleep(2000);
+                    Thread.Sleep(1000);
                     Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Actual_Pixel(2));//触发拍照 
                     if (Cam.Length == 0)
                     {
@@ -1310,11 +1279,11 @@ namespace Laser_Build_1._0
         /// <summary>
         /// 计算振镜坐标系与平台坐标系的夹角
         /// </summary>
-        public static void Get_Rtc_Coordinate_Affinity()
+        public static bool Get_Rtc_Coordinate_Affinity()
         {
             //打标距离
             decimal Radius = 0.5m;//半径
-            decimal Interval = 22.5m;//间距 
+            decimal Interval = 25m;//间距 
             //数据采集
             DataTable Calibration_Data_Acquisition = new DataTable();
             Calibration_Data_Acquisition.Columns.Add("振镜X坐标", typeof(decimal));
@@ -1356,27 +1325,27 @@ namespace Laser_Build_1._0
                 do
                 {
                     //定位到标定板数据实际点位i
-                    Mark(Cali_Mark_Dst[i]);
+                    Mark_Correct(Cali_Mark_Dst[i]); 
                     //调用相机，获取对比的坐标信息
                     Thread.Sleep(500);//延时200ms
                     Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation_Coordinate_Correct(1));//触发拍照 
                     if (Cam.Length == 0)
                     {
                         MessageBox.Show("相机坐标提取失败，请检查！！！");
-                        return;
+                        return false;
                     }
-                    Coordinate = GTS_Fun.Interpolation.Get_Coordinate(0);
+                    Coordinate = GTS_Fun.Interpolation.Get_Coordinate(1);
                     Tem_Mark = new Vector(Coordinate - Cam);//计算偏移
                     Cali_Mark_Dst[i] = new Vector(Tem_Mark);//反馈回标定板数据实际点位                                                            
                     Counting++;//自增
                     if (Counting >= 30)
                     {
                         MessageBox.Show("超出重试次数！！！");
-                        return;
+                        return false;
                     }
                 } while (!Differ_Deviation(Cam, Para_List.Parameter.Pos_Tolerance));            
                 //获取实际坐标值
-                Cali_Mark_Dst[i] = Gts_Cal_Data_Resolve.Get_Affinity_Point(1, Cali_Mark_Dst[i].X, Cali_Mark_Dst[i].Y, GTS_Fun.Interpolation.affinity_Matrices);
+                Cali_Mark_Dst[i] = GTS_Fun.Interpolation.Get_Coordinate(1);
                 //数据保存
                 Calibration_Data_Acquisition.Rows.Add(new object[] { Cali_Mark_Src[i].X, Cali_Mark_Src[i].Y, Cali_Mark_Dst[i].X, Cali_Mark_Dst[i].Y });
             }
@@ -1411,6 +1380,7 @@ namespace Laser_Build_1._0
             //Para_List.Parameter.Rtc_Trans_Angle = new Affinity_Matrix(Temp_para);
             //数据保存
             CSV_RW.SaveCSV(Calibration_Data_Acquisition, "Rtc_Cor_Data_Acquisition");
+            return true;
         }
         /// <summary>
         /// 生成Rtc坐标系矫正 所需的加工轨迹
@@ -1619,20 +1589,47 @@ namespace Laser_Build_1._0
             {
                 for (int i = 0; i < Aquisition_Point.Count; i++)
                 {
-                    GTS_Fun.Interpolation.Gts_Ready_Test(Aquisition_Point[i].X + Para_List.Parameter.Rtc_Org.X, Aquisition_Point[i].Y + Para_List.Parameter.Rtc_Org.Y);
-                    //调用相机，获取对比的坐标信息
-                    Thread.Sleep(500);
-                    //相机反馈的当前坐标
-                    Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation_Coordinate_Correct(1));//触发拍照 
-                    if (Cam.Length == 0)
+                    Tem_Mark = new Vector(Aquisition_Point[i].X + Para_List.Parameter.Rtc_Org.X, Aquisition_Point[i].Y + Para_List.Parameter.Rtc_Org.Y);
+
+                    if (Para_List.Parameter.Rtc_Get_Data_Align == 1)
                     {
-                        MessageBox.Show("相机坐标提取失败，请检查！！！");
-                        CSV_RW.SaveCSV(Temp_Acquisition, "Rtc_Data_Aquisition_Temp_Fail");//原始数据保存
-                        CSV_RW.SaveCSV(Calibration_Data_Acquisition, "Rtc_Data_Aquisition_Fail");//原始数据保存
-                        return Aquisition_Point;
+                        //对齐中心
+                        do
+                        {
+                            GTS_Fun.Interpolation.Gts_Ready_Test(Tem_Mark.X, Tem_Mark.Y);
+                            //调用相机，获取对比的坐标信息
+                            Thread.Sleep(500);
+                            //相机反馈的当前坐标
+                            Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation_Coordinate_Correct(1));//触发拍照 
+                            if (Cam.Length == 0)
+                            {
+                                MessageBox.Show("相机坐标提取失败，请检查！！！");
+                                CSV_RW.SaveCSV(Temp_Acquisition, "Rtc_Data_Aquisition_Temp_Fail");//原始数据保存
+                                CSV_RW.SaveCSV(Calibration_Data_Acquisition, "Rtc_Data_Aquisition_Fail");//原始数据保存
+                                return Aquisition_Point;
+                            }
+                            Coordinate = GTS_Fun.Interpolation.Get_Coordinate(1);
+                            Tem_Mark = new Vector(Coordinate - Cam);//获取实际位置
+                        } while (!Differ_Deviation(Cam, Para_List.Parameter.Pos_Tolerance));
                     }
-                    Coordinate = GTS_Fun.Interpolation.Get_Coordinate(1);
-                    Tem_Mark = new Vector(Coordinate + Cam);//获取实际位置
+                    else
+                    {
+                        //实际测量
+                        GTS_Fun.Interpolation.Gts_Ready_Test(Tem_Mark.X, Tem_Mark.Y);
+                        //调用相机，获取对比的坐标信息
+                        Thread.Sleep(500);
+                        //相机反馈的当前坐标
+                        Cam = new Vector(Initialization.Initial.T_Client.Get_Cam_Deviation_Coordinate_Correct(1));//触发拍照 
+                        if (Cam.Length == 0)
+                        {
+                            MessageBox.Show("相机坐标提取失败，请检查！！！");
+                            CSV_RW.SaveCSV(Temp_Acquisition, "Rtc_Data_Aquisition_Temp_Fail");//原始数据保存
+                            CSV_RW.SaveCSV(Calibration_Data_Acquisition, "Rtc_Data_Aquisition_Fail");//原始数据保存
+                            return Aquisition_Point;
+                        }
+                        Coordinate = GTS_Fun.Interpolation.Get_Coordinate(1);
+                    }  
+                    //添加数据
                     Temp_Acquisition.Rows.Add(new object[] { Rtc_Point[i].X, Rtc_Point[i].Y, Tem_Mark.Y, Tem_Mark.X });
                 }
             }
@@ -1864,10 +1861,8 @@ namespace Laser_Build_1._0
                         CSV_RW.SaveCSV(Calibration_Data_Acquisition, "Rtc坐标系校准数据_Fail");//原始数据保存
                         return Aquisition_Point;
                     }
-                    Coordinate = GTS_Fun.Interpolation.Get_Coordinate(0);
-                    Tem_Mark = new Vector(Coordinate + Cam);//计算偏移 
-                    //获取实际坐标值
-                    //Aquisition_Point[i] = Gts_Cal_Data_Resolve.Get_Affinity_Point(1, Tem_Mark.X, Tem_Mark.Y, GTS_Fun.Interpolation.affinity_Matrices);  
+                    Coordinate = GTS_Fun.Interpolation.Get_Coordinate(1);
+                    Tem_Mark = new Vector(Coordinate + Cam);//计算偏移
                     Aquisition_Point[i] = Tem_Mark;
                     Temp_Acquisition.Rows.Add(new object[] { Tem_Mark.X, Tem_Mark.Y,Rtc_Point[i].X, Rtc_Point[i].Y});
                 }

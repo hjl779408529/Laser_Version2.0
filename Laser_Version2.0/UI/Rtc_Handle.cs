@@ -46,12 +46,11 @@ namespace Laser_Version2._0
             textBox6.Text = Convert.ToString(Abs_X);
             textBox5.Text = Convert.ToString(Abs_Y);
 
-            textBox7.Text = Convert.ToString(Para_List.Parameter.Rtc_XPos_Reference);
-            textBox8.Text = Convert.ToString(Para_List.Parameter.Rtc_YPos_Reference);
+            textBox7.Text = Convert.ToString(Para_List.Parameter.Rtc_Pos_Reference);
             Home_Vector = Para_List.Parameter.Rtc_Home;
 
-            Mark_Speed.Text = (((decimal)Para_List.Parameter.Mark_Speed / Para_List.Parameter.Rtc_XPos_Reference) * 1000m).ToString();
-            Jump_Speed.Text = (((decimal)Para_List.Parameter.Jump_Speed / Para_List.Parameter.Rtc_XPos_Reference) * 1000m).ToString();
+            Mark_Speed.Text = (((decimal)Para_List.Parameter.Mark_Speed / Para_List.Parameter.Rtc_Pos_Reference) * 1000m).ToString();
+            Jump_Speed.Text = (((decimal)Para_List.Parameter.Jump_Speed / Para_List.Parameter.Rtc_Pos_Reference) * 1000m).ToString();
             Laser_ON_Delay.Text = Para_List.Parameter.Laser_On_Delay.ToString();
             Laser_Off_Delay.Text = Para_List.Parameter.Laser_Off_Delay.ToString();
             Jump_Delay.Text = Para_List.Parameter.Jump_Delay.ToString();
@@ -195,7 +194,7 @@ namespace Laser_Version2._0
         {
             RTC_Fun.Motion.Close_Laser();
         }
-        //Rtc位置X轴基准
+        //Rtc位置基准
         private void textBox7_TextChanged(object sender, EventArgs e)
         {
             if (!decimal.TryParse(textBox7.Text, out decimal tem)) 
@@ -203,17 +202,7 @@ namespace Laser_Version2._0
                 MessageBox.Show("请正确输入数字");
                 return;
             }
-            Para_List.Parameter.Rtc_XPos_Reference = tem;
-        }
-        //Rtc位置Y轴基准
-        private void textBox8_TextChanged(object sender, EventArgs e)
-        {
-            if (!decimal.TryParse(textBox8.Text, out decimal tem))
-            {
-                MessageBox.Show("请正确输入数字");
-                return;
-            }
-            Para_List.Parameter.Rtc_YPos_Reference = tem;
+            Para_List.Parameter.Rtc_Pos_Reference = tem;
         }
         /// <summary>
         /// Mark_Speed
@@ -227,7 +216,7 @@ namespace Laser_Version2._0
                 MessageBox.Show("请正确输入数字");
                 return;
             }
-            Para_List.Parameter.Mark_Speed =(double)(tem * Para_List.Parameter.Rtc_XPos_Reference / 1000m);
+            Para_List.Parameter.Mark_Speed =(double)(tem * Para_List.Parameter.Rtc_Pos_Reference / 1000m);
         }
         //参数生效
         private void Change_Para_List_Click(object sender, EventArgs e)
@@ -247,7 +236,7 @@ namespace Laser_Version2._0
                 MessageBox.Show("请正确输入数字");
                 return;
             }
-            Para_List.Parameter.Jump_Speed = (double)(tem * Para_List.Parameter.Rtc_XPos_Reference / 1000m);
+            Para_List.Parameter.Jump_Speed = (double)(tem * Para_List.Parameter.Rtc_Pos_Reference / 1000m);
         }
         /// <summary>
         /// Laser_On_Delay
@@ -318,6 +307,15 @@ namespace Laser_Version2._0
                 return;
             }
             Para_List.Parameter.Polygon_Delay = tem;
+        }
+        /// <summary>
+        /// 复位Rtc控制卡
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Reset_Rtc_Click(object sender, EventArgs e)
+        {
+            RTC_Fun.Factory.Load_Correct_File();
         }
     }
 }

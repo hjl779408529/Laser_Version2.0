@@ -53,8 +53,6 @@
             this.button9 = new System.Windows.Forms.Button();
             this.label11 = new System.Windows.Forms.Label();
             this.textBox7 = new System.Windows.Forms.TextBox();
-            this.label12 = new System.Windows.Forms.Label();
-            this.textBox8 = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.Mark_Speed = new System.Windows.Forms.TextBox();
             this.Change_Para_List = new System.Windows.Forms.Button();
@@ -74,6 +72,7 @@
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.groupBox6 = new System.Windows.Forms.GroupBox();
+            this.Reset_Rtc = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -303,36 +302,19 @@
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(26, 44);
+            this.label11.Location = new System.Drawing.Point(17, 44);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(143, 18);
+            this.label11.Size = new System.Drawing.Size(161, 18);
             this.label11.TabIndex = 16;
-            this.label11.Text = "Rtc_X_Reference";
+            this.label11.Text = "Rtc_Pos_Reference";
             // 
             // textBox7
             // 
-            this.textBox7.Location = new System.Drawing.Point(35, 68);
+            this.textBox7.Location = new System.Drawing.Point(35, 72);
             this.textBox7.Name = "textBox7";
             this.textBox7.Size = new System.Drawing.Size(125, 28);
             this.textBox7.TabIndex = 15;
             this.textBox7.TextChanged += new System.EventHandler(this.textBox7_TextChanged);
-            // 
-            // label12
-            // 
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(312, 44);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(143, 18);
-            this.label12.TabIndex = 22;
-            this.label12.Text = "Rtc_Y_Reference";
-            // 
-            // textBox8
-            // 
-            this.textBox8.Location = new System.Drawing.Point(321, 68);
-            this.textBox8.Name = "textBox8";
-            this.textBox8.Size = new System.Drawing.Size(125, 28);
-            this.textBox8.TabIndex = 21;
-            this.textBox8.TextChanged += new System.EventHandler(this.textBox8_TextChanged);
             // 
             // label3
             // 
@@ -518,8 +500,7 @@
             // 
             // groupBox6
             // 
-            this.groupBox6.Controls.Add(this.label12);
-            this.groupBox6.Controls.Add(this.textBox8);
+            this.groupBox6.Controls.Add(this.Reset_Rtc);
             this.groupBox6.Controls.Add(this.label11);
             this.groupBox6.Controls.Add(this.textBox7);
             this.groupBox6.Location = new System.Drawing.Point(506, 375);
@@ -528,6 +509,16 @@
             this.groupBox6.TabIndex = 46;
             this.groupBox6.TabStop = false;
             this.groupBox6.Text = "打标参数 mm/bit";
+            // 
+            // Reset_Rtc
+            // 
+            this.Reset_Rtc.Location = new System.Drawing.Point(267, 62);
+            this.Reset_Rtc.Name = "Reset_Rtc";
+            this.Reset_Rtc.Size = new System.Drawing.Size(158, 37);
+            this.Reset_Rtc.TabIndex = 43;
+            this.Reset_Rtc.Text = "复位Rtc控制卡";
+            this.Reset_Rtc.UseVisualStyleBackColor = true;
+            this.Reset_Rtc.Click += new System.EventHandler(this.Reset_Rtc_Click);
             // 
             // Rtc_Handle
             // 
@@ -585,8 +576,6 @@
         private System.Windows.Forms.Button button9;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.TextBox textBox7;
-        private System.Windows.Forms.Label label12;
-        private System.Windows.Forms.TextBox textBox8;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox Mark_Speed;
         private System.Windows.Forms.Button Change_Para_List;
@@ -606,5 +595,6 @@
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.GroupBox groupBox5;
         private System.Windows.Forms.GroupBox groupBox6;
+        private System.Windows.Forms.Button Reset_Rtc;
     }
 }

@@ -56,6 +56,7 @@
             this.button9 = new System.Windows.Forms.Button();
             this.button10 = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.Axis_Motor_Posed = new System.Windows.Forms.Button();
             this.button17 = new System.Windows.Forms.Button();
             this.button16 = new System.Windows.Forms.Button();
             this.button15 = new System.Windows.Forms.Button();
@@ -82,7 +83,9 @@
             this.label21 = new System.Windows.Forms.Label();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.label22 = new System.Windows.Forms.Label();
-            this.Axis_Posed = new System.Windows.Forms.Button();
+            this.Axis_Upper_Posed = new System.Windows.Forms.Button();
+            this.label23 = new System.Windows.Forms.Label();
+            this.label24 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -213,14 +216,16 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(290, 16);
+            this.label6.Location = new System.Drawing.Point(328, 16);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(125, 18);
             this.label6.TabIndex = 13;
-            this.label6.Text = "当前位置 (mm)";
+            this.label6.Text = "规划位置 (mm)";
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.label23);
+            this.groupBox1.Controls.Add(this.label24);
             this.groupBox1.Controls.Add(this.label12);
             this.groupBox1.Controls.Add(this.button11);
             this.groupBox1.Controls.Add(this.button12);
@@ -239,7 +244,7 @@
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(290, 42);
+            this.label12.Location = new System.Drawing.Point(332, 42);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(116, 18);
             this.label12.TabIndex = 26;
@@ -365,7 +370,7 @@
             // 
             // button9
             // 
-            this.button9.Location = new System.Drawing.Point(264, 246);
+            this.button9.Location = new System.Drawing.Point(264, 240);
             this.button9.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button9.Name = "button9";
             this.button9.Size = new System.Drawing.Size(130, 38);
@@ -376,7 +381,7 @@
             // 
             // button10
             // 
-            this.button10.Location = new System.Drawing.Point(264, 301);
+            this.button10.Location = new System.Drawing.Point(264, 294);
             this.button10.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button10.Name = "button10";
             this.button10.Size = new System.Drawing.Size(130, 38);
@@ -387,7 +392,8 @@
             // 
             // groupBox3
             // 
-            this.groupBox3.Controls.Add(this.Axis_Posed);
+            this.groupBox3.Controls.Add(this.Axis_Upper_Posed);
+            this.groupBox3.Controls.Add(this.Axis_Motor_Posed);
             this.groupBox3.Controls.Add(this.button17);
             this.groupBox3.Controls.Add(this.button16);
             this.groupBox3.Controls.Add(this.button15);
@@ -402,17 +408,27 @@
             this.groupBox3.Controls.Add(this.label9);
             this.groupBox3.Controls.Add(this.label10);
             this.groupBox3.Controls.Add(this.label11);
-            this.groupBox3.Location = new System.Drawing.Point(393, 254);
+            this.groupBox3.Location = new System.Drawing.Point(392, 213);
             this.groupBox3.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.groupBox3.Size = new System.Drawing.Size(452, 412);
+            this.groupBox3.Size = new System.Drawing.Size(452, 453);
             this.groupBox3.TabIndex = 23;
             this.groupBox3.TabStop = false;
             // 
+            // Axis_Motor_Posed
+            // 
+            this.Axis_Motor_Posed.Location = new System.Drawing.Point(264, 348);
+            this.Axis_Motor_Posed.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Axis_Motor_Posed.Name = "Axis_Motor_Posed";
+            this.Axis_Motor_Posed.Size = new System.Drawing.Size(130, 38);
+            this.Axis_Motor_Posed.TabIndex = 35;
+            this.Axis_Motor_Posed.Text = "Motor 到位";
+            this.Axis_Motor_Posed.UseVisualStyleBackColor = true;
+            // 
             // button17
             // 
-            this.button17.Location = new System.Drawing.Point(264, 26);
+            this.button17.Location = new System.Drawing.Point(264, 24);
             this.button17.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button17.Name = "button17";
             this.button17.Size = new System.Drawing.Size(130, 38);
@@ -423,7 +439,7 @@
             // 
             // button16
             // 
-            this.button16.Location = new System.Drawing.Point(264, 191);
+            this.button16.Location = new System.Drawing.Point(264, 186);
             this.button16.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button16.Name = "button16";
             this.button16.Size = new System.Drawing.Size(130, 38);
@@ -434,7 +450,7 @@
             // 
             // button15
             // 
-            this.button15.Location = new System.Drawing.Point(264, 136);
+            this.button15.Location = new System.Drawing.Point(264, 132);
             this.button15.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button15.Name = "button15";
             this.button15.Size = new System.Drawing.Size(130, 38);
@@ -444,7 +460,7 @@
             // 
             // button14
             // 
-            this.button14.Location = new System.Drawing.Point(264, 81);
+            this.button14.Location = new System.Drawing.Point(264, 78);
             this.button14.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button14.Name = "button14";
             this.button14.Size = new System.Drawing.Size(130, 38);
@@ -683,21 +699,40 @@
             this.label22.Text = "原点回归参数";
             this.label22.Visible = false;
             // 
-            // Axis_Posed
+            // Axis_Upper_Posed
             // 
-            this.Axis_Posed.Location = new System.Drawing.Point(264, 356);
-            this.Axis_Posed.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.Axis_Posed.Name = "Axis_Posed";
-            this.Axis_Posed.Size = new System.Drawing.Size(130, 38);
-            this.Axis_Posed.TabIndex = 35;
-            this.Axis_Posed.Text = "轴到位";
-            this.Axis_Posed.UseVisualStyleBackColor = true;
+            this.Axis_Upper_Posed.Location = new System.Drawing.Point(264, 402);
+            this.Axis_Upper_Posed.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Axis_Upper_Posed.Name = "Axis_Upper_Posed";
+            this.Axis_Upper_Posed.Size = new System.Drawing.Size(130, 38);
+            this.Axis_Upper_Posed.TabIndex = 36;
+            this.Axis_Upper_Posed.Text = "Upper 到位";
+            this.Axis_Upper_Posed.UseVisualStyleBackColor = true;
+            // 
+            // label23
+            // 
+            this.label23.AutoSize = true;
+            this.label23.Location = new System.Drawing.Point(332, 108);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(116, 18);
+            this.label23.TabIndex = 28;
+            this.label23.Text = "当前位置指示";
+            this.label23.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            // 
+            // label24
+            // 
+            this.label24.AutoSize = true;
+            this.label24.Location = new System.Drawing.Point(328, 82);
+            this.label24.Name = "label24";
+            this.label24.Size = new System.Drawing.Size(125, 18);
+            this.label24.TabIndex = 27;
+            this.label24.Text = "实际位置 (mm)";
             // 
             // Menu_5_Axis_Handle
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(878, 681);
+            this.ClientSize = new System.Drawing.Size(860, 682);
             this.Controls.Add(this.label22);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.label7);
@@ -782,6 +817,9 @@
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.Label label22;
         private System.Windows.Forms.Button button17;
-        private System.Windows.Forms.Button Axis_Posed;
+        private System.Windows.Forms.Button Axis_Motor_Posed;
+        private System.Windows.Forms.Button Axis_Upper_Posed;
+        private System.Windows.Forms.Label label23;
+        private System.Windows.Forms.Label label24;
     }
 }

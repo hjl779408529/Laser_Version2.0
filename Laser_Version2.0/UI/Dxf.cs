@@ -199,7 +199,7 @@ namespace Laser_Build_1._0
             appendInfo("Dxf数据提取完成！！！！");
             appendInfo("直线和圆弧 数据计数：" + Arc_Line_Entity_Data.Count);
             appendInfo("多边形 数据计数：" + LwPolylines_Entity_Data.Count);
-            appendInfo("圆形 数据计数：" + Circle_Entity_Data);
+            appendInfo("圆形 数据计数：" + Circle_Entity_Data.Count);
             appendInfo("轨迹数据生成中！！！！");
             //直线圆弧数据转换为  轨迹加工数据
             Arc_Line_List_Data = new List<List<Interpolation_Data>>(Data_Cal.Integrate_Arc_Line(Arc_Line_Entity_Data));
@@ -531,44 +531,44 @@ namespace Laser_Build_1._0
                 //        }
                 //    }
                 //}
-                for (int i = 0; i < Rtc_List_Data.Count; i++)
-                {
-                    appendInfo("序号：" + i + "加工类型:" + Rtc_List_Data[i][0].Work);
-                    for (int j = 0; j < Rtc_List_Data[i].Count; j++)
-                    {
-                        if (Rtc_List_Data[i][j].Work == 10)
-                        {
-                            if (Rtc_List_Data[i][j].Type == 2)
-                            {
-                                appendInfo(string.Format("    类型：{4},起点({0},{1}),终点({2},{3}),角度{5}", Rtc_List_Data[i][j].Start_x, Rtc_List_Data[i][j].Start_y, Rtc_List_Data[i][j].End_x, Rtc_List_Data[i][j].End_y, Rtc_List_Data[i][j].Type, Rtc_List_Data[i][j].Angle));
-                            }
-                            else if (Rtc_List_Data[i][j].Type == 3)
-                            {
-                                appendInfo(string.Format("    类型：{4},起点({0},{1}),终点({2},{3}),角度{5}", Rtc_List_Data[i][j].Start_x, Rtc_List_Data[i][j].Start_y, Rtc_List_Data[i][j].End_x, Rtc_List_Data[i][j].End_y, Rtc_List_Data[i][j].Type, Rtc_List_Data[i][j].Angle));
-                            }
-                            else if (Rtc_List_Data[i][j].Type == 1)
-                            {
-                                appendInfo(string.Format("    类型：{4},起点({0},{1}),终点({2},{3})", Rtc_List_Data[i][j].Start_x, Rtc_List_Data[i][j].Start_y, Rtc_List_Data[i][j].End_x, Rtc_List_Data[i][j].End_y, Rtc_List_Data[i][j].Type));
-                            }
-                        }
-                        else if (Rtc_List_Data[i][j].Work == 20)
-                        {
-                            if (j == 0) appendInfo(string.Format("    本段起点({0},{1})", Rtc_List_Data[i][j].Rtc_x, Rtc_List_Data[i][j].Rtc_y));
-                            if (Rtc_List_Data[i][j].Type == 11)
-                            {
-                                appendInfo(string.Format("    类型：{4},起点({0},{1}),终点({2},{3}),角度{5},圆心({6},{7})", Rtc_List_Data[i][j].Start_x, Rtc_List_Data[i][j].Start_y, Rtc_List_Data[i][j].End_x, Rtc_List_Data[i][j].End_y, Rtc_List_Data[i][j].Type, Rtc_List_Data[i][j].Angle, Rtc_List_Data[i][j].Center_x, Rtc_List_Data[i][j].Center_y));
-                            }
-                            else if (Rtc_List_Data[i][j].Type == 15)
-                            {
-                                appendInfo(string.Format("    类型：{4},起点({0},{1}),终点({2},{3})", Rtc_List_Data[i][j].Start_x, Rtc_List_Data[i][j].Start_y, Rtc_List_Data[i][j].End_x, Rtc_List_Data[i][j].End_y, Rtc_List_Data[i][j].Type));
-                            }
-                            else if (Rtc_List_Data[i][j].Type == 13)
-                            {
-                                appendInfo(string.Format("    类型：{4},起点({0},{1}),终点({2},{3})", Rtc_List_Data[i][j].Start_x, Rtc_List_Data[i][j].Start_y, Rtc_List_Data[i][j].End_x, Rtc_List_Data[i][j].End_y, Rtc_List_Data[i][j].Type));
-                            }
-                        }
-                    }
-                }
+                //for (int i = 0; i < Rtc_List_Data.Count; i++)
+                //{
+                //    appendInfo("序号：" + i + "加工类型:" + Rtc_List_Data[i][0].Work);
+                //    for (int j = 0; j < Rtc_List_Data[i].Count; j++)
+                //    {
+                //        if (Rtc_List_Data[i][j].Work == 10)
+                //        {
+                //            if (Rtc_List_Data[i][j].Type == 2)
+                //            {
+                //                appendInfo(string.Format("    类型：{4},起点({0},{1}),终点({2},{3}),角度{5}", Rtc_List_Data[i][j].Start_x, Rtc_List_Data[i][j].Start_y, Rtc_List_Data[i][j].End_x, Rtc_List_Data[i][j].End_y, Rtc_List_Data[i][j].Type, Rtc_List_Data[i][j].Angle));
+                //            }
+                //            else if (Rtc_List_Data[i][j].Type == 3)
+                //            {
+                //                appendInfo(string.Format("    类型：{4},起点({0},{1}),终点({2},{3}),角度{5}", Rtc_List_Data[i][j].Start_x, Rtc_List_Data[i][j].Start_y, Rtc_List_Data[i][j].End_x, Rtc_List_Data[i][j].End_y, Rtc_List_Data[i][j].Type, Rtc_List_Data[i][j].Angle));
+                //            }
+                //            else if (Rtc_List_Data[i][j].Type == 1)
+                //            {
+                //                appendInfo(string.Format("    类型：{4},起点({0},{1}),终点({2},{3})", Rtc_List_Data[i][j].Start_x, Rtc_List_Data[i][j].Start_y, Rtc_List_Data[i][j].End_x, Rtc_List_Data[i][j].End_y, Rtc_List_Data[i][j].Type));
+                //            }
+                //        }
+                //        else if (Rtc_List_Data[i][j].Work == 20)
+                //        {
+                //            if (j == 0) appendInfo(string.Format("    本段起点({0},{1})", Rtc_List_Data[i][j].Rtc_x, Rtc_List_Data[i][j].Rtc_y));
+                //            if (Rtc_List_Data[i][j].Type == 11)
+                //            {
+                //                appendInfo(string.Format("    类型：{4},起点({0},{1}),终点({2},{3}),角度{5},圆心({6},{7})", Rtc_List_Data[i][j].Start_x, Rtc_List_Data[i][j].Start_y, Rtc_List_Data[i][j].End_x, Rtc_List_Data[i][j].End_y, Rtc_List_Data[i][j].Type, Rtc_List_Data[i][j].Angle, Rtc_List_Data[i][j].Center_x, Rtc_List_Data[i][j].Center_y));
+                //            }
+                //            else if (Rtc_List_Data[i][j].Type == 15)
+                //            {
+                //                appendInfo(string.Format("    类型：{4},起点({0},{1}),终点({2},{3})", Rtc_List_Data[i][j].Start_x, Rtc_List_Data[i][j].Start_y, Rtc_List_Data[i][j].End_x, Rtc_List_Data[i][j].End_y, Rtc_List_Data[i][j].Type));
+                //            }
+                //            else if (Rtc_List_Data[i][j].Type == 13)
+                //            {
+                //                appendInfo(string.Format("    类型：{4},起点({0},{1}),终点({2},{3})", Rtc_List_Data[i][j].Start_x, Rtc_List_Data[i][j].Start_y, Rtc_List_Data[i][j].End_x, Rtc_List_Data[i][j].End_y, Rtc_List_Data[i][j].Type));
+                //            }
+                //        }
+                //    }
+                //}
                 //for (int i = 0; i < Rtc_List_Data.Count; i++)
                 //{
                 //    appendInfo("序号：" + i + "加工类型:" + Rtc_List_Data[i][0].Work);
@@ -974,10 +974,11 @@ namespace Laser_Build_1._0
         {
             Calibration.Rtc_Correct_AFF_Coordinate();
         }
-       
+       //参数验证
         private void button4_Click(object sender, EventArgs e)
         {
             Calibration.Get_Datas_Angle();
+            //Calibration.Get_Datas_Test();
         }
         /// <summary>
         /// 振镜不补偿，平台补偿

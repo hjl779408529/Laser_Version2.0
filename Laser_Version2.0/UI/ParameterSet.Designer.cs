@@ -40,6 +40,8 @@
             this.textBox19 = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
             this.Mark_Group = new System.Windows.Forms.GroupBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.Mark_Type_List = new System.Windows.Forms.ComboBox();
             this.Re_Cali_Mark = new System.Windows.Forms.Button();
             this.button6 = new System.Windows.Forms.Button();
             this.Set_txt_markY4 = new System.Windows.Forms.TextBox();
@@ -63,9 +65,9 @@
             this.Set_txt_valueK = new System.Windows.Forms.TextBox();
             this.Correct_Rtc_Cor = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.Acquisation_Rtc_Correct = new System.Windows.Forms.Button();
             this.label9 = new System.Windows.Forms.Label();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.Acquisation_Rtc_Correct = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.Mark_Group.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -79,7 +81,7 @@
             this.Correct_Cam_Cor.Name = "Correct_Cam_Cor";
             this.Correct_Cam_Cor.Size = new System.Drawing.Size(205, 52);
             this.Correct_Cam_Cor.TabIndex = 101;
-            this.Correct_Cam_Cor.Text = "矫正相机坐标系偏转角";
+            this.Correct_Cam_Cor.Text = "相机坐标系标定";
             this.Correct_Cam_Cor.UseVisualStyleBackColor = true;
             this.Correct_Cam_Cor.Click += new System.EventHandler(this.Correct_Cam_Cor_Click);
             // 
@@ -147,7 +149,7 @@
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(205, 52);
             this.button4.TabIndex = 8;
-            this.button4.Text = "计算振镜与ORG的距离";
+            this.button4.Text = "振镜与ORG的距离矫正";
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
@@ -198,6 +200,8 @@
             // 
             // Mark_Group
             // 
+            this.Mark_Group.Controls.Add(this.label1);
+            this.Mark_Group.Controls.Add(this.Mark_Type_List);
             this.Mark_Group.Controls.Add(this.Re_Cali_Mark);
             this.Mark_Group.Controls.Add(this.button6);
             this.Mark_Group.Controls.Add(this.Set_txt_markY4);
@@ -227,9 +231,34 @@
             this.Mark_Group.TabStop = false;
             this.Mark_Group.Text = "Mark参数";
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("宋体", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label1.Location = new System.Drawing.Point(52, 252);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(89, 20);
+            this.label1.TabIndex = 105;
+            this.label1.Text = "Mark类型";
+            // 
+            // Mark_Type_List
+            // 
+            this.Mark_Type_List.FormattingEnabled = true;
+            this.Mark_Type_List.Items.AddRange(new object[] {
+            "黑色圆白背景",
+            "白色圆黑背景",
+            "黑色矩形白背景",
+            "黑色十字白背景"});
+            this.Mark_Type_List.Location = new System.Drawing.Point(15, 284);
+            this.Mark_Type_List.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Mark_Type_List.Name = "Mark_Type_List";
+            this.Mark_Type_List.Size = new System.Drawing.Size(162, 26);
+            this.Mark_Type_List.TabIndex = 20;
+            this.Mark_Type_List.SelectedIndexChanged += new System.EventHandler(this.Mark_Type_List_SelectedIndexChanged);
+            // 
             // Re_Cali_Mark
             // 
-            this.Re_Cali_Mark.Location = new System.Drawing.Point(401, 258);
+            this.Re_Cali_Mark.Location = new System.Drawing.Point(433, 258);
             this.Re_Cali_Mark.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Re_Cali_Mark.Name = "Re_Cali_Mark";
             this.Re_Cali_Mark.Size = new System.Drawing.Size(195, 52);
@@ -311,7 +340,7 @@
             // 
             // Set_Btn_Mark1
             // 
-            this.Set_Btn_Mark1.Location = new System.Drawing.Point(53, 258);
+            this.Set_Btn_Mark1.Location = new System.Drawing.Point(202, 258);
             this.Set_Btn_Mark1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Set_Btn_Mark1.Name = "Set_Btn_Mark1";
             this.Set_Btn_Mark1.Size = new System.Drawing.Size(195, 52);
@@ -458,6 +487,17 @@
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "偏差矫正";
             // 
+            // Acquisation_Rtc_Correct
+            // 
+            this.Acquisation_Rtc_Correct.Location = new System.Drawing.Point(457, 38);
+            this.Acquisation_Rtc_Correct.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.Acquisation_Rtc_Correct.Name = "Acquisation_Rtc_Correct";
+            this.Acquisation_Rtc_Correct.Size = new System.Drawing.Size(178, 52);
+            this.Acquisation_Rtc_Correct.TabIndex = 103;
+            this.Acquisation_Rtc_Correct.Text = "采集振镜校准数据";
+            this.Acquisation_Rtc_Correct.UseVisualStyleBackColor = true;
+            this.Acquisation_Rtc_Correct.Click += new System.EventHandler(this.Acquisation_Rtc_Correct_Click);
+            // 
             // label9
             // 
             this.label9.AutoSize = true;
@@ -482,22 +522,11 @@
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "相机操作";
             // 
-            // Acquisation_Rtc_Correct
-            // 
-            this.Acquisation_Rtc_Correct.Location = new System.Drawing.Point(457, 38);
-            this.Acquisation_Rtc_Correct.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.Acquisation_Rtc_Correct.Name = "Acquisation_Rtc_Correct";
-            this.Acquisation_Rtc_Correct.Size = new System.Drawing.Size(178, 52);
-            this.Acquisation_Rtc_Correct.TabIndex = 103;
-            this.Acquisation_Rtc_Correct.Text = "采集振镜校准数据";
-            this.Acquisation_Rtc_Correct.UseVisualStyleBackColor = true;
-            this.Acquisation_Rtc_Correct.Click += new System.EventHandler(this.Acquisation_Rtc_Correct_Click);
-            // 
             // ParameterSet
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(711, 773);
+            this.ClientSize = new System.Drawing.Size(713, 772);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.Mark_Group);
@@ -555,5 +584,7 @@
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Button Acquisation_Rtc_Correct;
+        private System.Windows.Forms.ComboBox Mark_Type_List;
+        private System.Windows.Forms.Label label1;
     }
 }

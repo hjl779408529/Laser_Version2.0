@@ -36,6 +36,12 @@ namespace Para_List
         private static decimal lookAhead_EvenTime = 1;//前瞻运动平滑时间  ms
         private static decimal lookAhead_MaxAcc = syn_MaxAcc / 100;//前瞻运动最大合成加速度 mm/s2 1G=10米/秒
 
+        //轴到位跟随
+        private static UInt16 axis_x_band = 5;//X轴到位允许误差 /pluse
+        private static UInt16 axis_x_time = 50;//X轴误差带保持时间 /250us
+        private static UInt16 axis_y_band = 5;//X轴到位允许误差 /pluse
+        private static UInt16 axis_y_time = 50;//X轴误差带保持时间 /250us
+        private static UInt16 posed_time = 50;//到位延时
         //回零参数
         private static decimal search_Home = -2000;//设定原点搜索范围 搜索范围-2000mm
         private static decimal home_OffSet = 0;//设定原点OFF偏移距离
@@ -44,9 +50,7 @@ namespace Para_List
         private static decimal home_dcc = 500m;//回零减速度 mm/s2
         private static short home_smoothTime = 5;//回零平滑时间 ms        
 
-        private static decimal pos_Tolerance = 0.02m;//坐标误差范围判断
-        private static decimal arc_Compensation_A = 0.0m;//坐标误差范围判断  度
-        private static decimal arc_Compensation_R = Convert.ToDecimal(Math.PI) * (arc_Compensation_A / 180.0m);//坐标误差范围判断  弧度
+        private static decimal pos_Tolerance = 0.0005m;//坐标误差范围判断
 
         //GTS坐标矫正变换参数
         private static decimal gts_calibration_x_len = 350.0m;//标定板X尺寸 mm
@@ -64,23 +68,11 @@ namespace Para_List
         private static Int16 rtc_affinity_type = 1;//RTC坐标矫正变换类型 0-三对点 小区块数据 仿射变换、1-全部点对 仿射变换
         //加工坐标系
         private static Vector work = new Vector(0,0);//加工坐标系
-        //刀具绝对坐标 激光光束相对于整个平台绝对坐标
-        private static Vector laser =new Vector(0,0);//刀具绝对坐标X坐标 Vector mark1 = new Vector(0, 0);
         //相机单像素对应的实际比例
         private static decimal cam_reference = 0.0m;
-        //相机中心与坐标系原点对正时，像素偏差值，每次开机时矫正（待确定）
-        private static Vector cam_org_pixel = new Vector(0,0); 
-        //Camera中心 相对于 直角坐标系原点 相对间距
-        private static Vector cam_org= new Vector(0,0);
         //振镜激光原点  相对于 直角坐标系原点 相对间距
-        private static Vector rtc_org = new Vector(0,0); 
-        //Camera中心 相对于 振镜激光原点   相对间距
-        private static Vector cam_rtc = new Vector(0,0);
-        //偏差补偿值  Dxf中图形 与实际工件摆放的 偏差值，每次加工前进行处理调用获取该值
-        private static Vector delta = new Vector(0,0);
-        //定义图像中心点
-        private static Vector pic_center = new Vector(0,0);
-        //定义矫正坐标点
+        private static Vector rtc_org = new Vector(0,0);
+        //坐标系原点对正偏移量
         private static Vector cal_org = new Vector(0, 0);
 
         //振镜参数
@@ -94,8 +86,7 @@ namespace Para_List
         private static decimal laser_delay_reference = 1/2; //延时基准 RTC4-1us RTC5-1/2us 用于set_laser_delays( LaserOnDelay, LaserOffDelay )
         private static decimal scanner_delay_reference = 10; //延时基准 10us  用于set_scanner_delays( Jump, Mark, Polygon )，eg.warmup_time/jump_delay/mark_delay/polygon_delay/arc_delay/line_delay
         //运动基准
-        private static decimal rtc_xpos_reference = 10000; //x轴 mm与振镜变量转换比例 
-        private static decimal rtc_ypos_reference = 10000; //y轴 mm与振镜变量转换比例
+        private static decimal rtc_pos_reference = 15488; //x轴 mm与振镜变量转换比例
         //RTC通用参数
         private static UInt32 analog_out_ch = 1;//  输出通道 
         private static UInt32 analog_out_value = 640;//  Standard Pump Source Value
@@ -145,8 +136,6 @@ namespace Para_List
 
         //整体的仿射变换参数
         private static Affinity_Matrix trans_affinity = new Affinity_Matrix();
-        //标定板的仿射变换参数
-        private static Affinity_Matrix cal_trans_affinity = new Affinity_Matrix();
         //标定板的旋转变换参数
         private static Affinity_Matrix cal_trans_angle = new Affinity_Matrix();
         //相机坐标系的仿射变换参数
@@ -175,15 +164,18 @@ namespace Para_List
         private static UInt16 split_block_x;
         private static UInt16 split_block_y;
         //Tcp Socket
-        private static string server_ip = "127.0.0.1";
+        private static String server_ip = null;
         private static ushort server_port = 6230;
         //Rtc 桶形畸变加工数据 参数
         private static ushort rtc_distortion_data_type = 1;
         private static decimal rtc_distortion_data_radius = 1.0m;
         private static decimal rtc_distortion_data_interval = 2.5m;
-        private static decimal rtc_distortion_data_limit = 62.5m;
+        private static decimal rtc_distortion_data_limit = 60m;
+        private static UInt16 rtc_get_data_align = 0;
         //平台配合振镜数据生成 的基准点
         private static Vector base_gts = new Vector(100, 100);
+        //相机图形识别类型
+        private static UInt16 camera_mark_type = 2;
 
         public static decimal Gts_Vel_reference { get => gts_vel_reference; set => gts_vel_reference = value; }
         public static decimal Gts_Acc_reference { get => gts_acc_reference; set => gts_acc_reference = value; }
@@ -203,6 +195,11 @@ namespace Para_List
         public static decimal Circle_endVel { get => circle_endVel; set => circle_endVel = value; }
         public static decimal LookAhead_EvenTime { get => lookAhead_EvenTime; set => lookAhead_EvenTime = value; }
         public static decimal LookAhead_MaxAcc { get => lookAhead_MaxAcc; set => lookAhead_MaxAcc = value; }
+        public static UInt16 Axis_X_Band { get => axis_x_band; set => axis_x_band = value; }
+        public static UInt16 Axis_X_Time { get => axis_x_time; set => axis_x_time = value; }
+        public static UInt16 Axis_Y_Band { get => axis_y_band; set => axis_y_band = value; }
+        public static UInt16 Axis_Y_Time { get => axis_y_time; set => axis_y_time = value; }
+        public static UInt16 Posed_Time { get => posed_time; set => posed_time = value; }
         public static decimal Search_Home { get => search_Home; set => search_Home = value; }
         public static decimal Home_OffSet { get => home_OffSet; set => home_OffSet = value; }
         public static decimal Home_High_Speed { get => home_High_Speed; set => home_High_Speed = value; }
@@ -210,8 +207,6 @@ namespace Para_List
         public static decimal Home_dcc { get => home_dcc; set => home_dcc = value; }
         public static short Home_smoothTime { get => home_smoothTime; set => home_smoothTime = value; }
         public static decimal Pos_Tolerance { get => pos_Tolerance; set => pos_Tolerance = value; }
-        public static decimal Arc_Compensation_A { get => arc_Compensation_A; set => arc_Compensation_A = value; }
-        public static decimal Arc_Compensation_R { get => arc_Compensation_R; set => arc_Compensation_R = value; }
         public static decimal Gts_Calibration_X_Len { get => gts_calibration_x_len; set => gts_calibration_x_len = value; }
         public static decimal Gts_Calibration_Y_Len { get => gts_calibration_y_len; set => gts_calibration_y_len = value; }
         public static decimal Gts_Calibration_Cell { get => gts_calibration_cell; set => gts_calibration_cell = value; }
@@ -229,15 +224,9 @@ namespace Para_List
         public static Int16 Rtc_Affinity_Row { get => rtc_affinity_row; set => rtc_affinity_row = value; }
         public static Int16 Rtc_Affinity_Type { get => rtc_affinity_type; set => rtc_affinity_type = value; }        
         public static Vector Work { get => work; set => work = value; }
-        public static Vector Laser { get => laser; set => laser = value; }
         public static decimal Cam_Reference { get => cam_reference; set => cam_reference = value; }
-        public static Vector Cam_Org_Pixel { get => cam_org_pixel; set => cam_org_pixel = value; }     
-        public static Vector Cam_Org { get => cam_org; set => cam_org = value; }
         public static Vector Rtc_Org { get => rtc_org; set => rtc_org = value; }
-        public static Vector Cam_Rtc { get => cam_rtc; set => cam_rtc = value; }
-        public static Vector Delta { get => delta; set => delta = value; }
-        public static Vector Pic_Center { get => pic_center; set => pic_center = value; }
-        public static Vector Cal_Org { get => cal_org; set => cal_org = value; } 
+        public static Vector Cal_Org { get => cal_org; set => cal_org = value; }
 
         public static UInt32 Reset_Completely { get => reset_completely; set => reset_completely = value; }
         public static UInt32 Default_Card { get => default_card; set => default_card = value; }
@@ -246,8 +235,7 @@ namespace Para_List
         public static decimal Rtc_Period_Reference { get => rtc_period_reference; set => rtc_period_reference = value; }
         public static decimal Laser_Delay_Reference { get => laser_delay_reference; set => laser_delay_reference = value; }
         public static decimal Scanner_Delay_Reference { get => scanner_delay_reference; set => scanner_delay_reference = value; }
-        public static decimal Rtc_XPos_Reference { get => rtc_xpos_reference; set => rtc_xpos_reference = value; }
-        public static decimal Rtc_YPos_Reference { get => rtc_ypos_reference; set => rtc_ypos_reference = value; }
+        public static decimal Rtc_Pos_Reference { get => rtc_pos_reference; set => rtc_pos_reference = value; }
         public static UInt32 Analog_Out_Ch { get => analog_out_ch; set => analog_out_ch = value; }
         public static UInt32 Analog_Out_Value { get => analog_out_value; set => analog_out_value = value; }
         public static UInt32 Analog_Out_Standby { get => analog_out_standby; set => analog_out_standby = value; }
@@ -282,7 +270,6 @@ namespace Para_List
         public static Vector Mark_Dxf3 { get => mark_dxf3; set => mark_dxf3 = value; }
         public static Vector Mark_Dxf4 { get => mark_dxf4; set => mark_dxf4 = value; }
         public static Affinity_Matrix Trans_Affinity { get => trans_affinity; set => trans_affinity = value; }
-        public static Affinity_Matrix Cal_Trans_Affinity { get => cal_trans_affinity; set => cal_trans_affinity = value; }
         public static Affinity_Matrix Cal_Trans_Angle { get => cal_trans_angle; set => cal_trans_angle = value; }
         public static Affinity_Matrix Cam_Trans_Affinity { get => cam_trans_affinity; set => cam_trans_affinity = value; }
         public static Affinity_Matrix Rtc_Trans_Affinity { get => rtc_trans_affinity; set => rtc_trans_affinity = value; }
@@ -301,13 +288,15 @@ namespace Para_List
         public static decimal Mark_Reference { get => mark_reference; set => mark_reference = value; }
         public static UInt16 Split_Block_X { get => split_block_x; set => split_block_x = value; }
         public static UInt16 Split_Block_Y { get => split_block_y; set => split_block_y = value; }
-        public static string Server_Ip { get => server_ip; set => server_ip = value; }
+        public static String Server_Ip { get => server_ip; set => server_ip = value; }
         public static ushort Server_Port { get => server_port; set => server_port = value; }
         public static ushort Rtc_Distortion_Data_Type { get => rtc_distortion_data_type; set => rtc_distortion_data_type = value; }
         public static decimal Rtc_Distortion_Data_Radius { get => rtc_distortion_data_radius; set => rtc_distortion_data_radius = value; }
         public static decimal Rtc_Distortion_Data_Interval { get => rtc_distortion_data_interval; set => rtc_distortion_data_interval = value; }
         public static decimal Rtc_Distortion_Data_Limit { get => rtc_distortion_data_limit; set => rtc_distortion_data_limit = value; }
+        public static UInt16 Rtc_Get_Data_Align { get => rtc_get_data_align; set => rtc_get_data_align = value; }
         public static Vector Base_Gts { get => base_gts; set => base_gts = value; }
+        public static UInt16 Camera_Mark_Type { get => camera_mark_type; set => camera_mark_type = value; }
         //公开构造函数
         public Parameter() { }
     }
@@ -339,6 +328,12 @@ namespace Para_List
         private decimal lookAhead_EvenTime;//前瞻运动平滑时间  ms
         private decimal lookAhead_MaxAcc;//前瞻运动最大合成加速度 mm/s2 1G=10米/秒
 
+        //轴到位跟随
+        private UInt16 axis_x_band = 1;//X轴到位允许误差 /pluse
+        private UInt16 axis_x_time = 1;//X轴误差带保持时间 /250us
+        private UInt16 axis_y_band = 1;//X轴到位允许误差 /pluse
+        private UInt16 axis_y_time = 1;//X轴误差带保持时间 /250us
+        private UInt16 posed_time = 50;//到位延时
         //回零参数
         private decimal search_Home;//设定原点搜索范围 1脉冲10um，搜索范围-2000mm
         private decimal home_OffSet;//设定原点OFF偏移距离
@@ -346,10 +341,7 @@ namespace Para_List
         private decimal home_acc;//回零加速度 mm/s2
         private decimal home_dcc;//回零减速度 mm/s2
         private short home_smoothTime;//回零平滑时间 ms
-
         private decimal pos_Tolerance;//坐标误差范围判断
-        private decimal arc_Compensation_A;//坐标误差范围判断  度
-        private decimal arc_Compensation_R;//坐标误差范围判断  弧度
 
         //GTS坐标矫正变换参数
         private decimal gts_calibration_x_len;//标定板X尺寸 mm
@@ -369,23 +361,11 @@ namespace Para_List
 
         //加工坐标系
         private Vector work;//加工坐标系
-        //刀具绝对坐标 激光光束相对于整个平台绝对坐标
-        private Vector laser;//刀具绝对坐标X坐标 Vector mark1 = new Vector(0, 0);
         //相机单像素对应的实际比例
         private decimal cam_reference;
-        //相机中心与坐标系原点对正时，像素偏差值，每次开机时矫正（待确定）
-        private Vector cam_org_pixel;
-        //Camera中心 相对于 直角坐标系原点 相对间距
-        private Vector cam_org;
         //振镜激光原点  相对于 直角坐标系原点 相对间距
         private Vector rtc_org;
-        //Camera中心 相对于 振镜激光原点   相对间距
-        private Vector cam_rtc;
-        //偏差补偿值  Dxf中图形 与实际工件摆放的 偏差值，每次加工前进行处理调用获取该值
-        private Vector delta;
-        //定义图像中心点
-        private Vector pic_center;
-        //定义矫正坐标点
+        //坐标系原点对正偏移量
         private Vector cal_org;
 
         //振镜参数
@@ -397,8 +377,7 @@ namespace Para_List
         private decimal rtc_period_reference; //分频基准 1/8us
         private decimal laser_delay_reference; //延时基准 1us
         private decimal scanner_delay_reference; //延时基准 1us
-        private decimal rtc_xpos_reference; //x轴 mm与振镜变量转换比例 
-        private decimal rtc_ypos_reference; //y轴 mm与振镜变量转换比例 
+        private decimal rtc_pos_reference; //x轴 mm与振镜变量转换比例 
         //RTC通用参数
         private UInt32 analog_out_ch;//  输出通道 
         private UInt32 analog_out_value;//  Standard Pump Source Value
@@ -429,19 +408,17 @@ namespace Para_List
         private decimal rtc_cal_radius; //圆半径
         private decimal rtc_cal_interval; //间距
         //mark点参数
-        private static Vector mark1 = new Vector(0, 0);
-        private static Vector mark2 = new Vector(0, 0);
-        private static Vector mark3 = new Vector(0, 0);
-        private static Vector mark4 = new Vector(0, 0);
+        private Vector mark1;
+        private Vector mark2;
+        private Vector mark3;
+        private Vector mark4;
         //Dxf Mark点参数
-        private static Vector mark_dxf1 = new Vector(0, 0);
-        private static Vector mark_dxf2 = new Vector(0, 0);
-        private static Vector mark_dxf3 = new Vector(0, 0);
-        private static Vector mark_dxf4 = new Vector(0, 0);
+        private Vector mark_dxf1;
+        private Vector mark_dxf2;
+        private Vector mark_dxf3;
+        private Vector mark_dxf4;
         //整体的仿射变换参数
         private Affinity_Matrix trans_affinity;
-        //标定板的仿射变换参数
-        private Affinity_Matrix cal_trans_affinity;
         //标定板的旋转变换参数
         private Affinity_Matrix cal_trans_angle;
         //相机坐标系的仿射变换参数
@@ -469,15 +446,19 @@ namespace Para_List
         private UInt16 split_block_x;
         private UInt16 split_block_y;
         //Tcp Socket
-        private string server_ip = null;
+        private String server_ip = null;
         private ushort server_port;
         //Rtc 桶形畸变加工数据 参数
         private ushort rtc_distortion_data_type;
         private decimal rtc_distortion_data_radius;
         private decimal rtc_distortion_data_interval;
         private decimal rtc_distortion_data_limit;
+        private UInt16 rtc_get_data_align;
         //平台配合振镜数据生成 的基准点
-        private static Vector base_gts = new Vector(100, 100);
+        private Vector base_gts;
+        //相机图形识别类型
+        private UInt16 camera_mark_type;
+
         public decimal Gts_Vel_reference { get => gts_vel_reference; set => gts_vel_reference = value; }
         public decimal Gts_Acc_reference { get => gts_acc_reference; set => gts_acc_reference = value; }
         public decimal Gts_Pos_reference { get => gts_pos_reference; set => gts_pos_reference = value; }
@@ -496,6 +477,11 @@ namespace Para_List
         public decimal Circle_endVel { get => circle_endVel; set => circle_endVel = value; }
         public decimal LookAhead_EvenTime { get => lookAhead_EvenTime; set => lookAhead_EvenTime = value; }
         public decimal LookAhead_MaxAcc { get => lookAhead_MaxAcc; set => lookAhead_MaxAcc = value; }
+        public UInt16 Axis_X_Band { get => axis_x_band; set => axis_x_band = value; }
+        public UInt16 Axis_X_Time { get => axis_x_time; set => axis_x_time = value; }
+        public UInt16 Axis_Y_Band { get => axis_y_band; set => axis_y_band = value; }
+        public UInt16 Axis_Y_Time { get => axis_y_time; set => axis_y_time = value; }
+        public UInt16 Posed_Time { get => posed_time; set => posed_time = value; }
         public decimal Search_Home { get => search_Home; set => search_Home = value; }
         public decimal Home_OffSet { get => home_OffSet; set => home_OffSet = value; }
         public decimal Home_High_Speed { get => home_High_Speed; set => home_High_Speed = value; }
@@ -503,8 +489,6 @@ namespace Para_List
         public decimal Home_dcc { get => home_dcc; set => home_dcc = value; }
         public short Home_smoothTime { get => home_smoothTime; set => home_smoothTime = value; }
         public decimal Pos_Tolerance { get => pos_Tolerance; set => pos_Tolerance = value; }
-        public decimal Arc_Compensation_A { get => arc_Compensation_A; set => arc_Compensation_A = value; }
-        public decimal Arc_Compensation_R { get => arc_Compensation_R; set => arc_Compensation_R = value; }
         public decimal Gts_Calibration_X_Len { get => gts_calibration_x_len; set => gts_calibration_x_len = value; }
         public decimal Gts_Calibration_Y_Len { get => gts_calibration_y_len; set => gts_calibration_y_len = value; }
         public decimal Gts_Calibration_Cell { get => gts_calibration_cell; set => gts_calibration_cell = value; }
@@ -522,15 +506,9 @@ namespace Para_List
         public Int16 Rtc_Affinity_Row { get => rtc_affinity_row; set => rtc_affinity_row = value; }
         public Int16 Rtc_Affinity_Type { get => rtc_affinity_type; set => rtc_affinity_type = value; }
         public Vector Work { get => work; set => work = value; }
-        public Vector Laser { get => laser; set => laser = value; }
         public decimal Cam_Reference { get => cam_reference; set => cam_reference = value; }
-        public Vector Cam_Org_Pixel { get => cam_org_pixel; set => cam_org_pixel = value; }
-        public Vector Cam_Org { get => cam_org; set => cam_org = value; }
         public Vector Rtc_Org { get => rtc_org; set => rtc_org = value; }
-        public Vector Cam_Rtc { get => cam_rtc; set => cam_rtc = value; }
-        public Vector Delta { get => delta; set => delta = value; }
-        public Vector Pic_Center { get => pic_center; set => pic_center = value; }
-        public Vector Cal_Org { get => cal_org; set => cal_org = value; }        
+        public Vector Cal_Org { get => cal_org; set => cal_org = value; }
         public UInt32 Reset_Completely { get => reset_completely; set => reset_completely = value; }
         public UInt32 Default_Card { get => default_card; set => default_card = value; }
         public UInt32 Laser_Mode { get => laser_mode; set => laser_mode = value; }
@@ -538,8 +516,7 @@ namespace Para_List
         public decimal Rtc_Period_Reference { get => rtc_period_reference; set => rtc_period_reference = value; }
         public decimal Laser_Delay_Reference { get => laser_delay_reference; set => laser_delay_reference = value; }
         public decimal Scanner_Delay_Reference { get => scanner_delay_reference; set => scanner_delay_reference = value; }
-        public decimal Rtc_XPos_Reference { get => rtc_xpos_reference; set => rtc_xpos_reference = value; }
-        public decimal Rtc_YPos_Reference { get => rtc_ypos_reference; set => rtc_ypos_reference = value; }
+        public decimal Rtc_Pos_Reference { get => rtc_pos_reference; set => rtc_pos_reference = value; }
         public UInt32 Analog_Out_Ch { get => analog_out_ch; set => analog_out_ch = value; }
         public UInt32 Analog_Out_Value { get => analog_out_value; set => analog_out_value = value; }
         public UInt32 Analog_Out_Standby { get => analog_out_standby; set => analog_out_standby = value; }
@@ -574,7 +551,6 @@ namespace Para_List
         public Vector Mark_Dxf3 { get => mark_dxf3; set => mark_dxf3 = value; }
         public Vector Mark_Dxf4 { get => mark_dxf4; set => mark_dxf4 = value; }
         public Affinity_Matrix Trans_Affinity { get => trans_affinity; set => trans_affinity = value; }
-        public Affinity_Matrix Cal_Trans_Affinity { get => cal_trans_affinity; set => cal_trans_affinity = value; }
         public Affinity_Matrix Cal_Trans_Angle { get => cal_trans_angle; set => cal_trans_angle = value; }
         public Affinity_Matrix Cam_Trans_Affinity { get => cam_trans_affinity; set => cam_trans_affinity = value; }
         public Affinity_Matrix Rtc_Trans_Affinity { get => rtc_trans_affinity; set => rtc_trans_affinity = value; }
@@ -593,13 +569,15 @@ namespace Para_List
         public decimal Mark_Reference { get => mark_reference; set => mark_reference = value; }
         public UInt16 Split_Block_X { get => split_block_x; set => split_block_x = value; }
         public UInt16 Split_Block_Y { get => split_block_y; set => split_block_y = value; }
-        public string Server_Ip { get => server_ip; set => server_ip = value; }
+        public String Server_Ip { get => server_ip; set => server_ip = value; }
         public ushort Server_Port { get => server_port; set => server_port = value; }
         public ushort Rtc_Distortion_Data_Type { get => rtc_distortion_data_type; set => rtc_distortion_data_type = value; }
         public decimal Rtc_Distortion_Data_Radius { get => rtc_distortion_data_radius; set => rtc_distortion_data_radius = value; }
         public decimal Rtc_Distortion_Data_Interval { get => rtc_distortion_data_interval; set => rtc_distortion_data_interval = value; }
-        public decimal Rtc_Distortion_Data_Limit { get => rtc_distortion_data_limit; set => rtc_distortion_data_limit = value; }
+        public decimal Rtc_Distortion_Data_Limit { get => rtc_distortion_data_limit; set => rtc_distortion_data_limit = value; }        
+        public UInt16 Rtc_Get_Data_Align { get => rtc_get_data_align; set => rtc_get_data_align = value; }
         public Vector Base_Gts { get => base_gts; set => base_gts = value; }
+        public UInt16 Camera_Mark_Type { get => camera_mark_type; set => camera_mark_type = value; }
         //构造函数
         public Parameter_RW() { }
     } 
@@ -635,6 +613,11 @@ namespace Para_List
                 Circle_endVel = Para_List.Parameter.Circle_endVel,
                 LookAhead_EvenTime = Para_List.Parameter.LookAhead_EvenTime,
                 LookAhead_MaxAcc = Para_List.Parameter.LookAhead_MaxAcc,
+                Axis_X_Band = Para_List.Parameter.Axis_X_Band,
+                Axis_X_Time = Para_List.Parameter.Axis_X_Time,
+                Axis_Y_Band = Para_List.Parameter.Axis_Y_Band,
+                Axis_Y_Time = Para_List.Parameter.Axis_Y_Time,
+                Posed_Time = Para_List.Parameter.Posed_Time,
                 Search_Home = Para_List.Parameter.Search_Home,
                 Home_OffSet = Para_List.Parameter.Home_OffSet,
                 Home_High_Speed = Para_List.Parameter.Home_High_Speed,
@@ -642,8 +625,6 @@ namespace Para_List
                 Home_dcc = Para_List.Parameter.Home_dcc,
                 Home_smoothTime = Para_List.Parameter.Home_smoothTime,
                 Pos_Tolerance = Para_List.Parameter.Pos_Tolerance,
-                Arc_Compensation_A = Para_List.Parameter.Arc_Compensation_A,
-                Arc_Compensation_R = Para_List.Parameter.Arc_Compensation_R,
                 Gts_Calibration_X_Len = Para_List.Parameter.Gts_Calibration_X_Len,
                 Gts_Calibration_Y_Len = Para_List.Parameter.Gts_Calibration_Y_Len,
                 Gts_Calibration_Cell = Para_List.Parameter.Gts_Calibration_Cell,
@@ -661,14 +642,8 @@ namespace Para_List
                 Rtc_Affinity_Row = Para_List.Parameter.Rtc_Affinity_Row,
                 Rtc_Affinity_Type = Para_List.Parameter.Rtc_Affinity_Type,
                 Work = Para_List.Parameter.Work,
-                Laser = Para_List.Parameter.Laser,
                 Cam_Reference = Para_List.Parameter.Cam_Reference,
-                Cam_Org_Pixel = Para_List.Parameter.Cam_Org_Pixel,
-                Cam_Org = Para_List.Parameter.Cam_Org,
                 Rtc_Org = Para_List.Parameter.Rtc_Org,
-                Cam_Rtc = Para_List.Parameter.Cam_Rtc,
-                Delta = Para_List.Parameter.Delta,
-                Pic_Center = Para_List.Parameter.Pic_Center,
                 Cal_Org = Para_List.Parameter.Cal_Org,
                 Reset_Completely = Para_List.Parameter.Reset_Completely,
                 Default_Card = Para_List.Parameter.Default_Card,
@@ -677,8 +652,7 @@ namespace Para_List
                 Rtc_Period_Reference = Para_List.Parameter.Rtc_Period_Reference,
                 Laser_Delay_Reference = Para_List.Parameter.Laser_Delay_Reference,
                 Scanner_Delay_Reference = Para_List.Parameter.Scanner_Delay_Reference,
-                Rtc_XPos_Reference = Para_List.Parameter.Rtc_XPos_Reference,
-                Rtc_YPos_Reference = Para_List.Parameter.Rtc_YPos_Reference,
+                Rtc_Pos_Reference = Para_List.Parameter.Rtc_Pos_Reference,
                 Analog_Out_Ch = Para_List.Parameter.Analog_Out_Ch,
                 Analog_Out_Value = Para_List.Parameter.Analog_Out_Value,
                 Analog_Out_Standby = Para_List.Parameter.Analog_Out_Standby,
@@ -713,7 +687,6 @@ namespace Para_List
                 Mark_Dxf3 = Para_List.Parameter.Mark_Dxf3,
                 Mark_Dxf4 = Para_List.Parameter.Mark_Dxf4,
                 Trans_Affinity = Para_List.Parameter.Trans_Affinity,
-                Cal_Trans_Affinity = Para_List.Parameter.Cal_Trans_Affinity,
                 Cal_Trans_Angle = Para_List.Parameter.Cal_Trans_Angle,
                 Cam_Trans_Affinity = Para_List.Parameter.Cam_Trans_Affinity,
                 Rtc_Trans_Affinity = Para_List.Parameter.Rtc_Trans_Affinity,
@@ -738,7 +711,9 @@ namespace Para_List
                 Rtc_Distortion_Data_Radius = Para_List.Parameter.Rtc_Distortion_Data_Radius,
                 Rtc_Distortion_Data_Interval = Para_List.Parameter.Rtc_Distortion_Data_Interval,
                 Rtc_Distortion_Data_Limit = Para_List.Parameter.Rtc_Distortion_Data_Limit,
-                Base_Gts = Para_List.Parameter.Base_Gts
+                Rtc_Get_Data_Align = Para_List.Parameter.Rtc_Get_Data_Align,
+                Base_Gts = Para_List.Parameter.Base_Gts,
+                Camera_Mark_Type = Para_List.Parameter.Camera_Mark_Type
             };
 
             //二进制 序列化
@@ -798,6 +773,11 @@ namespace Para_List
                     Para_List.Parameter.Circle_endVel = parameter.Circle_endVel;
                     Para_List.Parameter.LookAhead_EvenTime = parameter.LookAhead_EvenTime;
                     Para_List.Parameter.LookAhead_MaxAcc = parameter.LookAhead_MaxAcc;
+                    Para_List.Parameter.Axis_X_Band = parameter.Axis_X_Band;
+                    Para_List.Parameter.Axis_X_Time = parameter.Axis_X_Time;
+                    Para_List.Parameter.Axis_Y_Band = parameter.Axis_Y_Band;
+                    Para_List.Parameter.Axis_Y_Time = parameter.Axis_Y_Time;
+                    Para_List.Parameter.Posed_Time = parameter.Posed_Time;
                     Para_List.Parameter.Search_Home = parameter.Search_Home;
                     Para_List.Parameter.Home_OffSet = parameter.Home_OffSet;
                     Para_List.Parameter.Home_High_Speed = parameter.Home_High_Speed;
@@ -805,8 +785,6 @@ namespace Para_List
                     Para_List.Parameter.Home_dcc = parameter.Home_dcc;
                     Para_List.Parameter.Home_smoothTime = parameter.Home_smoothTime;
                     Para_List.Parameter.Pos_Tolerance = parameter.Pos_Tolerance;
-                    Para_List.Parameter.Arc_Compensation_A = parameter.Arc_Compensation_A;
-                    Para_List.Parameter.Arc_Compensation_R = parameter.Arc_Compensation_R;
                     Para_List.Parameter.Gts_Calibration_X_Len = parameter.Gts_Calibration_X_Len;
                     Para_List.Parameter.Gts_Calibration_Y_Len = parameter.Gts_Calibration_Y_Len;
                     Para_List.Parameter.Gts_Calibration_Cell = parameter.Gts_Calibration_Cell;
@@ -824,14 +802,8 @@ namespace Para_List
                     Para_List.Parameter.Rtc_Affinity_Row = parameter.Rtc_Affinity_Row;
                     Para_List.Parameter.Rtc_Affinity_Type = parameter.Rtc_Affinity_Type;
                     Para_List.Parameter.Work = parameter.Work;
-                    Para_List.Parameter.Laser = parameter.Laser;
                     Para_List.Parameter.Cam_Reference = parameter.Cam_Reference;
-                    Para_List.Parameter.Cam_Org_Pixel = parameter.Cam_Org_Pixel;
-                    Para_List.Parameter.Cam_Org = parameter.Cam_Org;
                     Para_List.Parameter.Rtc_Org = parameter.Rtc_Org;
-                    Para_List.Parameter.Cam_Rtc = parameter.Cam_Rtc;
-                    Para_List.Parameter.Delta = parameter.Delta;
-                    Para_List.Parameter.Pic_Center = parameter.Pic_Center;
                     Para_List.Parameter.Cal_Org = parameter.Cal_Org;
                     Para_List.Parameter.Reset_Completely = parameter.Reset_Completely;
                     Para_List.Parameter.Default_Card = parameter.Default_Card;
@@ -840,8 +812,7 @@ namespace Para_List
                     Para_List.Parameter.Rtc_Period_Reference = parameter.Rtc_Period_Reference;
                     Para_List.Parameter.Laser_Delay_Reference = parameter.Laser_Delay_Reference;
                     Para_List.Parameter.Scanner_Delay_Reference = parameter.Scanner_Delay_Reference;
-                    Para_List.Parameter.Rtc_XPos_Reference = parameter.Rtc_XPos_Reference;
-                    Para_List.Parameter.Rtc_YPos_Reference = parameter.Rtc_YPos_Reference;
+                    Para_List.Parameter.Rtc_Pos_Reference = parameter.Rtc_Pos_Reference;
                     Para_List.Parameter.Analog_Out_Ch = parameter.Analog_Out_Ch;
                     Para_List.Parameter.Analog_Out_Value = parameter.Analog_Out_Value;
                     Para_List.Parameter.Analog_Out_Standby = parameter.Analog_Out_Standby;
@@ -876,7 +847,6 @@ namespace Para_List
                     Para_List.Parameter.Mark_Dxf3 = parameter.Mark_Dxf3;
                     Para_List.Parameter.Mark_Dxf4 = parameter.Mark_Dxf4;
                     Para_List.Parameter.Trans_Affinity = parameter.Trans_Affinity;
-                    Para_List.Parameter.Cal_Trans_Affinity = parameter.Cal_Trans_Affinity;
                     Para_List.Parameter.Cal_Trans_Angle = parameter.Cal_Trans_Angle;
                     Para_List.Parameter.Cam_Trans_Affinity = parameter.Cam_Trans_Affinity;
                     Para_List.Parameter.Rtc_Trans_Affinity = parameter.Rtc_Trans_Affinity;
@@ -901,7 +871,9 @@ namespace Para_List
                     Para_List.Parameter.Rtc_Distortion_Data_Radius = parameter.Rtc_Distortion_Data_Radius;
                     Para_List.Parameter.Rtc_Distortion_Data_Interval = parameter.Rtc_Distortion_Data_Interval;
                     Para_List.Parameter.Rtc_Distortion_Data_Limit = parameter.Rtc_Distortion_Data_Limit;
+                    Para_List.Parameter.Rtc_Get_Data_Align = parameter.Rtc_Get_Data_Align;
                     Para_List.Parameter.Base_Gts = parameter.Base_Gts;
+                    Para_List.Parameter.Camera_Mark_Type = parameter.Camera_Mark_Type;
                 }
             }
         }

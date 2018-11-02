@@ -34,11 +34,17 @@ namespace Laser_Version2._0
         //构造函数
         public RS232()
         {
-            //获取设备串口名
-            PortName.Clear();
-            PortName =SerialPort.GetPortNames().ToList<string>();
+            //更新列表
+            Refresh_Com_List();
             //绑定数据接收事件
             ComDevice.DataReceived += new SerialDataReceivedEventHandler(Com_DataReceived);//绑定事件
+        }
+        //更新列表
+        public void Refresh_Com_List()
+        {
+            //获取设备串口名
+            PortName.Clear();
+            PortName = SerialPort.GetPortNames().ToList<string>();
         }
         //串口打开
         public bool Open_Com(Int32 No)

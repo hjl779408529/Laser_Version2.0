@@ -13,6 +13,7 @@ using System.Threading;
 using CCWin;
 using Initialization;
 using Laser_Version2._0;
+using Laser_Version2._0.UI;
 
 namespace Laser_Build_1._0
 {
@@ -34,12 +35,12 @@ namespace Laser_Build_1._0
         IO_Monitor iO_Monitor;//打开IO监视界面
         Laser_Program_Info Info_Display;//关于信息
         public static Dxf dxf;//Dxf处理页面
-        Laser_Version2._0.Rtc_Handle Rtc_Manual;//振镜操作
+        Rtc_Handle Rtc_Manual;//振镜操作
         Menu_5_Axis_Handle menu_5_Axis_Handle;//轴手动操作页面
-        Laser_Version2._0.ParameterSet parameterSet;    //参数设置界面
-        Laser_Version2._0.Laser_Control_Panel Laser_Control_Window;//激光控制界面 
-        public static Laser_Version2._0.UI.Laser_Watt Laser_Watt_Window;//激光功率
-
+        ParameterSet parameterSet;    //参数设置界面
+        Laser_Control_Panel Laser_Control_Window;//激光控制界面 
+        public static Laser_Watt Laser_Watt_Window;//激光功率
+        public static Camera_Capture pic_resolve = new Camera_Capture();
         //打开IO监视界面
         private void Status_Click(object sender, EventArgs e)
         {
@@ -357,6 +358,31 @@ namespace Laser_Build_1._0
                 else
                 {
                     Laser_Watt_Window.Activate();//使子窗体获得焦点
+                }
+            }
+        }
+        /// <summary>
+        /// 相机捕获界面
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Camera_Form_Click(object sender, EventArgs e)
+        {
+            if (pic_resolve == null)
+            {
+                pic_resolve = new Camera_Capture();
+                pic_resolve.Show();
+            }
+            else
+            {
+                if (pic_resolve.IsDisposed)//若子窗体关闭 则打开新子窗体 并显示
+                {
+                    pic_resolve = new Camera_Capture();
+                    pic_resolve.Show();
+                }
+                else
+                {
+                    pic_resolve.Dispose();
                 }
             }
         }

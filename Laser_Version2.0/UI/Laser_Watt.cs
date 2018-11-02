@@ -117,5 +117,18 @@ namespace Laser_Version2._0.UI
         {
             CSV_RW.SaveCSV(Laser_Watt_Percent_Data,"Laser_PEC_Watt_Data.csv");
         }
+        /// <summary>
+        /// 更新串口列表
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Refresh_List_Click(object sender, EventArgs e)
+        {            
+            //刷新列表
+            Initial.Laser_Watt_Com.Refresh_Com_List();
+            //初始化通讯端口列表
+            Com_List.Items.Clear();
+            Com_List.Items.AddRange(Initial.Laser_Watt_Com.PortName.ToArray());
+        }
     }
 }

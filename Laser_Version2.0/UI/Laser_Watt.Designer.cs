@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             this.Re_connect = new System.Windows.Forms.Button();
-            this.label6 = new System.Windows.Forms.Label();
             this.Com_List = new System.Windows.Forms.ComboBox();
             this.Com_Status = new System.Windows.Forms.PictureBox();
             this.Current_Laser_Watt = new System.Windows.Forms.TextBox();
@@ -39,6 +38,7 @@
             this.Cal_Data_Acquisition = new System.Windows.Forms.Button();
             this.Acquisition_Once = new System.Windows.Forms.Button();
             this.Save_Data = new System.Windows.Forms.Button();
+            this.Refresh_List = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.Com_Status)).BeginInit();
             this.SuspendLayout();
             // 
@@ -52,16 +52,6 @@
             this.Re_connect.Text = "打开串口";
             this.Re_connect.UseVisualStyleBackColor = true;
             this.Re_connect.Click += new System.EventHandler(this.Re_connect_Click);
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label6.Location = new System.Drawing.Point(84, 33);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(80, 18);
-            this.label6.TabIndex = 20;
-            this.label6.Text = "通讯端口";
             // 
             // Com_List
             // 
@@ -149,11 +139,23 @@
             this.Save_Data.UseVisualStyleBackColor = true;
             this.Save_Data.Click += new System.EventHandler(this.Save_Data_Click);
             // 
+            // Refresh_List
+            // 
+            this.Refresh_List.Location = new System.Drawing.Point(46, 23);
+            this.Refresh_List.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Refresh_List.Name = "Refresh_List";
+            this.Refresh_List.Size = new System.Drawing.Size(122, 35);
+            this.Refresh_List.TabIndex = 29;
+            this.Refresh_List.Text = "更新列表";
+            this.Refresh_List.UseVisualStyleBackColor = true;
+            this.Refresh_List.Click += new System.EventHandler(this.Refresh_List_Click);
+            // 
             // Laser_Watt
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(502, 287);
+            this.ClientSize = new System.Drawing.Size(545, 287);
+            this.Controls.Add(this.Refresh_List);
             this.Controls.Add(this.Save_Data);
             this.Controls.Add(this.Acquisition_Once);
             this.Controls.Add(this.Cal_Data_Acquisition);
@@ -163,7 +165,6 @@
             this.Controls.Add(this.Current_Laser_Watt);
             this.Controls.Add(this.Com_Status);
             this.Controls.Add(this.Re_connect);
-            this.Controls.Add(this.label6);
             this.Controls.Add(this.Com_List);
             this.Name = "Laser_Watt";
             this.Text = "Laser_Watt";
@@ -179,7 +180,6 @@
 
         private System.Windows.Forms.PictureBox Com_Status;
         private System.Windows.Forms.Button Re_connect;
-        private System.Windows.Forms.Label label6;
         private System.Windows.Forms.ComboBox Com_List;
         private System.Windows.Forms.TextBox Current_Laser_Watt;
         private System.Windows.Forms.TextBox Laser_Percent;
@@ -188,5 +188,6 @@
         private System.Windows.Forms.Button Cal_Data_Acquisition;
         private System.Windows.Forms.Button Acquisition_Once;
         private System.Windows.Forms.Button Save_Data;
+        private System.Windows.Forms.Button Refresh_List;
     }
 }

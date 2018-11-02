@@ -43,7 +43,14 @@ namespace Laser_Version2._0
         /// <param name="e"></param>
         private void Set_Btn_Mark1_Click(object sender, EventArgs e)
         {
-            Calibration.Calibrate_Mark(0);
+            if (Calibration.Calibrate_Mark(0))
+            {
+                MessageBox.Show("Mark点矫正完成！！！");
+            }
+            else
+            {
+                MessageBox.Show("Mark点矫正失败！！！");
+            }
             //更新显示
             Set_txt_markX1.Text = Para_List.Parameter.Mark1.X.ToString();
             Set_txt_markY1.Text = Para_List.Parameter.Mark1.Y.ToString();
@@ -239,6 +246,7 @@ namespace Laser_Version2._0
             textBox19.Text = Para_List.Parameter.Rtc_Org.X.ToString(6);
             textBox18.Text = Para_List.Parameter.Rtc_Org.Y.ToString(6);
             numericUpDown1.Value = (short)Intrigue;
+            Mark_Type_List.SelectedIndex = (Para_List.Parameter.Camera_Mark_Type - 1);
         }       
         //定位mark点1
         private void button1_Click(object sender, EventArgs e)
@@ -280,10 +288,21 @@ namespace Laser_Version2._0
             }
             Para_List.Parameter.Rtc_Org=new Vector(Para_List.Parameter.Rtc_Org.X,tmp);
         }
-        //矫正振镜与ORG的偏差
+        /// <summary>
+        /// 振镜与ORG的距离矫正
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button4_Click(object sender, EventArgs e)
         {
-            Calibration.Calibrate_RTC_ORG();
+            if (Calibration.Calibrate_RTC_ORG())
+            {
+                MessageBox.Show("振镜与ORG的距离矫正完成！！");
+            }
+            else
+            {
+                MessageBox.Show("振镜与ORG的距离矫正失败！！");
+            }
             textBox19.Text = Para_List.Parameter.Rtc_Org.X.ToString(6);
             textBox18.Text = Para_List.Parameter.Rtc_Org.Y.ToString(6);
         }
@@ -310,7 +329,7 @@ namespace Laser_Version2._0
             Initialization.Initial.T_Client.Stop_Connect();
         }
         /// <summary>
-        /// 矫正相机坐标系偏转角
+        /// 相机坐标系标定
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -318,11 +337,11 @@ namespace Laser_Version2._0
         {
             if (Calibration.Cal_Cam_Affinity())
             {
-                MessageBox.Show("相机坐标系矫正完成！！！");
+                MessageBox.Show("相机坐标系标定完成！！！");
             }
             else
             {
-                MessageBox.Show("相机坐标系矫正失败！！！");
+                MessageBox.Show("相机坐标系标定失败！！！");
             }
         }
         /// <summary>
@@ -332,7 +351,14 @@ namespace Laser_Version2._0
         /// <param name="e"></param>
         private void Correct_Rtc_Cor_Click(object sender, EventArgs e)
         {
-            Calibration.Get_Rtc_Coordinate_Affinity();
+            if (Calibration.Get_Rtc_Coordinate_Affinity())
+            {
+                MessageBox.Show("振镜坐标系偏转角矫正完成！！！");
+            }
+            else
+            {
+                MessageBox.Show("振镜坐标系偏转角矫正失败！！！");
+            }
         }
         /// <summary>
         /// 采集振镜矫正数据
@@ -347,6 +373,15 @@ namespace Laser_Version2._0
         private void Get_Rtc_Data()
         {
             Calibration.Rtc_Correct_Coordinate();
+        }
+        /// <summary>
+        /// 修改mark类型
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Mark_Type_List_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Para_List.Parameter.Camera_Mark_Type = (UInt16)(Mark_Type_List.SelectedIndex + 1);
         }
     }
 }
