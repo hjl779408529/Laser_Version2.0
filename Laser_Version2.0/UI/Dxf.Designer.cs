@@ -95,6 +95,7 @@
             this.button4 = new System.Windows.Forms.Button();
             this.Rtc_No_Gts_Yes = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
+            this.button7 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -175,7 +176,7 @@
             this.Debug_Info_Display.Location = new System.Drawing.Point(1036, 45);
             this.Debug_Info_Display.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Debug_Info_Display.Name = "Debug_Info_Display";
-            this.Debug_Info_Display.Size = new System.Drawing.Size(460, 898);
+            this.Debug_Info_Display.Size = new System.Drawing.Size(460, 774);
             this.Debug_Info_Display.TabIndex = 36;
             this.Debug_Info_Display.Text = "";
             this.Debug_Info_Display.DoubleClick += new System.EventHandler(this.Debug_Info_Display_DoubleClick);
@@ -809,11 +810,23 @@
             this.button5.UseVisualStyleBackColor = true;
             this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
+            // button7
+            // 
+            this.button7.Location = new System.Drawing.Point(802, 769);
+            this.button7.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.button7.Name = "button7";
+            this.button7.Size = new System.Drawing.Size(154, 50);
+            this.button7.TabIndex = 139;
+            this.button7.Text = "Test";
+            this.button7.UseVisualStyleBackColor = true;
+            this.button7.Click += new System.EventHandler(this.button7_Click);
+            // 
             // Dxf
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1532, 962);
+            this.ClientSize = new System.Drawing.Size(1532, 838);
+            this.Controls.Add(this.button7);
             this.Controls.Add(this.button5);
             this.Controls.Add(this.Rtc_No_Gts_Yes);
             this.Controls.Add(this.button4);
@@ -933,5 +946,6 @@
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.Button Rtc_No_Gts_Yes;
         private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.Button button7;
     }
 }

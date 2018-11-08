@@ -383,5 +383,22 @@ namespace Laser_Version2._0
         {
             Para_List.Parameter.Camera_Mark_Type = (UInt16)(Mark_Type_List.SelectedIndex + 1);
         }
+
+        /// <summary>
+        /// 相机坐标系标定 By标定板原点
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Correct_Cam_ByBoard_Click(object sender, EventArgs e)
+        {
+            if (Calibration.Cal_Cam_Affinity_By_Board())
+            {
+                MessageBox.Show("相机坐标系标定板标定完成！！！");
+            }
+            else
+            {
+                MessageBox.Show("相机坐标系标定板标定失败！！！");
+            }
+        }
     }
 }

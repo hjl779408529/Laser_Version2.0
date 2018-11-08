@@ -572,10 +572,11 @@ namespace Laser_Build_1._0
                         Cam = new Vector(x0, y0);
                     }
                     //当前平台坐标 对应的 标定板坐标
-                    Cal_Angle_Point = Get_Cal_Angle_Point(new Vector(j * Para_List.Parameter.Gts_Calibration_Cell, i * Para_List.Parameter.Gts_Calibration_Cell));
+                    Cal_Angle_Point = Get_Cal_Angle_Point_Differ(new Vector(j * Para_List.Parameter.Gts_Calibration_Cell, i * Para_List.Parameter.Gts_Calibration_Cell));
+                    Cal_Angle_Point = new Vector(Cal_Angle_Point + Cam);
                     //数据保存
-                    Temp_Correct_Data.Xo = Cal_Angle_Point.X + Cam.X;//相机实际X坐标
-                    Temp_Correct_Data.Yo = Cal_Angle_Point.Y + Cam.Y;//相机实际Y坐标
+                    Temp_Correct_Data.Xo = j * Para_List.Parameter.Gts_Calibration_Cell + Cal_Angle_Point.X;//相机实际X坐标
+                    Temp_Correct_Data.Yo = i * Para_List.Parameter.Gts_Calibration_Cell + Cal_Angle_Point.Y;//相机实际Y坐标
                     Temp_Correct_Data.Xm = j * Para_List.Parameter.Gts_Calibration_Cell;//平台电机 理论X坐标
                     Temp_Correct_Data.Ym = i * Para_List.Parameter.Gts_Calibration_Cell;//平台电机 理论Y坐标
                     //添加进入List
@@ -757,12 +758,11 @@ namespace Laser_Build_1._0
                 {
                     MessageBox.Show("相机坐标数据提取错误，请检查！！！");
                     return false;
-                }                
-                //反馈回标定板数据实际点位i
-                Cali_Mark[i] = new Vector(Tem_Mark + Cam);
+                }
                 //数据保存
                 Calibration_Board_Angle.Rows.Add(new object[] { Cali_Mark[i].X, Cali_Mark[i].Y, Cam.X, Cam.Y });
-
+                //反馈回标定板数据实际点位i
+                Cali_Mark[i] = new Vector(Tem_Mark - Cam);
             }
             Mat rotateMat = new Mat();//定义旋转变换数组
             double angle = -(Math.Atan((double)((Cali_Mark[1].Y - Cali_Mark[0].Y) / (Cali_Mark[1].X - Cali_Mark[0].X))) * 180) / Math.PI;//旋转角度
@@ -788,6 +788,16 @@ namespace Laser_Build_1._0
         public static Vector Get_Cal_Angle_Point(Vector src)
         {
             return new Vector(src.X * Para_List.Parameter.Cal_Trans_Angle.Stretch_X + src.Y * Para_List.Parameter.Cal_Trans_Angle.Distortion_X + Para_List.Parameter.Cal_Trans_Angle.Delta_X, src.Y * Para_List.Parameter.Cal_Trans_Angle.Stretch_Y + src.X * Para_List.Parameter.Cal_Trans_Angle.Distortion_Y + Para_List.Parameter.Cal_Trans_Angle.Delta_Y);
+        }
+        /// <summary>
+        /// 计算标定板旋转变换后坐标值
+        /// </summary>
+        /// <param name="src"></param>
+        /// <returns></returns>
+        public static Vector Get_Cal_Angle_Point_Differ(Vector src) 
+        {
+            Vector Tmp = new Vector(src.X * Para_List.Parameter.Cal_Trans_Angle.Stretch_X + src.Y * Para_List.Parameter.Cal_Trans_Angle.Distortion_X + Para_List.Parameter.Cal_Trans_Angle.Delta_X, src.Y * Para_List.Parameter.Cal_Trans_Angle.Stretch_Y + src.X * Para_List.Parameter.Cal_Trans_Angle.Distortion_Y + Para_List.Parameter.Cal_Trans_Angle.Delta_Y);
+            return new Vector(Tmp - src);
         }
         /// <summary>
         /// 矫正Mark坐标
@@ -1179,7 +1189,7 @@ namespace Laser_Build_1._0
         ///对应物理坐标系的坐标点
         ///实现像素与坐标的转换
         ///使用标定板原点进行校准
-        public static bool Cal_Cam_Affinity_Test()
+        public static bool Cal_Cam_Affinity_By_Board()
         {
             //建立变量
             Affinity_Matrix Result = new Affinity_Matrix();
@@ -1190,8 +1200,8 @@ namespace Laser_Build_1._0
             PointF[] dstTri = new PointF[3];//差异化数据 
             double[] temp_array;
             //定位点位计算标定板偏差
-            Vector[] Cali_Mark_Src = new Vector[3] { new Vector(0, 0), new Vector(0, 1.5m), new Vector(1.5m, 0) };
-            Vector[] Cali_Mark_Dst = new Vector[3] { new Vector(0, 0), new Vector(0, 1.5m), new Vector(1.5m, 0) };
+            Vector[] Cali_Mark_Src = new Vector[3] { new Vector(0, 0), new Vector(0, 2.0m), new Vector(1.5m, 0) };
+            Vector[] Cali_Mark_Dst = new Vector[3] { new Vector(0, 0), new Vector(0, 2.0m), new Vector(1.5m, 0) };
 
             //矫正坐标中心对齐
             Vector Cam = new Vector();
@@ -1609,7 +1619,7 @@ namespace Laser_Build_1._0
                                 return Aquisition_Point;
                             }
                             Coordinate = GTS_Fun.Interpolation.Get_Coordinate(1);
-                            Tem_Mark = new Vector(Coordinate - Cam);//获取实际位置
+                            Tem_Mark = new Vector(Coordinate - Cam);//获取实际位置 对齐的坐标值
                         } while (!Differ_Deviation(Cam, Para_List.Parameter.Pos_Tolerance));
                     }
                     else
@@ -1628,6 +1638,7 @@ namespace Laser_Build_1._0
                             return Aquisition_Point;
                         }
                         Coordinate = GTS_Fun.Interpolation.Get_Coordinate(1);
+                        Tem_Mark = new Vector(Coordinate - Cam);//获取实际位置  对齐的坐标值
                     }  
                     //添加数据
                     Temp_Acquisition.Rows.Add(new object[] { Rtc_Point[i].X, Rtc_Point[i].Y, Tem_Mark.Y, Tem_Mark.X });

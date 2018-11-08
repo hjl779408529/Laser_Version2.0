@@ -698,6 +698,7 @@ namespace Laser_Build_1._0
             Vector Cam = new Vector();
             Vector Cal_Actual_Point = new Vector();
             Vector Result = new Vector();
+            Vector Tmp = new Vector();
             //定位矫正坐标
             GTS_Fun.Interpolation.Gts_Ready_Test(Cor_x, Cor_y);            
             //相机反馈的当前坐标
@@ -708,12 +709,12 @@ namespace Laser_Build_1._0
                 return;
             }
             //当前平台坐标 对应的 标定板坐标
-            Cal_Actual_Point = Calibration.Get_Cal_Angle_Point(new Vector(Cor_x, Cor_y));
+            Cal_Actual_Point = Calibration.Get_Cal_Angle_Point_Differ(new Vector(Cor_x, Cor_y));
+            Tmp = Calibration.Get_Cal_Angle_Point(new Vector(Cor_x, Cor_y));
             //数据保存
             Result = new Vector(Cal_Actual_Point + Cam);//实际坐标
-            Result = new Vector(Result.X - Cor_x,Result.Y - Cor_y);
             //信息输出
-            MessageBox.Show(string.Format("计算差值XY:({0},{1})", Result.X, Result.Y));
+            MessageBox.Show(string.Format("对应坐标:({0},{1}),计算差值XY:({2},{3})",Tmp.X,Tmp.Y, Result.X, Result.Y));
 
             //Laser_Watt_Cal.Resolve(CSV_RW.OpenCSV(@"./\Config/Laser_Data.csv"));
 
@@ -1004,6 +1005,28 @@ namespace Laser_Build_1._0
         private void Rtc_Mat_Gts_Yes()
         {
             Integrated.Rtc_Mat_Gts_Yes_Correct(Rtc_List_Data);
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            //建立变量
+            Affinity_Matrix Result = new Affinity_Matrix();
+            double[] temp_array;
+            Mat rotateMat = new Mat();//定义旋转变换数组
+            double angle = -(Math.Atan((double)((0 + 0.0276482190409833 - 0) / (350 + 0.0232828789156063 - 0))) * 180) / Math.PI;//旋转角度
+            double scale = 1.0;//缩放因子
+            PointF center = new PointF(0, 0);//旋转中心
+            CvInvoke.GetRotationMatrix2D(center, angle, scale, rotateMat);
+            //提取矩阵数据
+            temp_array = rotateMat.GetDoubleArray();
+            //获取仿射变换参数
+            Result = Gts_Cal_Data_Resolve.Array_To_Affinity(temp_array);
+            appendInfo("标定板旋转参数Stretch_X：" + Result.Stretch_X);
+            appendInfo("标定板旋转参数Distortion_X：" + Result.Distortion_X);
+            appendInfo("标定板旋转参数DeltaX：" + Result.Delta_X);
+            appendInfo("标定板旋转参数Stretch_Y：" + Result.Stretch_Y);
+            appendInfo("标定板旋转参数Distortion_Y：" + Result.Distortion_Y);
+            appendInfo("标定板旋转参数DeltaY：" + Result.Delta_Y);
         }
 
         ///// <summary>

@@ -68,6 +68,7 @@
             this.Acquisation_Rtc_Correct = new System.Windows.Forms.Button();
             this.label9 = new System.Windows.Forms.Label();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.Correct_Cam_ByBoard = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.Mark_Group.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -470,6 +471,7 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.Correct_Cam_ByBoard);
             this.groupBox3.Controls.Add(this.Acquisation_Rtc_Correct);
             this.groupBox3.Controls.Add(this.button4);
             this.groupBox3.Controls.Add(this.Correct_Rtc_Cor);
@@ -521,6 +523,17 @@
             this.groupBox4.TabIndex = 105;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "相机操作";
+            // 
+            // Correct_Cam_ByBoard
+            // 
+            this.Correct_Cam_ByBoard.Location = new System.Drawing.Point(458, 108);
+            this.Correct_Cam_ByBoard.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.Correct_Cam_ByBoard.Name = "Correct_Cam_ByBoard";
+            this.Correct_Cam_ByBoard.Size = new System.Drawing.Size(178, 52);
+            this.Correct_Cam_ByBoard.TabIndex = 106;
+            this.Correct_Cam_ByBoard.Text = "相机坐标系标定(标定板)";
+            this.Correct_Cam_ByBoard.UseVisualStyleBackColor = true;
+            this.Correct_Cam_ByBoard.Click += new System.EventHandler(this.Correct_Cam_ByBoard_Click);
             // 
             // ParameterSet
             // 
@@ -586,5 +599,6 @@
         private System.Windows.Forms.Button Acquisation_Rtc_Correct;
         private System.Windows.Forms.ComboBox Mark_Type_List;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button Correct_Cam_ByBoard;
     }
 }
