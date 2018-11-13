@@ -148,24 +148,24 @@ namespace Laser_Build_1._0
             {
                 Dxf_filename = openfile.FileName;
                 appendInfo(Dxf_filename);
-                if (display_dxf == null)
-                {
-                    display_dxf = new Display_Dxf();
-                    display_dxf.Show();
-                }
-                else
-                {
-                    if (display_dxf.IsDisposed)//若子窗体关闭 则打开新子窗体 并显示
-                    {
-                        display_dxf = new Display_Dxf();
-                        display_dxf.Show();
-                    }
-                    else
-                    {
-                        display_dxf.Activate();//使子窗体获得焦点
-                    }
-                }
-                display_dxf.axMxDrawX1.OpenDwgFile(openfile.FileName);
+                //if (display_dxf == null)
+                //{
+                //    display_dxf = new Display_Dxf();
+                //    display_dxf.Show();
+                //}
+                //else
+                //{
+                //    if (display_dxf.IsDisposed)//若子窗体关闭 则打开新子窗体 并显示
+                //    {
+                //        display_dxf = new Display_Dxf();
+                //        display_dxf.Show();
+                //    }
+                //    else
+                //    {
+                //        display_dxf.Activate();//使子窗体获得焦点
+                //    }
+                //}
+                //display_dxf.axMxDrawX1.OpenDwgFile(openfile.FileName);
             }
         }
         //DXF文件数据处理        

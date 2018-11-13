@@ -434,7 +434,7 @@ namespace Laser_Build_1._0
             Calibration_Data_Acquisition.Columns.Add("相机采集Y坐标", typeof(decimal));
             //建立变量
             Vector Cam=new Vector();//相机反馈的当前坐标
-            Vector Cal_Actual_Point = new Vector();//当前平台坐标 对应的 标定板坐标
+            Vector Cal_Angle_Point = new Vector();//当前平台坐标 对应的 标定板坐标
             int i = 0, j = 0;
             //建立直角坐标系
             GTS_Fun.Interpolation.Coordination(Para_List.Parameter.Work.X, Para_List.Parameter.Work.Y);
@@ -461,10 +461,11 @@ namespace Laser_Build_1._0
                     }
                     //相机测算的实际偏差值:(相机反馈的当前坐标) - (相机中心坐标)
                     //当前平台坐标 对应的 标定板坐标
-                    Cal_Actual_Point = Get_Cal_Angle_Point(new Vector(j * Para_List.Parameter.Gts_Calibration_Cell, i * Para_List.Parameter.Gts_Calibration_Cell));
+                    Cal_Angle_Point = Get_Cal_Angle_Point_Differ(new Vector(j * Para_List.Parameter.Gts_Calibration_Cell, i * Para_List.Parameter.Gts_Calibration_Cell));
+                    Cal_Angle_Point = new Vector(Cal_Angle_Point + Cam);
                     //数据保存
-                    Temp_Correct_Data.Xo = Cal_Actual_Point.X + Cam.X;//相机实际X坐标
-                    Temp_Correct_Data.Yo = Cal_Actual_Point.Y + Cam.Y;//相机实际Y坐标
+                    Temp_Correct_Data.Xo = j * Para_List.Parameter.Gts_Calibration_Cell + Cal_Angle_Point.X;//相机实际X坐标
+                    Temp_Correct_Data.Yo = i * Para_List.Parameter.Gts_Calibration_Cell + Cal_Angle_Point.Y;//相机实际Y坐标
                     Temp_Correct_Data.Xm = j * Para_List.Parameter.Gts_Calibration_Cell;//平台电机 理论X坐标
                     Temp_Correct_Data.Ym = i * Para_List.Parameter.Gts_Calibration_Cell;//平台电机 理论Y坐标
                     //标定板数据保存
@@ -488,61 +489,7 @@ namespace Laser_Build_1._0
             CSV_RW.SaveCSV(Calibration_Data_Acquisition, "Calibration_Data_Acquisition_01");//标定板原始数据采集
             MessageBox.Show("数据采集完成！！！");
             return Result;
-        }
-        /// <summary>
-        /// 标定板数据测试功能
-        /// </summary>
-        /// <returns></returns>
-        public static List<Correct_Data> Get_Datas_Test()
-        {
-            //建立变量
-            List<Correct_Data> Result = new List<Correct_Data>();
-            Correct_Data Temp_Correct_Data = new Correct_Data();
-            //标定板数据采集
-            DataTable Calibration_Data_Acquisition = CSV_RW.OpenCSV(@"./\Config/Calibration_Data_Acquisition.csv");
-            //建立变量
-            Vector Cam = new Vector();//相机反馈的当前坐标
-            Vector Cal_Actual_Point = new Vector();//当前平台坐标 对应的 标定板坐标
-            int i = 0, j = 0;
-            //2.5mm步距进行数据提取和整合，使用INC指令
-            for (i = 0; i < Para_List.Parameter.Gts_Calibration_Row; i++)
-            {
-                //1轴-x轴，2轴-y轴，X轴归零，y轴归 步距*i
-                for (j = 0; j < Para_List.Parameter.Gts_Calibration_Col; j++)
-                {
-                    //清空Temp_Correct_Data
-                    Temp_Correct_Data.Empty();
-                    if((decimal.TryParse(Calibration_Data_Acquisition.Rows[i * Para_List.Parameter.Gts_Calibration_Row + j][2].ToString(), out decimal x0)) && (decimal.TryParse(Calibration_Data_Acquisition.Rows[i * Para_List.Parameter.Gts_Calibration_Row + j][3].ToString(), out decimal y0)))
-                    {
-                        //提取数据
-                        Cam = new Vector(x0,y0);
-                    }                    
-                    //相机测算的实际偏差值:(相机反馈的当前坐标) - (相机中心坐标)
-                    //当前平台坐标 对应的 标定板坐标
-                    Cal_Actual_Point = Get_Cal_Angle_Point(new Vector(j * Para_List.Parameter.Gts_Calibration_Cell, i * Para_List.Parameter.Gts_Calibration_Cell));
-                    //数据保存
-                    Temp_Correct_Data.Xo = Cal_Actual_Point.X + Cam.X;//相机实际X坐标
-                    Temp_Correct_Data.Yo = Cal_Actual_Point.Y + Cam.Y;//相机实际Y坐标
-                    Temp_Correct_Data.Xm = j * Para_List.Parameter.Gts_Calibration_Cell;//平台电机 理论X坐标
-                    Temp_Correct_Data.Ym = i * Para_List.Parameter.Gts_Calibration_Cell;//平台电机 理论Y坐标
-                    //添加进入List
-                    Result.Add(Temp_Correct_Data);
-                    //线程终止
-                    if (Exit_Flag)
-                    {
-                        Exit_Flag = false;
-                        Serialize_Data.Serialize_Correct_Data(Result, "Gts_Correct_Data_Test.xml");//采集数据以xml保存
-                        CSV_RW.SaveCSV(CSV_RW.Correct_Data_DataTable(Result), "Gts_Correct_Data_Test");//采集数据转化为Csv保存
-                        return Result;
-                    }
-                }
-            }
-            //保存文件至Config
-            Serialize_Data.Serialize_Correct_Data(Result, "Gts_Correct_Data_Test.xml");//采集数据以xml保存
-            CSV_RW.SaveCSV(CSV_RW.Correct_Data_DataTable(Result), "Gts_Correct_Data_Test");//采集数据转化为Csv保存
-            MessageBox.Show("数据采集完成！！！");
-            return Result;
-        }
+        }        
         /// <summary>
         /// 标定板数据测试功能 标定板旋转
         /// </summary>
@@ -614,7 +561,7 @@ namespace Laser_Build_1._0
             Calibration_Data_Acquisition.Columns.Add("相机采集Y坐标", typeof(decimal));
             //建立变量
             Vector Cam = new Vector();//相机反馈的当前坐标
-            Vector Cal_Actual_Point = new Vector();//当前平台坐标 对应的 标定板坐标
+            Vector Cal_Angle_Point = new Vector();//当前平台坐标 对应的 标定板坐标 
             int i = 0, j = 0;
             //建立直角坐标系
             GTS_Fun.Interpolation.Coordination(Para_List.Parameter.Work.X, Para_List.Parameter.Work.Y);
@@ -640,10 +587,11 @@ namespace Laser_Build_1._0
                         return new List<Correct_Data>();
                     }
                     //当前平台坐标 对应的 标定板坐标
-                    Cal_Actual_Point = Get_Cal_Angle_Point(new Vector(j * Para_List.Parameter.Gts_Calibration_Cell, i * Para_List.Parameter.Gts_Calibration_Cell));
+                    Cal_Angle_Point = Get_Cal_Angle_Point_Differ(new Vector(j * Para_List.Parameter.Gts_Calibration_Cell, i * Para_List.Parameter.Gts_Calibration_Cell));
+                    Cal_Angle_Point = new Vector(Cal_Angle_Point + Cam);
                     //数据保存
-                    Temp_Correct_Data.Xo = Cal_Actual_Point.X + Cam.X;//相机实际X坐标
-                    Temp_Correct_Data.Yo = Cal_Actual_Point.Y + Cam.Y;//相机实际Y坐标
+                    Temp_Correct_Data.Xo = j * Para_List.Parameter.Gts_Calibration_Cell + Cal_Angle_Point.X;//相机实际X坐标
+                    Temp_Correct_Data.Yo = i * Para_List.Parameter.Gts_Calibration_Cell + Cal_Angle_Point.Y;//相机实际Y坐标
                     Temp_Correct_Data.Xm = j * Para_List.Parameter.Gts_Calibration_Cell;//平台电机 理论X坐标
                     Temp_Correct_Data.Ym = i * Para_List.Parameter.Gts_Calibration_Cell;//平台电机 理论Y坐标
 
